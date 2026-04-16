@@ -13,45 +13,47 @@ def get_db():
         port=int(os.getenv("DB_PORT"))
     )
 
-# INICIO
+# FORMULARIO + TABLA
 @app.route("/")
 def inicio():
-    return render_template("registro.html")
-
-# REGISTRAR (NO TOCA TU HTML)
-@app.route("/registrar", methods=["POST"])
-def registrar():
-
-    nombre = request.form.get("nombre")
-    correo = request.form.get("correo")
-
-    conexion = get_db()
-    cursor = conexion.cursor()
-
-    cursor.execute(
-        "INSERT INTO estudiantes (nombres, correo_institucional) VALUES (%s,%s)",
-        (nombre, correo)
-    )
-
-    conexion.commit()
-    conexion.close()
-
-    return redirect("/inspector")
-
-# MOSTRAR LISTA SIN CAMBIAR DISEÑO
-@app.route("/inspector")
-def inspector():
 
     conexion = get_db()
     cursor = conexion.cursor(dictionary=True)
 
+    # estudiantes para el dropdown
     cursor.execute("SELECT * FROM estudiantes")
     estudiantes = cursor.fetchall()
 
+    # solicitudes para la tabla
+    cursor.execute("SELECT * FROM solicitudes")
+    solicitudes = cursor.fetchall()
+
     conexion.close()
 
-    # 👇 IMPORTANTE: esto manda los datos a tu HTML
-    return render_template("inspector.html", estudiantes=estudiantes)
+    return render_template("solicitudes.html",
+                           estudiantes=estudiantes,
+                           solicitudes=solicitudes)
+
+
+# GUARDAR SOLICITUD
+@app.route("/guardar_solicitud", methods=["POST"])
+def guardar_solicitud():
+
+    estudiante = request.form.get("estudiante")
+    dolor = request.form.get("dolor")
+
+    conexion = get_db()
+    cursor = conexion.cursor()
+
+    cursor.execute("""
+        INSERT INTO solicitudes (id_estudiante, nivel_dolor)
+        VALUES (%s, %s)
+    """, (estudiante, dolor))
+
+    conexion.commit()
+    conexion.close()
+
+    return redirect("/")
 
 
 # PUERTO
