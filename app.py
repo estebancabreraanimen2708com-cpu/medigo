@@ -4,28 +4,29 @@ import os
 
 app = Flask(__name__)
 
+# CONEXIÓN A LA BD (Railway)
 def get_db():
     return mysql.connector.connect(
         host=os.getenv("DB_HOST"),
         user=os.getenv("DB_USER"),
         password=os.getenv("DB_PASSWORD"),
         database=os.getenv("DB_NAME"),
-        port=int(os.getenv("DB_PORT"))
+        port=int(os.getenv("DB_PORT")),
+        connection_timeout=10
     )
 
-# FORMULARIO + TABLA
+# PÁGINA PRINCIPAL (FORMULARIO + TABLA)
 @app.route("/")
 def inicio():
-
     conexion = get_db()
     cursor = conexion.cursor(dictionary=True)
 
-    # estudiantes para el dropdown
-    cursor.execute("SELECT * FROM estudiantes")
+    # obtener estudiantes
+    cursor.execute("SELECT id_estudiante, nombres FROM estudiantes")
     estudiantes = cursor.fetchall()
 
-    # solicitudes para la tabla
-    cursor.execute("SELECT * FROM solicitudes")
+    # obtener solicitudes
+    cursor.execute("SELECT id_estudiante, nivel_dolor FROM solicitudes")
     solicitudes = cursor.fetchall()
 
     conexion.close()
@@ -34,13 +35,15 @@ def inicio():
                            estudiantes=estudiantes,
                            solicitudes=solicitudes)
 
-
 # GUARDAR SOLICITUD
 @app.route("/guardar_solicitud", methods=["POST"])
 def guardar_solicitud():
 
     estudiante = request.form.get("estudiante")
     dolor = request.form.get("dolor")
+
+    if not estudiante or not dolor:
+        return "Faltan datos"
 
     conexion = get_db()
     cursor = conexion.cursor()
@@ -55,8 +58,7 @@ def guardar_solicitud():
 
     return redirect("/")
 
-
-# PUERTO
+# CONFIGURACIÓN RENDER
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
