@@ -1,150 +1,201 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, session, flash
 import mysql.connector
+from werkzeug.security import check_password_hash
+import os
 
 app = Flask(__name__)
+app.secret_key = "clave_secreta"
 
-# CONEXIÓN A MYSQL
-conexion = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="",
-    database="medigo_db"
-)
+# CONEXIÓN A RAILWAY (SIN LOCALHOST)
+def get_db():
+    conexion = mysql.connector.connect(
+        host=os.getenv("DB_HOST"),
+        user=os.getenv("DB_USER"),
+        password=os.getenv("DB_PASSWORD"),
+        database=os.getenv("DB_NAME"),
+        port=int(os.getenv("DB_PORT")),
+        connection_timeout=10
+    )
+    return conexion, conexion.cursor(dictionary=True)
 
-cursor = conexion.cursor(dictionary=True)
+
+# INICIO
+@app.route("/")
+def inicio():
+    return render_template("inicio.html")
 
 
-# =========================
-# PROFESOR (CREAR Y VER)
-# =========================
-@app.route('/', methods=["GET","POST"])
-@app.route('/solicitudes', methods=["GET","POST"])
-def solicitudes():
+# FORMULARIO
+@app.route("/formulario")
+def formulario():
+    conexion, cursor = get_db()
 
+    cursor.execute("SELECT * FROM niveles")
+    niveles = cursor.fetchall()
+
+    cursor.execute("SELECT * FROM especialidades")
+    especialidades = cursor.fetchall()
+
+    conexion.close()
+
+    return render_template("formulario.html", niveles=niveles, especialidades=especialidades)
+
+
+# REGISTRO
+@app.route("/inscribirse", methods=["POST"])
+def inscribirse():
+    nombre = request.form["nombre"]
+    apellido = request.form["apellido"]
+    correo = request.form["correo"]
+    genero = request.form["genero"]
+    nivel = request.form["nivel"]
+    especialidad = request.form["especialidad"]
+
+    if "@" not in correo or not correo.endswith("@donboscolatola.edu.ec"):
+        return "Correo institucional inválido"
+
+    conexion, cursor = get_db()
+
+    cursor.execute("SELECT * FROM estudiantes WHERE correo_institucional=%s",(correo,))
+    if cursor.fetchone():
+        conexion.close()
+        return "Este correo ya está registrado"
+
+    cursor.execute("""
+    INSERT INTO estudiantes
+    (nombres, apellidos, correo_institucional, genero, id_nivel, id_especialidad)
+    VALUES (%s,%s,%s,%s,%s,%s)
+    """,(nombre,apellido,correo,genero,nivel,especialidad))
+
+    conexion.commit()
+    id_estudiante = cursor.lastrowid
+    conexion.close()
+
+    session["id_estudiante"] = id_estudiante
+    session["nivel"] = nivel
+
+    return redirect("/clubes")
+
+
+# CLUBES
+@app.route("/clubes")
+def clubes():
+    if "id_estudiante" not in session:
+        return redirect("/formulario")
+
+    nivel = session["nivel"]
+
+    conexion, cursor = get_db()
+
+    cursor.execute("""
+    SELECT 
+        clubes.*,
+        clubes.cupo_maximo - COUNT(inscripciones.id_inscripcion) AS cupos_restantes
+    FROM clubes
+    LEFT JOIN inscripciones 
+        ON clubes.id_club = inscripciones.id_club
+    WHERE clubes.id_nivel = %s AND clubes.activo = 1
+    GROUP BY clubes.id_club
+    """,(nivel,))
+
+    clubes = cursor.fetchall()
+    conexion.close()
+
+    return render_template("clubes.html", clubes=clubes)
+
+
+# INSCRIBIR
+@app.route("/inscribir_club", methods=["POST"])
+def inscribir_club():
+    if "id_estudiante" not in session:
+        return redirect("/")
+
+    estudiante = session["id_estudiante"]
+    club = request.form["club"]
+
+    conexion, cursor = get_db()
+
+    cursor.execute("SELECT * FROM inscripciones WHERE id_estudiante=%s",(estudiante,))
+    if cursor.fetchone():
+        conexion.close()
+        return "Este estudiante ya está inscrito en un club"
+
+    cursor.execute("""
+    SELECT clubes.cupo_maximo, COUNT(inscripciones.id_inscripcion) AS usados
+    FROM clubes
+    LEFT JOIN inscripciones ON clubes.id_club = inscripciones.id_club
+    WHERE clubes.id_club = %s
+    GROUP BY clubes.id_club
+    """,(club,))
+
+    datos = cursor.fetchone()
+
+    if datos["usados"] >= datos["cupo_maximo"]:
+        conexion.close()
+        return "Este club ya no tiene cupos disponibles"
+
+    cursor.execute("INSERT INTO inscripciones (id_estudiante,id_club) VALUES (%s,%s)",(estudiante,club))
+    conexion.commit()
+    conexion.close()
+
+    session.pop("id_estudiante",None)
+    session.pop("nivel",None)
+
+    flash("Inscripción completada correctamente")
+    return redirect("/")
+
+
+# LOGIN (SIN HASH PARA QUE FUNCIONE FÁCIL)
+@app.route("/login", methods=["GET","POST"])
+def login():
     if request.method == "POST":
+        usuario = request.form["usuario"]
+        password = request.form["password"]
 
-        estudiante = request.form["estudiante"]
-        motivo = request.form["motivo"]
-        dolor = request.form["dolor"]
+        conexion, cursor = get_db()
 
-        # 👇 AQUÍ ESTÁ LA CORRECCIÓN IMPORTANTE (id_profesor = 1)
-        sql = """
-        INSERT INTO solicitudes (id_estudiante,id_profesor,motivo,dolor,estado)
-        VALUES (%s,1,%s,%s,'pendiente')
-        """
+        cursor.execute("SELECT * FROM admin WHERE usuario=%s",(usuario,))
+        admin = cursor.fetchone()
 
-        cursor.execute(sql,(estudiante,motivo,dolor))
-        conexion.commit()
+        conexion.close()
 
-        return redirect(url_for("solicitudes"))
+        if admin and admin["password"] == password:
+            session["admin"] = True
+            return redirect("/admin")
 
-    # OBTENER ESTUDIANTES
-    cursor.execute("SELECT * FROM estudiantes")
-    estudiantes = cursor.fetchall()
+        return "Usuario o contraseña incorrectos"
 
-    # OBTENER SOLICITUDES
-    cursor.execute("""
-    SELECT s.id_solicitud,e.nombre,s.motivo,s.estado,s.fecha,s.dolor
-    FROM solicitudes s
-    JOIN estudiantes e
-    ON s.id_estudiante = e.id_estudiante
-    ORDER BY s.id_solicitud DESC
-    """)
-
-    solicitudes = cursor.fetchall()
-
-    return render_template(
-        "solicitudes.html",
-        solicitudes=solicitudes,
-        estudiantes=estudiantes
-    )
+    return render_template("login.html")
 
 
-# =========================
-# INSPECTOR
-# =========================
-@app.route('/inspector')
-def inspector():
+# PANEL ADMIN
+@app.route("/admin")
+def admin():
+    if "admin" not in session:
+        return redirect("/login")
+
+    conexion, cursor = get_db()
 
     cursor.execute("""
-    SELECT s.id_solicitud,e.nombre,s.motivo,s.estado,s.fecha,s.dolor
-    FROM solicitudes s
-    JOIN estudiantes e
-    ON s.id_estudiante = e.id_estudiante
-    ORDER BY s.id_solicitud DESC
+    SELECT clubes.*, niveles.nombre_nivel,
+    COUNT(inscripciones.id_inscripcion) AS cupos_usados
+    FROM clubes
+    LEFT JOIN inscripciones ON clubes.id_club = inscripciones.id_club
+    JOIN niveles ON clubes.id_nivel = niveles.id_nivel
+    GROUP BY clubes.id_club
     """)
 
-    solicitudes = cursor.fetchall()
+    clubes = cursor.fetchall()
 
-    return render_template("inspector.html", solicitudes=solicitudes)
+    cursor.execute("SELECT * FROM niveles")
+    niveles = cursor.fetchall()
 
+    conexion.close()
 
-# =========================
-# APROBAR
-# =========================
-@app.route('/aprobar/<int:id>')
-def aprobar(id):
-
-    cursor.execute(
-        "UPDATE solicitudes SET estado='aprobado' WHERE id_solicitud=%s",(id,)
-    )
-
-    conexion.commit()
-
-    return redirect(url_for("inspector"))
+    return render_template("admin.html", clubes=clubes, niveles=niveles)
 
 
-# =========================
-# RECHAZAR
-# =========================
-@app.route('/rechazar/<int:id>')
-def rechazar(id):
-
-    cursor.execute(
-        "UPDATE solicitudes SET estado='rechazado' WHERE id_solicitud=%s",(id,)
-    )
-
-    conexion.commit()
-
-    return redirect(url_for("inspector"))
-
-
-# =========================
-# MÉDICO
-# =========================
-@app.route('/medico')
-def medico():
-
-    cursor.execute("""
-    SELECT s.id_solicitud,e.nombre,s.motivo,s.dolor
-    FROM solicitudes s
-    JOIN estudiantes e
-    ON s.id_estudiante = e.id_estudiante
-    WHERE s.estado='aprobado'
-    """)
-
-    solicitudes = cursor.fetchall()
-
-    return render_template("medico.html", solicitudes=solicitudes)
-
-
-# =========================
-# ATENDIDO
-# =========================
-@app.route('/atendido/<int:id>')
-def atendido(id):
-
-    cursor.execute(
-        "UPDATE solicitudes SET estado='atendido' WHERE id_solicitud=%s",(id,)
-    )
-
-    conexion.commit()
-
-    return redirect(url_for("medico"))
-
-
-# =========================
-# EJECUTAR APP
-# =========================
-if __name__ == '__main__':
-    app.run(debug=True)
+# IMPORTANTE: PUERTO PARA RENDER
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
