@@ -4,7 +4,7 @@ import os
 
 app = Flask(__name__)
 
-# CONEXIÓN A RAILWAY
+# CONEXIÓN A LA BASE DE DATOS
 def get_db():
     conexion = mysql.connector.connect(
         host=os.getenv("DB_HOST"),
@@ -16,17 +16,12 @@ def get_db():
     )
     return conexion, conexion.cursor(dictionary=True)
 
-# INICIO
+# PÁGINA PRINCIPAL (FORMULARIO)
 @app.route("/")
 def inicio():
     return render_template("registro.html")
 
-# FORMULARIO
-@app.route("/formulario")
-def formulario():
-    return render_template("registro.html")
-
-# REGISTRAR (GUARDAR DATOS)
+# REGISTRAR ESTUDIANTE
 @app.route("/registrar", methods=["POST"])
 def registrar():
 
@@ -37,17 +32,17 @@ def registrar():
 
     cursor.execute("""
         INSERT INTO estudiantes (nombres, correo_institucional)
-        VALUES (%s,%s)
-    """,(nombre, correo))
+        VALUES (%s, %s)
+    """, (nombre, correo))
 
     conexion.commit()
     conexion.close()
 
-    return redirect("/lista")
+    return redirect("/inspector")
 
-# VER ESTUDIANTES
-@app.route("/lista")
-def lista():
+# MOSTRAR LISTA DE ESTUDIANTES
+@app.route("/inspector")
+def inspector():
 
     conexion, cursor = get_db()
 
@@ -56,9 +51,9 @@ def lista():
 
     conexion.close()
 
-    return render_template("lista.html", estudiantes=estudiantes)
+    return render_template("inspector.html", estudiantes=estudiantes)
 
-# PUERTO RENDER
+# CONFIGURACIÓN PARA RENDER
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
