@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="contenedor-app">
+        <div class="cabecera-azul">
+            <h2>MediGo</h2>
+            <p>Registro de Asistencia</p>
+        </div>
+        <div class="contenido">
+            <form action="/enviar" method="POST">
+                <label>Seleccionar Estudiante</label>
+                <select name="estudiante" required>
+                    {% for est in estudiantes %}
+                    <option value="{{ est.id_estudiante }}">{{ est.nombre }}</option>
+                    {% endfor %}
+                </select>
+
+                <label>Nivel de Dolor (1-10)</label>
+                <div class="escala-dolor">
+                    {% for i in range(1, 11) %}
+                    <label class="nivel-btn n-{{i}}">
+                        <input type="radio" name="dolor" value="{{i}}" {% if i==1 %}checked{% endif %}>
+                        <span>{{i}}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+
+                <label>Motivo</label>
+                <textarea name="motivo" rows="3" required></textarea>
+                
+                <button type="submit" class="btn-principal">Enviar Solicitud</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

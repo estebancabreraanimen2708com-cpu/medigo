@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>Panel Médico</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<div class="contenedor-app">
+
+<div class="cabecera-azul">
+
+<h2>Panel Médico</h2>
+
+</div>
+
+<div class="contenido">
+
+{% for s in solicitudes %}
+
+<div class="tarjeta-solicitud">
+
+<div class="fila-info">
+
+<span class="nombre-est">
+{{ s.nombre }}
+</span>
+
+<span class="estado-aprobado">
+En consulta
+</span>
+
+</div>
+
+<div class="cuadro-motivo">
+
+{{ s.motivo }}
+
+</div>
+
+<a href="/atendido/{{s.id_solicitud}}">
+
+<button class="btn-atendido">
+
+Marcar como atendido
+
+</button>
+
+</a>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+</div>
+
+</body>
+</html>

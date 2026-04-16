@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+<title>Inspector</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<meta http-equiv="refresh" content="5">
+
+</head>
+
+<body>
+
+<div class="contenedor-app">
+
+<div class="cabecera-azul">
+
+<h2>Panel del Inspector</h2>
+
+</div>
+
+<div class="contenido">
+
+{% for s in solicitudes %}
+
+<div class="tarjeta-solicitud">
+
+<div class="fila-info">
+
+<span class="nombre-est">{{s.nombre}}</span>
+
+<span class="badge-pendiente">{{s.estado}}</span>
+
+</div>
+
+<div class="cuadro-motivo">
+
+{{s.motivo}}
+
+</div>
+
+{% if s.estado == "pendiente" %}
+
+<a href="/aprobar/{{s.id_solicitud}}">
+
+<button class="btn-principal">
+
+Aprobar
+
+</button>
+
+</a>
+
+<a href="/rechazar/{{s.id_solicitud}}">
+
+<button class="btn-secundario">
+
+Rechazar
+
+</button>
+
+</a>
+
+{% endif %}
+
+</div>
+
+{% endfor %}
+
+</div>
+
+</div>
+
+</body>
+</html>
