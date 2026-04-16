@@ -1,12 +1,11 @@
 from flask import Flask, render_template, request, redirect, session, flash
 import mysql.connector
-from werkzeug.security import check_password_hash
 import os
 
 app = Flask(__name__)
 app.secret_key = "clave_secreta"
 
-# CONEXIÓN A RAILWAY (SIN LOCALHOST)
+# CONEXIÓN A LA BASE DE DATOS (RAILWAY)
 def get_db():
     conexion = mysql.connector.connect(
         host=os.getenv("DB_HOST"),
@@ -19,183 +18,56 @@ def get_db():
     return conexion, conexion.cursor(dictionary=True)
 
 
-# INICIO
+# INICIO (usa registro.html como página principal)
 @app.route("/")
 def inicio():
-    return render_template("inicio.html")
+    return render_template("registro.html")
 
 
-# FORMULARIO
+# FORMULARIO (también usa registro.html)
 @app.route("/formulario")
 def formulario():
-    conexion, cursor = get_db()
-
-    cursor.execute("SELECT * FROM niveles")
-    niveles = cursor.fetchall()
-
-    cursor.execute("SELECT * FROM especialidades")
-    especialidades = cursor.fetchall()
-
-    conexion.close()
-
-    return render_template("formulario.html", niveles=niveles, especialidades=especialidades)
+    return render_template("registro.html")
 
 
-# REGISTRO
-@app.route("/inscribirse", methods=["POST"])
-def inscribirse():
-    nombre = request.form["nombre"]
-    apellido = request.form["apellido"]
-    correo = request.form["correo"]
-    genero = request.form["genero"]
-    nivel = request.form["nivel"]
-    especialidad = request.form["especialidad"]
-
-    if "@" not in correo or not correo.endswith("@donboscolatola.edu.ec"):
-        return "Correo institucional inválido"
-
-    conexion, cursor = get_db()
-
-    cursor.execute("SELECT * FROM estudiantes WHERE correo_institucional=%s",(correo,))
-    if cursor.fetchone():
-        conexion.close()
-        return "Este correo ya está registrado"
-
-    cursor.execute("""
-    INSERT INTO estudiantes
-    (nombres, apellidos, correo_institucional, genero, id_nivel, id_especialidad)
-    VALUES (%s,%s,%s,%s,%s,%s)
-    """,(nombre,apellido,correo,genero,nivel,especialidad))
-
-    conexion.commit()
-    id_estudiante = cursor.lastrowid
-    conexion.close()
-
-    session["id_estudiante"] = id_estudiante
-    session["nivel"] = nivel
-
-    return redirect("/clubes")
-
-
-# CLUBES
-@app.route("/clubes")
-def clubes():
-    if "id_estudiante" not in session:
-        return redirect("/formulario")
-
-    nivel = session["nivel"]
+# REGISTRO (ejemplo básico)
+@app.route("/registrar", methods=["POST"])
+def registrar():
+    nombre = request.form.get("nombre")
+    correo = request.form.get("correo")
 
     conexion, cursor = get_db()
 
     cursor.execute("""
-    SELECT 
-        clubes.*,
-        clubes.cupo_maximo - COUNT(inscripciones.id_inscripcion) AS cupos_restantes
-    FROM clubes
-    LEFT JOIN inscripciones 
-        ON clubes.id_club = inscripciones.id_club
-    WHERE clubes.id_nivel = %s AND clubes.activo = 1
-    GROUP BY clubes.id_club
-    """,(nivel,))
+    INSERT INTO estudiantes (nombres, correo_institucional)
+    VALUES (%s,%s)
+    """,(nombre,correo))
 
-    clubes = cursor.fetchall()
-    conexion.close()
-
-    return render_template("clubes.html", clubes=clubes)
-
-
-# INSCRIBIR
-@app.route("/inscribir_club", methods=["POST"])
-def inscribir_club():
-    if "id_estudiante" not in session:
-        return redirect("/")
-
-    estudiante = session["id_estudiante"]
-    club = request.form["club"]
-
-    conexion, cursor = get_db()
-
-    cursor.execute("SELECT * FROM inscripciones WHERE id_estudiante=%s",(estudiante,))
-    if cursor.fetchone():
-        conexion.close()
-        return "Este estudiante ya está inscrito en un club"
-
-    cursor.execute("""
-    SELECT clubes.cupo_maximo, COUNT(inscripciones.id_inscripcion) AS usados
-    FROM clubes
-    LEFT JOIN inscripciones ON clubes.id_club = inscripciones.id_club
-    WHERE clubes.id_club = %s
-    GROUP BY clubes.id_club
-    """,(club,))
-
-    datos = cursor.fetchone()
-
-    if datos["usados"] >= datos["cupo_maximo"]:
-        conexion.close()
-        return "Este club ya no tiene cupos disponibles"
-
-    cursor.execute("INSERT INTO inscripciones (id_estudiante,id_club) VALUES (%s,%s)",(estudiante,club))
     conexion.commit()
     conexion.close()
 
-    session.pop("id_estudiante",None)
-    session.pop("nivel",None)
-
-    flash("Inscripción completada correctamente")
-    return redirect("/")
+    return "Registro guardado"
 
 
-# LOGIN (SIN HASH PARA QUE FUNCIONE FÁCIL)
-@app.route("/login", methods=["GET","POST"])
-def login():
-    if request.method == "POST":
-        usuario = request.form["usuario"]
-        password = request.form["password"]
-
-        conexion, cursor = get_db()
-
-        cursor.execute("SELECT * FROM admin WHERE usuario=%s",(usuario,))
-        admin = cursor.fetchone()
-
-        conexion.close()
-
-        if admin and admin["password"] == password:
-            session["admin"] = True
-            return redirect("/admin")
-
-        return "Usuario o contraseña incorrectos"
-
-    return render_template("login.html")
+# PANEL INSPECTOR
+@app.route("/inspector")
+def inspector():
+    return render_template("inspector.html")
 
 
-# PANEL ADMIN
-@app.route("/admin")
-def admin():
-    if "admin" not in session:
-        return redirect("/login")
-
-    conexion, cursor = get_db()
-
-    cursor.execute("""
-    SELECT clubes.*, niveles.nombre_nivel,
-    COUNT(inscripciones.id_inscripcion) AS cupos_usados
-    FROM clubes
-    LEFT JOIN inscripciones ON clubes.id_club = inscripciones.id_club
-    JOIN niveles ON clubes.id_nivel = niveles.id_nivel
-    GROUP BY clubes.id_club
-    """)
-
-    clubes = cursor.fetchall()
-
-    cursor.execute("SELECT * FROM niveles")
-    niveles = cursor.fetchall()
-
-    conexion.close()
-
-    return render_template("admin.html", clubes=clubes, niveles=niveles)
+# PANEL MÉDICO
+@app.route("/medico")
+def medico():
+    return render_template("medico.html")
 
 
-# IMPORTANTE: PUERTO PARA RENDER
+# SOLICITUDES
+@app.route("/solicitudes")
+def solicitudes():
+    return render_template("solicitudes.html")
+
+
+# PUERTO PARA RENDER
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
