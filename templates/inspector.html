@@ -1,78 +1,20 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-
-<meta charset="UTF-8">
-<title>Inspector</title>
-
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
-<meta http-equiv="refresh" content="5">
-
+    <title>Inspector</title>
 </head>
-
 <body>
 
-<div class="contenedor-app">
+<h1>Lista de Estudiantes</h1>
 
-<div class="cabecera-azul">
-
-<h2>Panel del Inspector</h2>
-
-</div>
-
-<div class="contenido">
-
-{% for s in solicitudes %}
-
-<div class="tarjeta-solicitud">
-
-<div class="fila-info">
-
-<span class="nombre-est">{{s.nombre}}</span>
-
-<span class="badge-pendiente">{{s.estado}}</span>
-
-</div>
-
-<div class="cuadro-motivo">
-
-{{s.motivo}}
-
-</div>
-
-{% if s.estado == "pendiente" %}
-
-<a href="/aprobar/{{s.id_solicitud}}">
-
-<button class="btn-principal">
-
-Aprobar
-
-</button>
-
-</a>
-
-<a href="/rechazar/{{s.id_solicitud}}">
-
-<button class="btn-secundario">
-
-Rechazar
-
-</button>
-
-</a>
-
-{% endif %}
-
-</div>
-
+<ul>
+{% for e in estudiantes %}
+    <li>{{ e.nombres }} - {{ e.correo_institucional }}</li>
 {% endfor %}
+</ul>
 
-</div>
-
-</div>
+<br>
+<a href="/">Volver</a>
 
 </body>
 </html>
