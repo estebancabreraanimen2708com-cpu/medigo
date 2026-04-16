@@ -4,56 +4,57 @@ import os
 
 app = Flask(__name__)
 
-# CONEXIÓN A LA BASE DE DATOS
 def get_db():
-    conexion = mysql.connector.connect(
+    return mysql.connector.connect(
         host=os.getenv("DB_HOST"),
         user=os.getenv("DB_USER"),
         password=os.getenv("DB_PASSWORD"),
         database=os.getenv("DB_NAME"),
-        port=int(os.getenv("DB_PORT")),
-        connection_timeout=10
+        port=int(os.getenv("DB_PORT"))
     )
-    return conexion, conexion.cursor(dictionary=True)
 
-# PÁGINA PRINCIPAL (FORMULARIO)
+# INICIO
 @app.route("/")
 def inicio():
     return render_template("registro.html")
 
-# REGISTRAR ESTUDIANTE
+# REGISTRAR (NO TOCA TU HTML)
 @app.route("/registrar", methods=["POST"])
 def registrar():
 
     nombre = request.form.get("nombre")
     correo = request.form.get("correo")
 
-    conexion, cursor = get_db()
+    conexion = get_db()
+    cursor = conexion.cursor()
 
-    cursor.execute("""
-        INSERT INTO estudiantes (nombres, correo_institucional)
-        VALUES (%s, %s)
-    """, (nombre, correo))
+    cursor.execute(
+        "INSERT INTO estudiantes (nombres, correo_institucional) VALUES (%s,%s)",
+        (nombre, correo)
+    )
 
     conexion.commit()
     conexion.close()
 
     return redirect("/inspector")
 
-# MOSTRAR LISTA DE ESTUDIANTES
+# MOSTRAR LISTA SIN CAMBIAR DISEÑO
 @app.route("/inspector")
 def inspector():
 
-    conexion, cursor = get_db()
+    conexion = get_db()
+    cursor = conexion.cursor(dictionary=True)
 
     cursor.execute("SELECT * FROM estudiantes")
     estudiantes = cursor.fetchall()
 
     conexion.close()
 
+    # 👇 IMPORTANTE: esto manda los datos a tu HTML
     return render_template("inspector.html", estudiantes=estudiantes)
 
-# CONFIGURACIÓN PARA RENDER
+
+# PUERTO
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
