@@ -1,104 +1,101 @@
 <!DOCTYPE html>
 <html>
-
 <head>
+    <title>Solicitudes Médicas</title>
 
-<meta charset="UTF-8">
-<title>Solicitudes</title>
+    <style>
+        body {
+            font-family: Arial;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
 
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+        h1 {
+            color: #333;
+        }
 
+        form {
+            background: white;
+            padding: 20px;
+            margin: 20px auto;
+            width: 300px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px gray;
+        }
+
+        select, input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        table {
+            margin: auto;
+            width: 80%;
+            background: white;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 10px;
+        }
+
+        th {
+            background-color: #333;
+            color: white;
+        }
+    </style>
 </head>
 
 <body>
 
-<div class="contenedor-app">
+<h1>Solicitud Médica</h1>
 
-<div class="cabecera-azul">
+<!-- FORMULARIO -->
+<form action="/guardar_solicitud" method="POST">
 
-<h2>Nueva Solicitud Médica</h2>
+    <label>Seleccionar Estudiante</label>
+    <select name="estudiante" required>
+        {% for e in estudiantes %}
+            <option value="{{ e.id_estudiante }}">{{ e.nombres }}</option>
+        {% endfor %}
+    </select>
 
-</div>
+    <label>Nivel de dolor (1 - 10)</label>
+    <input type="number" name="dolor" min="1" max="10" required>
 
-<div class="contenido">
-
-<form method="POST">
-
-<label>Estudiante</label>
-
-<select name="estudiante">
-
-{% for e in estudiantes %}
-
-<option value="{{e.id_estudiante}}">
-{{e.nombre}}
-</option>
-
-{% endfor %}
-
-</select>
-
-<label>Nivel de dolor</label>
-
-<div class="escala-dolor">
-
-{% for i in range(1,11) %}
-
-<label class="nivel-btn n-{{i}}">
-<input type="radio" name="dolor" value="{{i}}" required>
-<span>{{i}}</span>
-</label>
-
-{% endfor %}
-
-</div>
-
-<label>Motivo</label>
-
-<textarea name="motivo" required></textarea>
-
-<button class="btn-principal">
-Enviar solicitud
-</button>
+    <button type="submit">Enviar solicitud</button>
 
 </form>
 
-</div>
+<br><br>
 
-<div class="contenido">
+<h2>Solicitudes Registradas</h2>
 
-<h3>Solicitudes registradas</h3>
-
-<table width="100%">
+<!-- TABLA -->
+<table>
 
 <tr>
-
-<th>Estudiante</th>
-<th>Motivo</th>
-<th>Estado</th>
-<th>Fecha</th>
-
+    <th>ID Estudiante</th>
+    <th>Nivel Dolor</th>
 </tr>
 
 {% for s in solicitudes %}
-
 <tr>
-
-<td>{{s.nombre}}</td>
-<td>{{s.motivo}}</td>
-<td>{{s.estado}}</td>
-<td>{{s.fecha}}</td>
-
+    <td>{{ s.id_estudiante }}</td>
+    <td>{{ s.nivel_dolor }}</td>
 </tr>
-
 {% endfor %}
 
 </table>
 
-</div>
-
-</div>
-
 </body>
-
 </html>
