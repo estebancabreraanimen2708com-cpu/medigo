@@ -1,56 +1,113 @@
 from flask import Flask, render_template, request, redirect, url_for
 import mysql.connector
-import os
 
-app = Flask(__name__, static_folder='static')
-app.config["PROPAGATE_EXCEPTIONS"] = True
+app = Flask(__name__)
 
-# CONEXIÓN CORREGIDA PARA TU FOTO DE PHP_MYADMIN
-def get_db():
-    try:
-        # Forzamos los datos exactos de tu XAMPP
-        db = mysql.connector.connect(
-            host="localhost",       # Cambia a os.getenv si vas a subirlo a internet
-            user="root",            # Usuario por defecto de XAMPP
-            password="",            # Contraseña por defecto (vacia)
-            database="medigo_db",   # El nombre exacto de tu foto
-            port=3306
-        )
-        return db
-    except Exception as e:
-        # Esto saldrá en tu consola negra cuando intentes entrar a la web
-        print("***********************************")
-        print(f"ERROR DE CONEXIÓN: {e}")
-        print("***********************************")
-        return None
+# FUNCIÓN PARA CONECTAR (Para evitar que la conexión se pierda)
+def conectar_db():
+    return mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="",
+        database="medigo_db"
+    )
 
-# --- RUTA PROFESOR ---
+# =========================
+# PROFESOR (SOLICITUDES)
+# =========================
 @app.route('/', methods=["GET","POST"])
 @app.route('/solicitudes', methods=["GET","POST"])
 def solicitudes():
-    db = get_db()
-    if not db: 
-        return "<h1>Error Fatal: No se pudo conectar a 'medigo_db'</h1><p>Revisa que XAMPP tenga MySQL encendido.</p>"
-    
-    cursor = db.cursor(dictionary=True)
+    conexion = conectar_db()
+    cursor = conexion.cursor(dictionary=True)
+
     if request.method == "POST":
-        id_est = request.form.get("estudiante")
-        mot = request.form.get("motivo")
-        # INSERT según tu tabla de la foto (id_profesor es 1 por defecto)
-        cursor.execute("INSERT INTO solicitudes (id_estudiante, id_profesor, motivo, estado) VALUES (%s, 1, %s, 'pendiente')", (id_est, mot))
-        db.commit()
+        estudiante = request.form["estudiante"]
+        motivo = request.form["motivo"]
+        # Nota: En tu foto no veo la columna 'dolor', si te da error, quítala de aquí:
+        sql = "INSERT INTO solicitudes (id_estudiante, id_profesor, motivo, estado) VALUES (%s, 1, %s, 'pendiente')"
+        cursor.execute(sql, (estudiante, motivo))
+        conexion.commit()
+        conexion.close()
         return redirect(url_for("solicitudes"))
 
+    # OBTENER ESTUDIANTES (Columna 'nombres' según tu foto)
     cursor.execute("SELECT id_estudiante, nombres FROM estudiantes")
     estudiantes = cursor.fetchall()
-    
-    cursor.execute("SELECT s.*, e.nombres AS nombre FROM solicitudes s JOIN estudiantes e ON s.id_estudiante = e.id_estudiante ORDER BY s.id_solicitud DESC")
-    lista = cursor.fetchall()
-    db.close()
-    return render_template("solicitudes.html", solicitudes=lista, estudiantes=estudiantes)
 
-# --- LAS DEMÁS RUTAS (Inspector y Médico) SIGUEN IGUAL ---
-# (Copia las rutas de Inspector y Médico que te pasé en el mensaje anterior)
+    # OBTENER SOLICITUDES (Cambiado 'e.nombre' por 'e.nombres')
+    cursor.execute("""
+    SELECT s.id_solicitud, e.nombres as nombre, s.motivo, s.estado, s.fecha
+    FROM solicitudes s
+    JOIN estudiantes e ON s.id_estudiante = e.id_estudiante
+    ORDER BY s.id_solicitud DESC
+    """)
+    solicitudes_lista = cursor.fetchall()
+    
+    conexion.close()
+    return render_template("solicitudes.html", solicitudes=solicitudes_lista, estudiantes=estudiantes)
+
+# =========================
+# INSPECTOR
+# =========================
+@app.route('/inspector')
+def inspector():
+    conexion = conectar_db()
+    cursor = conexion.cursor(dictionary=True)
+    cursor.execute("""
+    SELECT s.id_solicitud, e.nombres as nombre, s.motivo, s.estado, s.fecha
+    FROM solicitudes s
+    JOIN estudiantes e ON s.id_estudiante = e.id_estudiante
+    WHERE s.estado = 'pendiente'
+    ORDER BY s.id_solicitud DESC
+    """)
+    solicitudes_lista = cursor.fetchall()
+    conexion.close()
+    return render_template("inspector.html", solicitudes=solicitudes_lista)
+
+@app.route('/aprobar/<int:id>')
+def aprobar(id):
+    conexion = conectar_db()
+    cursor = conexion.cursor()
+    cursor.execute("UPDATE solicitudes SET estado='aprobado' WHERE id_solicitud=%s", (id,))
+    conexion.commit()
+    conexion.close()
+    return redirect(url_for("inspector"))
+
+@app.route('/rechazar/<int:id>')
+def rechazar(id):
+    conexion = conectar_db()
+    cursor = conexion.cursor()
+    cursor.execute("UPDATE solicitudes SET estado='rechazado' WHERE id_solicitud=%s", (id,))
+    conexion.commit()
+    conexion.close()
+    return redirect(url_for("inspector"))
+
+# =========================
+# MÉDICO
+# =========================
+@app.route('/medico')
+def medico():
+    conexion = conectar_db()
+    cursor = conexion.cursor(dictionary=True)
+    cursor.execute("""
+    SELECT s.id_solicitud, e.nombres as nombre, s.motivo
+    FROM solicitudes s
+    JOIN estudiantes e ON s.id_estudiante = e.id_estudiante
+    WHERE s.estado='aprobado'
+    """)
+    solicitudes_lista = cursor.fetchall()
+    conexion.close()
+    return render_template("medico.html", solicitudes=solicitudes_lista)
+
+@app.route('/atendido/<int:id>')
+def atendido(id):
+    conexion = conectar_db()
+    cursor = conexion.cursor()
+    cursor.execute("UPDATE solicitudes SET estado='atendido' WHERE id_solicitud=%s", (id,))
+    conexion.commit()
+    conexion.close()
+    return redirect(url_for("medico"))
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(debug=True, port=5000)
