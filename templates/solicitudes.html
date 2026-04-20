@@ -1,75 +1,46 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Solicitudes</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta charset="UTF-8">
+    <title>Medigo - Profesor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
 <body>
+    <div class="container">
+        <h1>Generar Solicitud Médica</h1>
+        <form method="POST" class="card">
+            <label>Estudiante:</label>
+            <select name="estudiante" required>
+                {% for e in estudiantes %}
+                <option value="{{ e.id_estudiante }}">{{ e.nombres }}</option>
+                {% endfor %}
+            </select>
+            <label>Motivo:</label>
+            <input type="text" name="motivo" placeholder="Ej. Dolor de cabeza" required>
+            <label>Nivel de Dolor:</label>
+            <input type="number" name="dolor" min="1" max="10" value="1">
+            <button type="submit">Enviar Solicitud</button>
+        </form>
 
-<div class="contenedor-app">
-
-<div class="cabecera-azul">
-<h2>Nueva Solicitud Médica</h2>
-</div>
-
-<div class="contenido">
-
-<form action="/solicitudes" method="POST">
-
-<label>Estudiante</label>
-<select name="estudiante" required>
-{% for e in estudiantes %}
-<option value="{{e.id_estudiante}}">{{e.nombres}}</option>
-{% endfor %}
-</select>
-
-<label>Nivel de dolor</label>
-<div class="escala-dolor">
-{% for i in range(1,11) %}
-<label class="nivel-btn n-{{i}}">
-<input type="radio" name="dolor" value="{{i}}" required>
-<span>{{i}}</span>
-</label>
-{% endfor %}
-</div>
-
-<label>Motivo</label>
-<textarea name="motivo" required></textarea>
-
-<button class="btn-principal">Enviar solicitud</button>
-
-</form>
-
-</div>
-
-<div class="contenido">
-
-<h3>Solicitudes registradas</h3>
-
-<table width="100%">
-<tr>
-<th>Estudiante</th>
-<th>Motivo</th>
-<th>Estado</th>
-<th>Fecha</th>
-</tr>
-
-{% for s in solicitudes %}
-<tr>
-<td>{{s.nombre}}</td>
-<td>{{s.motivo}}</td>
-<td>{{s.estado}}</td>
-<td>{{s.fecha}}</td>
-</tr>
-{% endfor %}
-
-</table>
-
-</div>
-
-</div>
-
+        <h2>Historial Reciente</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Estudiante</th>
+                    <th>Motivo</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in solicitudes %}
+                <tr>
+                    <td>{{ s.nombre }}</td>
+                    <td>{{ s.motivo }}</td>
+                    <td><span class="status-{{ s.estado }}">{{ s.estado }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </body>
 </html>
