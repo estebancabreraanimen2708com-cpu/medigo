@@ -7,27 +7,26 @@
 </head>
 <body>
     <div class="container">
-        <h1>Generar Solicitud Médica</h1>
+        <h1>Nueva Solicitud Médica</h1>
         <form method="POST" class="card">
-            <label>Estudiante:</label>
+            <label>Seleccionar Estudiante:</label>
             <select name="estudiante" required>
                 {% for e in estudiantes %}
                 <option value="{{ e.id_estudiante }}">{{ e.nombres }}</option>
                 {% endfor %}
             </select>
-            <label>Motivo:</label>
-            <input type="text" name="motivo" placeholder="Ej. Dolor de cabeza" required>
-            <label>Nivel de Dolor:</label>
-            <input type="number" name="dolor" min="1" max="10" value="1">
-            <button type="submit">Enviar Solicitud</button>
+            <label>Motivo de la consulta:</label>
+            <input type="text" name="motivo" placeholder="Ej. Dolor abdominal" required>
+            <button type="submit">Enviar al Inspector</button>
         </form>
 
-        <h2>Historial Reciente</h2>
+        <h2>Solicitudes de Hoy</h2>
         <table>
             <thead>
                 <tr>
                     <th>Estudiante</th>
                     <th>Motivo</th>
+                    <th>Fecha</th>
                     <th>Estado</th>
                 </tr>
             </thead>
@@ -36,7 +35,8 @@
                 <tr>
                     <td>{{ s.nombre }}</td>
                     <td>{{ s.motivo }}</td>
-                    <td><span class="status-{{ s.estado }}">{{ s.estado }}</span></td>
+                    <td>{{ s.fecha }}</td>
+                    <td><span class="tag {{ s.estado }}">{{ s.estado }}</span></td>
                 </tr>
                 {% endfor %}
             </tbody>
