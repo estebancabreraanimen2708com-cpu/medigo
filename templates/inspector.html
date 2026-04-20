@@ -1,20 +1,40 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Inspector</title>
+    <meta charset="UTF-8">
+    <title>Medigo - Inspector</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-
-<h1>Lista de Estudiantes</h1>
-
-<ul>
-{% for e in estudiantes %}
-    <li>{{ e.nombres }} - {{ e.correo_institucional }}</li>
-{% endfor %}
-</ul>
-
-<br>
-<a href="/">Volver</a>
-
+    <div class="container">
+        <h1>Panel de Inspección</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Estudiante</th>
+                    <th>Motivo</th>
+                    <th>Dolor</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in solicitudes %}
+                <tr>
+                    <td>{{ s.nombre }}</td>
+                    <td>{{ s.motivo }}</td>
+                    <td>{{ s.dolor }}</td>
+                    <td>
+                        {% if s.estado == 'pendiente' %}
+                        <a href="{{ url_for('aprobar', id=s.id_solicitud) }}" class="btn btn-aprobar">Aprobar</a>
+                        <a href="{{ url_for('rechazar', id=s.id_solicitud) }}" class="btn btn-rechazar">Rechazar</a>
+                        {% else %}
+                        {{ s.estado }}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </body>
 </html>
