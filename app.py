@@ -36,15 +36,20 @@ def solicitudes():
 
         sql = """
         INSERT INTO solicitudes (id_estudiante, id_profesor, motivo, dolor, estado)
-        VALUES (%s, 1, %s, %s, 'pendiente')
+        VALUES (%s, 3, %s, %s, 'pendiente')
         """
 
-        cursor.execute(sql, (estudiante, motivo, dolor))
-        conexion.commit()
+        # 🔥 DEBUG PARA VER ERROR REAL
+        try:
+            cursor.execute(sql, (estudiante, motivo, dolor))
+            conexion.commit()
+        except Exception as e:
+            print("ERROR REAL:", e)
+            return "Error en el servidor: " + str(e)
 
         return redirect(url_for("solicitudes"))
 
-    # 🔥 OBTENER ESTUDIANTES (IMPORTANTE)
+    # 🔥 OBTENER ESTUDIANTES
     cursor.execute("SELECT * FROM estudiantes")
     estudiantes = cursor.fetchall()
 
