@@ -40,9 +40,10 @@ def solicitudes():
         motivo = request.form["motivo"]
         dolor = request.form["dolor"]
 
+        # 🔥 SOLUCIÓN: usa automáticamente un profesor existente
         sql = """
         INSERT INTO solicitudes (id_estudiante, id_profesor, motivo, dolor, estado)
-        VALUES (%s, 3, %s, %s, 'pendiente')
+        VALUES (%s, (SELECT id_profesor FROM profesores LIMIT 1), %s, %s, 'pendiente')
         """
 
         try:
