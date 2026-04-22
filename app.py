@@ -5,21 +5,21 @@ import os
 app = Flask(__name__)
 
 # =========================
-# CONEXIÓN A MYSQL (RAILWAY)
+# CONEXIÓN A MYSQL SEGURA
 # =========================
-try:
-    conexion = mysql.connector.connect(
-        host=os.getenv("DB_HOST"),
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD"),
-        database=os.getenv("DB_NAME"),
-        port=int(os.getenv("DB_PORT"))
-    )
-    cursor = conexion.cursor(dictionary=True)
-    print("✅ Conexión exitosa a la base de datos")
-
-except Exception as e:
-    print("❌ Error conectando a la base de datos:", e)
+def get_connection():
+    try:
+        conexion = mysql.connector.connect(
+            host=os.getenv("DB_HOST"),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD"),
+            database=os.getenv("DB_NAME"),
+            port=int(os.getenv("DB_PORT"))
+        )
+        return conexion
+    except Exception as e:
+        print("❌ Error DB:", e)
+        return None
 
 
 # =========================
@@ -28,6 +28,12 @@ except Exception as e:
 @app.route('/', methods=["GET", "POST"])
 @app.route('/solicitudes', methods=["GET", "POST"])
 def solicitudes():
+
+    conexion = get_connection()
+    if conexion is None:
+        return "Error de conexión a la base de datos"
+
+    cursor = conexion.cursor(dictionary=True)
 
     if request.method == "POST":
         estudiante = request.form["estudiante"]
@@ -39,21 +45,19 @@ def solicitudes():
         VALUES (%s, 3, %s, %s, 'pendiente')
         """
 
-        # 🔥 DEBUG PARA VER ERROR REAL
         try:
             cursor.execute(sql, (estudiante, motivo, dolor))
             conexion.commit()
         except Exception as e:
-            print("ERROR REAL:", e)
-            return "Error en el servidor: " + str(e)
+            return "Error al insertar: " + str(e)
 
         return redirect(url_for("solicitudes"))
 
-    # 🔥 OBTENER ESTUDIANTES
+    # OBTENER ESTUDIANTES
     cursor.execute("SELECT * FROM estudiantes")
     estudiantes = cursor.fetchall()
 
-    # 🔥 OBTENER SOLICITUDES
+    # OBTENER SOLICITUDES
     cursor.execute("""
     SELECT s.id_solicitud, e.nombre, s.motivo, s.estado, s.fecha, s.dolor
     FROM solicitudes s
@@ -61,6 +65,8 @@ def solicitudes():
     ORDER BY s.id_solicitud DESC
     """)
     solicitudes = cursor.fetchall()
+
+    conexion.close()
 
     return render_template(
         "solicitudes.html",
@@ -75,6 +81,12 @@ def solicitudes():
 @app.route('/inspector')
 def inspector():
 
+    conexion = get_connection()
+    if conexion is None:
+        return "Error de conexión"
+
+    cursor = conexion.cursor(dictionary=True)
+
     cursor.execute("""
     SELECT s.id_solicitud, e.nombre, s.motivo, s.estado, s.fecha, s.dolor
     FROM solicitudes s
@@ -83,6 +95,7 @@ def inspector():
     """)
 
     solicitudes = cursor.fetchall()
+    conexion.close()
 
     return render_template("inspector.html", solicitudes=solicitudes)
 
@@ -93,10 +106,14 @@ def inspector():
 @app.route('/aprobar/<int:id>')
 def aprobar(id):
 
+    conexion = get_connection()
+    cursor = conexion.cursor()
+
     cursor.execute(
         "UPDATE solicitudes SET estado='aprobado' WHERE id_solicitud=%s", (id,)
     )
     conexion.commit()
+    conexion.close()
 
     return redirect(url_for("inspector"))
 
@@ -107,10 +124,14 @@ def aprobar(id):
 @app.route('/rechazar/<int:id>')
 def rechazar(id):
 
+    conexion = get_connection()
+    cursor = conexion.cursor()
+
     cursor.execute(
         "UPDATE solicitudes SET estado='rechazado' WHERE id_solicitud=%s", (id,)
     )
     conexion.commit()
+    conexion.close()
 
     return redirect(url_for("inspector"))
 
@@ -121,6 +142,9 @@ def rechazar(id):
 @app.route('/medico')
 def medico():
 
+    conexion = get_connection()
+    cursor = conexion.cursor(dictionary=True)
+
     cursor.execute("""
     SELECT s.id_solicitud, e.nombre, s.motivo, s.dolor
     FROM solicitudes s
@@ -129,6 +153,7 @@ def medico():
     """)
 
     solicitudes = cursor.fetchall()
+    conexion.close()
 
     return render_template("medico.html", solicitudes=solicitudes)
 
@@ -139,16 +164,20 @@ def medico():
 @app.route('/atendido/<int:id>')
 def atendido(id):
 
+    conexion = get_connection()
+    cursor = conexion.cursor()
+
     cursor.execute(
         "UPDATE solicitudes SET estado='atendido' WHERE id_solicitud=%s", (id,)
     )
     conexion.commit()
+    conexion.close()
 
     return redirect(url_for("medico"))
 
 
 # =========================
-# EJECUTAR APP
+# EJECUTAR APP (LOCAL)
 # =========================
 if __name__ == '__main__':
     app.run(debug=True)
