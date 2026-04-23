@@ -1,40 +1,69 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
+
 <head>
-    <meta charset="UTF-8">
-    <title>Medigo - Inspector</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<meta charset="UTF-8">
+<title>Inspector</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<meta http-equiv="refresh" content="5">
+
 </head>
+
 <body>
-    <div class="container">
-        <h1>Panel de Inspección</h1>
-        <table>
-            <thead>
-                <tr>
-                    <th>Estudiante</th>
-                    <th>Motivo</th>
-                    <th>Dolor</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for s in solicitudes %}
-                <tr>
-                    <td>{{ s.nombre }}</td>
-                    <td>{{ s.motivo }}</td>
-                    <td>{{ s.dolor }}</td>
-                    <td>
-                        {% if s.estado == 'pendiente' %}
-                        <a href="{{ url_for('aprobar', id=s.id_solicitud) }}" class="btn btn-aprobar">Aprobar</a>
-                        <a href="{{ url_for('rechazar', id=s.id_solicitud) }}" class="btn btn-rechazar">Rechazar</a>
-                        {% else %}
-                        {{ s.estado }}
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+
+<div class="contenedor-app">
+
+<div class="cabecera-azul">
+<h2>Panel del Inspector</h2>
+
+<!-- 🔥 BOTÓN PDF -->
+<a href="/reporte_pdf">
+    <button class="btn-principal" style="margin-top:10px;">
+        Descargar reporte PDF
+    </button>
+</a>
+
+</div>
+
+<div class="contenido">
+
+{% for s in solicitudes %}
+
+<div class="tarjeta-solicitud">
+
+<div class="fila-info">
+<span class="nombre-est">{{s.nombre}}</span>
+<span class="badge-pendiente">{{s.estado}}</span>
+</div>
+
+<div class="cuadro-motivo">
+{{s.motivo}}
+</div>
+
+<div style="font-size:12px; margin-top:5px;">
+{{ s.fecha.strftime('%d/%m/%Y %H:%M') if s.fecha }}
+</div>
+
+{% if s.estado == "pendiente" %}
+
+<a href="/aprobar/{{s.id_solicitud}}">
+<button class="btn-principal">Aprobar</button>
+</a>
+
+<a href="/rechazar/{{s.id_solicitud}}">
+<button class="btn-secundario">Rechazar</button>
+</a>
+
+{% endif %}
+
+</div>
+
+{% endfor %}
+
+</div>
+
+</div>
+
 </body>
 </html>
