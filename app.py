@@ -29,13 +29,16 @@ def get_connection():
 
 
 # =========================
-# SOLICITUDES
+# SOLICITUDES (PROFESOR)
 # =========================
 @app.route('/', methods=["GET", "POST"])
 @app.route('/solicitudes', methods=["GET", "POST"])
 def solicitudes():
 
     conexion = get_connection()
+    if conexion is None:
+        return "Error de conexión a la base de datos"
+
     cursor = conexion.cursor(dictionary=True)
 
     if request.method == "POST":
@@ -43,6 +46,7 @@ def solicitudes():
         motivo = request.form["motivo"]
         dolor = request.form["dolor"]
 
+        # Hora Ecuador
         ecuador = pytz.timezone('America/Guayaquil')
         fecha_ecuador = datetime.now(ecuador)
 
@@ -51,14 +55,19 @@ def solicitudes():
         VALUES (%s, (SELECT id_profesor FROM profesores LIMIT 1), %s, %s, 'pendiente', %s)
         """
 
-        cursor.execute(sql, (estudiante, motivo, dolor, fecha_ecuador))
-        conexion.commit()
+        try:
+            cursor.execute(sql, (estudiante, motivo, dolor, fecha_ecuador))
+            conexion.commit()
+        except Exception as e:
+            return "Error al insertar: " + str(e)
 
         return redirect(url_for("solicitudes"))
 
+    # Obtener estudiantes
     cursor.execute("SELECT * FROM estudiantes")
     estudiantes = cursor.fetchall()
 
+    # Obtener solicitudes
     cursor.execute("""
     SELECT s.id_solicitud, e.nombre, s.motivo, s.estado, s.fecha, s.dolor
     FROM solicitudes s
@@ -151,10 +160,11 @@ def reporte_pdf():
 
 
 # =========================
-# APROBAR / RECHAZAR
+# APROBAR
 # =========================
 @app.route('/aprobar/<int:id>')
 def aprobar(id):
+
     conexion = get_connection()
     cursor = conexion.cursor()
 
@@ -165,8 +175,12 @@ def aprobar(id):
     return redirect(url_for("inspector"))
 
 
+# =========================
+# RECHAZAR
+# =========================
 @app.route('/rechazar/<int:id>')
 def rechazar(id):
+
     conexion = get_connection()
     cursor = conexion.cursor()
 
@@ -177,5 +191,49 @@ def rechazar(id):
     return redirect(url_for("inspector"))
 
 
+# =========================
+# MÉDICO
+# =========================
+@app.route('/medico')
+def medico():
+
+    conexion = get_connection()
+    cursor = conexion.cursor(dictionary=True)
+
+    cursor.execute("""
+    SELECT s.id_solicitud, e.nombre, s.motivo, s.dolor
+    FROM solicitudes s
+    JOIN estudiantes e ON s.id_estudiante = e.id_estudiante
+    WHERE s.estado='aprobado'
+    """)
+
+    solicitudes = cursor.fetchall()
+    conexion.close()
+
+    return render_template("medico.html", solicitudes=solicitudes)
+
+
+# =========================
+# ATENDIDO
+# =========================
+@app.route('/atendido/<int:id>')
+def atendido(id):
+
+    conexion = get_connection()
+    cursor = conexion.cursor()
+
+    cursor.execute(
+        "UPDATE solicitudes SET estado='atendido' WHERE id_solicitud=%s", (id,)
+    )
+
+    conexion.commit()
+    conexion.close()
+
+    return redirect(url_for("medico"))
+
+
+# =========================
+# RUN LOCAL
+# =========================
 if __name__ == '__main__':
     app.run(debug=True)
