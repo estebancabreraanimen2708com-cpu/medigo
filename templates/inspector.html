@@ -1,67 +1,68 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 
 <head>
-<meta charset="UTF-8">
-<title>Inspector</title>
+    <meta charset="UTF-8">
+    <title>Inspector</title>
 
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-<meta http-equiv="refresh" content="5">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
+    <!-- 🔥 Recarga más lenta para no interferir -->
+    <meta http-equiv="refresh" content="15">
 </head>
 
 <body>
 
 <div class="contenedor-app">
 
-<div class="cabecera-azul">
-<h2>Panel del Inspector</h2>
+    <div class="cabecera-azul">
+        <h2>Panel del Inspector</h2>
 
-<!-- 🔥 BOTÓN PDF -->
-<a href="/reporte_pdf">
-    <button class="btn-principal" style="margin-top:10px;">
-        Descargar reporte PDF
-    </button>
-</a>
+        <!-- 🔥 BOTÓN PDF -->
+        <a href="{{ url_for('reporte_pdf') }}" target="_blank">
+            <button class="btn-principal" style="margin-top:10px;">
+                Descargar reporte PDF del día
+            </button>
+        </a>
+    </div>
 
-</div>
+    <div class="contenido">
 
-<div class="contenido">
+        {% for s in solicitudes %}
 
-{% for s in solicitudes %}
+        <div class="tarjeta-solicitud">
 
-<div class="tarjeta-solicitud">
+            <div class="fila-info">
+                <span class="nombre-est">{{ s.nombre }}</span>
+                <span class="badge-pendiente">{{ s.estado }}</span>
+            </div>
 
-<div class="fila-info">
-<span class="nombre-est">{{s.nombre}}</span>
-<span class="badge-pendiente">{{s.estado}}</span>
-</div>
+            <div class="cuadro-motivo">
+                {{ s.motivo }}
+            </div>
 
-<div class="cuadro-motivo">
-{{s.motivo}}
-</div>
+            <!-- 🔥 FECHA FORMATEADA -->
+            <div style="font-size:12px; margin-top:5px;">
+                {{ s.fecha.strftime('%d/%m/%Y %H:%M') if s.fecha }}
+            </div>
 
-<div style="font-size:12px; margin-top:5px;">
-{{ s.fecha.strftime('%d/%m/%Y %H:%M') if s.fecha }}
-</div>
+            {% if s.estado == "pendiente" %}
 
-{% if s.estado == "pendiente" %}
+            <a href="{{ url_for('aprobar', id=s.id_solicitud) }}">
+                <button class="btn-principal">Aprobar</button>
+            </a>
 
-<a href="/aprobar/{{s.id_solicitud}}">
-<button class="btn-principal">Aprobar</button>
-</a>
+            <a href="{{ url_for('rechazar', id=s.id_solicitud) }}">
+                <button class="btn-secundario">Rechazar</button>
+            </a>
 
-<a href="/rechazar/{{s.id_solicitud}}">
-<button class="btn-secundario">Rechazar</button>
-</a>
+            {% endif %}
 
-{% endif %}
+        </div>
 
-</div>
+        {% endfor %}
 
-{% endfor %}
-
-</div>
+    </div>
 
 </div>
 
