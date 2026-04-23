@@ -1,11 +1,13 @@
 from flask import Flask, render_template, request, redirect, url_for
 import mysql.connector
 import os
+from datetime import datetime
+import pytz
 
 app = Flask(__name__)
 
 # =========================
-# CONEXIÓN A MYSQL SEGURA
+# CONEXIÓN A MYSQL
 # =========================
 def get_connection():
     try:
@@ -40,14 +42,17 @@ def solicitudes():
         motivo = request.form["motivo"]
         dolor = request.form["dolor"]
 
-        # 🔥 SOLUCIÓN: usa automáticamente un profesor existente
+        # 🔥 Hora Ecuador
+        ecuador = pytz.timezone('America/Guayaquil')
+        fecha_ecuador = datetime.now(ecuador)
+
         sql = """
-        INSERT INTO solicitudes (id_estudiante, id_profesor, motivo, dolor, estado)
-        VALUES (%s, (SELECT id_profesor FROM profesores LIMIT 1), %s, %s, 'pendiente')
+        INSERT INTO solicitudes (id_estudiante, id_profesor, motivo, dolor, estado, fecha)
+        VALUES (%s, (SELECT id_profesor FROM profesores LIMIT 1), %s, %s, 'pendiente', %s)
         """
 
         try:
-            cursor.execute(sql, (estudiante, motivo, dolor))
+            cursor.execute(sql, (estudiante, motivo, dolor, fecha_ecuador))
             conexion.commit()
         except Exception as e:
             return "Error al insertar: " + str(e)
@@ -83,9 +88,6 @@ def solicitudes():
 def inspector():
 
     conexion = get_connection()
-    if conexion is None:
-        return "Error de conexión"
-
     cursor = conexion.cursor(dictionary=True)
 
     cursor.execute("""
@@ -177,8 +179,5 @@ def atendido(id):
     return redirect(url_for("medico"))
 
 
-# =========================
-# EJECUTAR APP (LOCAL)
-# =========================
 if __name__ == '__main__':
     app.run(debug=True)
