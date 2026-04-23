@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <title>Solicitudes</title>
@@ -54,20 +53,23 @@
 
         <h3>Solicitudes registradas</h3>
 
-        <table width="100%">
-            <tr>
-                <th>Estudiante</th>
-                <th>Motivo</th>
-                <th>Estado</th>
-                <th>Fecha</th>
+        <table style="width:100%; border-collapse: collapse; margin-top:15px;">
+
+            <tr style="background:#0056b3; color:white;">
+                <th style="padding:10px;">Estudiante</th>
+                <th style="padding:10px;">Motivo</th>
+                <th style="padding:10px;">Estado</th>
+                <th style="padding:10px;">Fecha</th>
             </tr>
 
             {% for s in solicitudes %}
-            <tr>
-                <td>{{ s.nombre }}</td>
-                <td>{{ s.motivo }}</td>
-                <td>{{ s.estado }}</td>
-                <td>{{ s.fecha }}</td>
+            <tr style="text-align:center; border-bottom:1px solid #ddd;">
+                <td style="padding:8px;">{{ s.nombre }}</td>
+                <td style="padding:8px;">{{ s.motivo }}</td>
+                <td style="padding:8px;">{{ s.estado }}</td>
+                <td style="padding:8px;">
+                    {{ s.fecha.strftime('%d/%m/%Y %H:%M') if s.fecha }}
+                </td>
             </tr>
             {% endfor %}
 
