@@ -7,8 +7,8 @@
 
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
-    <!-- 🔥 Recarga más lenta para no interferir -->
-    <meta http-equiv="refresh" content="15">
+    <!-- 🔥 AUTO ACTUALIZACIÓN -->
+    <meta http-equiv="refresh" content="8">
 </head>
 
 <body>
@@ -41,7 +41,6 @@
                 {{ s.motivo }}
             </div>
 
-            <!-- 🔥 FECHA FORMATEADA -->
             <div style="font-size:12px; margin-top:5px;">
                 {{ s.fecha.strftime('%d/%m/%Y %H:%M') if s.fecha }}
             </div>
