@@ -1,54 +1,51 @@
 <!DOCTYPE html>
-<html lang="es">
-
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Panel Médico</title>
-
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
-    <!-- 🔥 AUTO ACTUALIZACIÓN -->
-    <meta http-equiv="refresh" content="8">
+<meta charset="UTF-8">
+<title>Médico</title>
 </head>
 
 <body>
 
-<div class="contenedor-app">
+<h2>Médico</h2>
 
-    <div class="cabecera-azul">
-        <h2>Panel Médico</h2>
-    </div>
+<table id="tabla">
+<thead>
+<tr>
+<th>Nombre</th>
+<th>Motivo</th>
+<th>Acción</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
 
-    <div class="contenido">
+<script>
+function cargar() {
+fetch('/api/solicitudes')
+.then(r => r.json())
+.then(data => {
+let tbody = document.querySelector("#tabla tbody");
+tbody.innerHTML = "";
 
-        {% for s in solicitudes %}
+data.forEach(s => {
 
-        <div class="tarjeta-solicitud">
+if(s.estado === "aprobado"){
+tbody.innerHTML += `
+<tr>
+<td>${s.nombre}</td>
+<td>${s.motivo}</td>
+<td><a href="/atendido/${s.id_solicitud}">Atender</a></td>
+</tr>`;
+}
 
-            <div class="fila-info">
-                <span class="nombre-est">{{ s.nombre }}</span>
-                <span class="estado-aprobado">
-                    En consulta
-                </span>
-            </div>
+});
+});
+}
 
-            <div class="cuadro-motivo">
-                {{ s.motivo }}
-            </div>
-
-            <a href="{{ url_for('atendido', id=s.id_solicitud) }}">
-                <button class="btn-atendido">
-                    Marcar como atendido
-                </button>
-            </a>
-
-        </div>
-
-        {% endfor %}
-
-    </div>
-
-</div>
+setInterval(cargar, 5000);
+cargar();
+</script>
 
 </body>
 </html>
