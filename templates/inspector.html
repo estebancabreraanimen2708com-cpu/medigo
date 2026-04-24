@@ -8,53 +8,50 @@
 
 <body>
 
+<div class="contenedor-app">
+
+<div class="cabecera-azul">
 <h2>Inspector</h2>
-
 <a href="/reporte_pdf" target="_blank">
-<button>PDF</button>
+<button class="btn-principal">PDF</button>
 </a>
+</div>
 
-<table id="tabla">
-<thead>
-<tr>
-<th>Nombre</th>
-<th>Motivo</th>
-<th>Estado</th>
-<th>Acciones</th>
-</tr>
-</thead>
-<tbody></tbody>
-</table>
+<div class="contenido" id="contenedor"></div>
+
+</div>
 
 <script>
-function cargar() {
+function cargar(){
 fetch('/api/solicitudes')
-.then(r => r.json())
-.then(data => {
-let tbody = document.querySelector("#tabla tbody");
-tbody.innerHTML = "";
+.then(r=>r.json())
+.then(data=>{
+let c=document.getElementById("contenedor");
+c.innerHTML="";
 
-data.forEach(s => {
-let acciones = "";
+data.forEach(s=>{
+let botones="";
 
-if(s.estado === "pendiente"){
-acciones = `
-<a href="/aprobar/${s.id_solicitud}">✔</a>
-<a href="/rechazar/${s.id_solicitud}">✖</a>`;
+if(s.estado==="pendiente"){
+botones=`
+<a href="/aprobar/${s.id_solicitud}"><button>Aprobar</button></a>
+<a href="/rechazar/${s.id_solicitud}"><button>Rechazar</button></a>`;
 }
 
-tbody.innerHTML += `
-<tr>
-<td>${s.nombre}</td>
-<td>${s.motivo}</td>
-<td>${s.estado}</td>
-<td>${acciones}</td>
-</tr>`;
+let fecha=new Date(s.fecha).toLocaleString();
+
+c.innerHTML+=`
+<div class="tarjeta-solicitud">
+<b>${s.nombre}</b> - ${s.estado}<br>
+${s.motivo}<br>
+${fecha}<br>
+${botones}
+</div>`;
 });
 });
 }
 
-setInterval(cargar, 5000);
+setInterval(cargar,5000);
 cargar();
 </script>
 
