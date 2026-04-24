@@ -1,69 +1,62 @@
 <!DOCTYPE html>
-<html lang="es">
-
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Inspector</title>
-
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
-    <!-- 🔥 AUTO ACTUALIZACIÓN -->
-    <meta http-equiv="refresh" content="8">
+<meta charset="UTF-8">
+<title>Inspector</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body>
 
-<div class="contenedor-app">
+<h2>Inspector</h2>
 
-    <div class="cabecera-azul">
-        <h2>Panel del Inspector</h2>
+<a href="/reporte_pdf" target="_blank">
+<button>PDF</button>
+</a>
 
-        <!-- 🔥 BOTÓN PDF -->
-        <a href="{{ url_for('reporte_pdf') }}" target="_blank">
-            <button class="btn-principal" style="margin-top:10px;">
-                Descargar reporte PDF del día
-            </button>
-        </a>
-    </div>
+<table id="tabla">
+<thead>
+<tr>
+<th>Nombre</th>
+<th>Motivo</th>
+<th>Estado</th>
+<th>Acciones</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
 
-    <div class="contenido">
+<script>
+function cargar() {
+fetch('/api/solicitudes')
+.then(r => r.json())
+.then(data => {
+let tbody = document.querySelector("#tabla tbody");
+tbody.innerHTML = "";
 
-        {% for s in solicitudes %}
+data.forEach(s => {
+let acciones = "";
 
-        <div class="tarjeta-solicitud">
+if(s.estado === "pendiente"){
+acciones = `
+<a href="/aprobar/${s.id_solicitud}">✔</a>
+<a href="/rechazar/${s.id_solicitud}">✖</a>`;
+}
 
-            <div class="fila-info">
-                <span class="nombre-est">{{ s.nombre }}</span>
-                <span class="badge-pendiente">{{ s.estado }}</span>
-            </div>
+tbody.innerHTML += `
+<tr>
+<td>${s.nombre}</td>
+<td>${s.motivo}</td>
+<td>${s.estado}</td>
+<td>${acciones}</td>
+</tr>`;
+});
+});
+}
 
-            <div class="cuadro-motivo">
-                {{ s.motivo }}
-            </div>
-
-            <div style="font-size:12px; margin-top:5px;">
-                {{ s.fecha.strftime('%d/%m/%Y %H:%M') if s.fecha }}
-            </div>
-
-            {% if s.estado == "pendiente" %}
-
-            <a href="{{ url_for('aprobar', id=s.id_solicitud) }}">
-                <button class="btn-principal">Aprobar</button>
-            </a>
-
-            <a href="{{ url_for('rechazar', id=s.id_solicitud) }}">
-                <button class="btn-secundario">Rechazar</button>
-            </a>
-
-            {% endif %}
-
-        </div>
-
-        {% endfor %}
-
-    </div>
-
-</div>
+setInterval(cargar, 5000);
+cargar();
+</script>
 
 </body>
 </html>
