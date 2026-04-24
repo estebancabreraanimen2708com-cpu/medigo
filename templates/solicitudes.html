@@ -1,5 +1,6 @@
+<!-- PEGA EXACTAMENTE TODO ESTO -->
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
 <meta charset="UTF-8">
 <title>Solicitudes</title>
@@ -7,36 +8,50 @@
 </head>
 
 <body>
-
 <div class="contenedor-app">
 
 <div class="cabecera-azul">
-<h2>Solicitudes</h2>
+<h2>Nueva Solicitud Médica</h2>
 </div>
 
 <div class="contenido">
 
 <form method="POST">
-<select name="estudiante">
+
+<label>Estudiante</label>
+<select name="estudiante" required>
 {% for e in estudiantes %}
 <option value="{{e.id_estudiante}}">{{e.nombre}}</option>
 {% endfor %}
 </select>
 
-<input type="text" name="motivo" placeholder="Motivo" required>
+<label>Nivel de dolor</label>
+<div class="escala-dolor">
+{% for i in range(1,11) %}
+<label class="nivel-btn n-{{i}}">
+<input type="radio" name="dolor" value="{{i}}" required>
+<span>{{i}}</span>
+</label>
+{% endfor %}
+</div>
 
-<button>Enviar</button>
+<label>Motivo</label>
+<textarea name="motivo" required></textarea>
+
+<button class="btn-principal">Enviar solicitud</button>
 </form>
 
 </div>
 
 <div class="contenido">
+<h3>Solicitudes registradas</h3>
 
-<table id="tabla">
+<table id="tablaSolicitudes">
 <thead>
 <tr>
 <th>Estudiante</th>
 <th>Motivo</th>
+<th>Dolor</th>
 <th>Estado</th>
 <th>Fecha</th>
 </tr>
@@ -45,7 +60,6 @@
 </table>
 
 </div>
-
 </div>
 
 <script>
@@ -53,16 +67,19 @@ function cargar() {
 fetch('/api/solicitudes')
 .then(r => r.json())
 .then(data => {
-let tbody = document.querySelector("#tabla tbody");
+let tbody = document.querySelector("#tablaSolicitudes tbody");
 tbody.innerHTML = "";
 
 data.forEach(s => {
+let fecha = new Date(s.fecha).toLocaleString();
+
 tbody.innerHTML += `
 <tr>
 <td>${s.nombre}</td>
 <td>${s.motivo}</td>
+<td>${s.dolor}</td>
 <td>${s.estado}</td>
-<td>${new Date(s.fecha).toLocaleString()}</td>
+<td>${fecha}</td>
 </tr>`;
 });
 });
