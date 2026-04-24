@@ -3,47 +3,45 @@
 <head>
 <meta charset="UTF-8">
 <title>Médico</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body>
 
-<h2>Médico</h2>
+<div class="contenedor-app">
 
-<table id="tabla">
-<thead>
-<tr>
-<th>Nombre</th>
-<th>Motivo</th>
-<th>Acción</th>
-</tr>
-</thead>
-<tbody></tbody>
-</table>
+<div class="cabecera-azul">
+<h2>Médico</h2>
+</div>
+
+<div class="contenido" id="contenedor"></div>
+
+</div>
 
 <script>
-function cargar() {
+function cargar(){
 fetch('/api/solicitudes')
-.then(r => r.json())
-.then(data => {
-let tbody = document.querySelector("#tabla tbody");
-tbody.innerHTML = "";
+.then(r=>r.json())
+.then(data=>{
+let c=document.getElementById("contenedor");
+c.innerHTML="";
 
-data.forEach(s => {
-
-if(s.estado === "aprobado"){
-tbody.innerHTML += `
-<tr>
-<td>${s.nombre}</td>
-<td>${s.motivo}</td>
-<td><a href="/atendido/${s.id_solicitud}">Atender</a></td>
-</tr>`;
+data.forEach(s=>{
+if(s.estado==="aprobado"){
+c.innerHTML+=`
+<div class="tarjeta-solicitud">
+<b>${s.nombre}</b><br>
+${s.motivo}<br>
+<a href="/atendido/${s.id_solicitud}">
+<button>Atender</button>
+</a>
+</div>`;
 }
-
 });
 });
 }
 
-setInterval(cargar, 5000);
+setInterval(cargar,5000);
 cargar();
 </script>
 
