@@ -11,9 +11,6 @@ from reportlab.lib.styles import getSampleStyleSheet
 
 app = Flask(__name__)
 
-# =========================
-# CONEXIÓN DB
-# =========================
 def get_connection():
     return mysql.connector.connect(
         host=os.getenv("DB_HOST"),
@@ -24,7 +21,7 @@ def get_connection():
     )
 
 # =========================
-# API (ACTUALIZACIÓN)
+# API
 # =========================
 @app.route('/api/solicitudes')
 def api_solicitudes():
@@ -40,11 +37,10 @@ def api_solicitudes():
 
     data = cursor.fetchall()
     conexion.close()
-
     return jsonify(data)
 
 # =========================
-# SOLICITUDES
+# VISTAS
 # =========================
 @app.route('/', methods=["GET", "POST"])
 @app.route('/solicitudes', methods=["GET", "POST"])
@@ -73,25 +69,21 @@ def solicitudes():
     estudiantes = cursor.fetchall()
 
     conexion.close()
-
     return render_template("solicitudes.html", estudiantes=estudiantes)
 
-# =========================
-# INSPECTOR
-# =========================
+
 @app.route('/inspector')
 def inspector():
     return render_template("inspector.html")
 
-# =========================
-# MÉDICO
-# =========================
+
 @app.route('/medico')
 def medico():
     return render_template("medico.html")
 
+
 # =========================
-# APROBAR / RECHAZAR
+# ACCIONES
 # =========================
 @app.route('/aprobar/<int:id>')
 def aprobar(id):
@@ -102,6 +94,7 @@ def aprobar(id):
     conexion.close()
     return redirect(url_for("inspector"))
 
+
 @app.route('/rechazar/<int:id>')
 def rechazar(id):
     conexion = get_connection()
@@ -111,9 +104,7 @@ def rechazar(id):
     conexion.close()
     return redirect(url_for("inspector"))
 
-# =========================
-# ATENDIDO
-# =========================
+
 @app.route('/atendido/<int:id>')
 def atendido(id):
     conexion = get_connection()
@@ -122,6 +113,7 @@ def atendido(id):
     conexion.commit()
     conexion.close()
     return redirect(url_for("medico"))
+
 
 # =========================
 # PDF
@@ -173,6 +165,7 @@ def reporte_pdf():
 
     buffer.seek(0)
     return send_file(buffer, as_attachment=True, download_name="reporte.pdf")
+
 
 if __name__ == '__main__':
     app.run(debug=True)
