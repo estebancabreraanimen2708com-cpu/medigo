@@ -11,6 +11,9 @@ from reportlab.lib.styles import getSampleStyleSheet
 
 app = Flask(__name__)
 
+# =========================
+# CONEXIÓN DB
+# =========================
 def get_connection():
     return mysql.connector.connect(
         host=os.getenv("DB_HOST"),
@@ -21,7 +24,7 @@ def get_connection():
     )
 
 # =========================
-# API PARA ACTUALIZAR TABLAS
+# API (ACTUALIZACIÓN)
 # =========================
 @app.route('/api/solicitudes')
 def api_solicitudes():
@@ -29,7 +32,7 @@ def api_solicitudes():
     cursor = conexion.cursor(dictionary=True)
 
     cursor.execute("""
-    SELECT s.id_solicitud, e.nombre, s.motivo, s.estado, s.fecha
+    SELECT s.id_solicitud, e.nombre, s.motivo, s.estado, s.fecha, s.dolor
     FROM solicitudes s
     JOIN estudiantes e ON s.id_estudiante = e.id_estudiante
     ORDER BY s.id_solicitud DESC
@@ -37,8 +40,8 @@ def api_solicitudes():
 
     data = cursor.fetchall()
     conexion.close()
-    return jsonify(data)
 
+    return jsonify(data)
 
 # =========================
 # SOLICITUDES
@@ -73,7 +76,6 @@ def solicitudes():
 
     return render_template("solicitudes.html", estudiantes=estudiantes)
 
-
 # =========================
 # INSPECTOR
 # =========================
@@ -81,14 +83,12 @@ def solicitudes():
 def inspector():
     return render_template("inspector.html")
 
-
 # =========================
 # MÉDICO
 # =========================
 @app.route('/medico')
 def medico():
     return render_template("medico.html")
-
 
 # =========================
 # APROBAR / RECHAZAR
@@ -111,7 +111,6 @@ def rechazar(id):
     conexion.close()
     return redirect(url_for("inspector"))
 
-
 # =========================
 # ATENDIDO
 # =========================
@@ -123,7 +122,6 @@ def atendido(id):
     conexion.commit()
     conexion.close()
     return redirect(url_for("medico"))
-
 
 # =========================
 # PDF
@@ -175,7 +173,6 @@ def reporte_pdf():
 
     buffer.seek(0)
     return send_file(buffer, as_attachment=True, download_name="reporte.pdf")
-
 
 if __name__ == '__main__':
     app.run(debug=True)
