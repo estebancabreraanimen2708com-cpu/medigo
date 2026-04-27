@@ -5,13 +5,15 @@ from datetime import datetime
 import pytz
 
 app = Flask(__name__)
-app.secret_key = "secreto123"
+app.secret_key = "supersecreto123"  # 🔥 IMPORTANTE
 
+# USUARIOS
 USUARIOS = {
     "inspector": {"user": "admin", "pass": "1234"},
     "medico": {"user": "doctor", "pass": "1234"}
 }
 
+# CONEXIÓN DB
 def get_connection():
     return mysql.connector.connect(
         host=os.getenv("DB_HOST"),
@@ -21,8 +23,11 @@ def get_connection():
         port=int(os.getenv("DB_PORT"))
     )
 
+# PROTEGER RUTAS
 def proteger(rol):
-    return "rol" in session and session["rol"] == rol
+    if "rol" not in session:
+        return False
+    return session["rol"] == rol
 
 # API
 @app.route('/api/solicitudes')
@@ -48,9 +53,14 @@ def login(rol):
         user = request.form["user"]
         password = request.form["pass"]
 
-        if rol in USUARIOS and user == USUARIOS[rol]["user"] and password == USUARIOS[rol]["pass"]:
-            session["rol"] = rol
-            return redirect(f"/{rol}")
+        if rol == "inspector" and user == "admin" and password == "1234":
+            session["rol"] = "inspector"
+            return redirect("/inspector")
+
+        elif rol == "medico" and user == "doctor" and password == "1234":
+            session["rol"] = "medico"
+            return redirect("/medico")
+
         else:
             return render_template("login.html", error="Credenciales incorrectas", rol=rol)
 
@@ -59,7 +69,7 @@ def login(rol):
 @app.route('/logout')
 def logout():
     session.clear()
-    return redirect("/")
+    return redirect("/solicitudes")
 
 # SOLICITUDES
 @app.route('/', methods=["GET","POST"])
@@ -96,7 +106,7 @@ def inspector():
         return redirect("/login/inspector")
     return render_template("inspector.html")
 
-# MEDICO
+# MÉDICO
 @app.route('/medico')
 def medico():
     if not proteger("medico"):
