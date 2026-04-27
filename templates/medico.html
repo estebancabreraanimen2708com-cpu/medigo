@@ -1,90 +1,46 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Médico</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
 <script>
 if (Notification.permission !== "granted") {
     Notification.requestPermission();
 }
 </script>
-
 </head>
 
 <body>
 
 <div class="contenedor-app">
+<div class="cabecera-azul"><h2>Médico</h2></div>
 
-<div class="cabecera-azul">
-<h2>Médico</h2>
-</div>
-
-<div class="contenido">
-<div style="display:flex; gap:10px; justify-content:center;">
-<a href="/solicitudes"><button class="btn-principal">Solicitudes</button></a>
-<a href="/inspector"><button class="btn-principal">Inspector</button></a>
-<a href="/medico"><button class="btn-principal">Médico</button></a>
-</div>
-</div>
-
-<div class="contenido" id="contenedor"></div>
+<div id="contenedor"></div>
 
 </div>
 
 <script>
-let ultimoId = 0;
-
-function sonido(){
-    let audio = new Audio("/static/notificacion.mp3");
-    audio.play();
-}
-
-function notificar(texto){
-    if (Notification.permission === "granted") {
-        new Notification("MediGo", { body: texto });
-    }
-}
-
 function cargar(){
 fetch('/api/solicitudes')
 .then(r=>r.json())
-.then(data=>{
-
-    let c=document.getElementById("contenedor");
-    c.innerHTML="";
-
-    data.forEach(s=>{
-        if(s.estado==="aprobado"){
-            c.innerHTML+=`
-            <div class="tarjeta-solicitud">
-            <b>${s.nombre}</b><br>
-            ${s.motivo}<br>
-            <a href="/atendido/${s.id_solicitud}">
-            <button>Atender</button>
-            </a>
-            </div>`;
-        }
-    });
-
-    if(data.length > 0){
-        let nueva = data[0];
-
-        if(nueva.id_solicitud > ultimoId){
-
-            notificar("Nuevo paciente disponible");
-            sonido();
-
-            ultimoId = nueva.id_solicitud;
-        }
-    }
-
+.then(d=>{
+let c=document.getElementById("contenedor");
+c.innerHTML="";
+d.forEach(s=>{
+if(s.estado==="aprobado"){
+c.innerHTML+=`
+<div class="tarjeta-solicitud">
+${s.nombre}<br>
+${s.motivo}<br>
+<a href="/atendido/${s.id_solicitud}">
+<button>Atender</button>
+</a>
+</div>`;
+}
+});
 });
 }
-
-setInterval(cargar, 4000);
+setInterval(cargar,4000);
 cargar();
 </script>
 
