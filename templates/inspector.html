@@ -3,19 +3,23 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-<script>
-if (Notification.permission !== "granted") {
-    Notification.requestPermission();
-}
-</script>
 </head>
 
 <body>
 
 <div class="contenedor-app">
+
 <div class="cabecera-azul"><h2>Inspector</h2></div>
 
-<div id="contenedor"></div>
+<div class="contenido">
+<div style="display:flex; gap:10px; justify-content:center; margin-bottom:15px;">
+<a href="/solicitudes"><button class="btn-principal">Solicitudes</button></a>
+<a href="/inspector"><button class="btn-principal">Inspector</button></a>
+<a href="/medico"><button class="btn-principal">Médico</button></a>
+</div>
+</div>
+
+<div class="contenido" id="contenedor"></div>
 
 </div>
 
@@ -23,21 +27,33 @@ if (Notification.permission !== "granted") {
 function cargar(){
 fetch('/api/solicitudes')
 .then(r=>r.json())
-.then(d=>{
+.then(data=>{
 let c=document.getElementById("contenedor");
 c.innerHTML="";
-d.forEach(s=>{
+
+data.forEach(s=>{
 c.innerHTML+=`
 <div class="tarjeta-solicitud">
-${s.nombre}<br>
-${s.motivo}<br>
+<div class="fila-info">
+<span class="nombre-est">${s.nombre}</span>
+<span class="estado estado-${s.estado}">${s.estado}</span>
+</div>
+
+<div class="cuadro-motivo">${s.motivo}</div>
+
+<small>${new Date(s.fecha).toLocaleString()}</small><br>
+
+${s.estado==="pendiente" ? `
 <a href="/aprobar/${s.id_solicitud}"><button>Aprobar</button></a>
 <a href="/rechazar/${s.id_solicitud}"><button>Rechazar</button></a>
+` : ""}
+
 </div>`;
 });
 });
 }
-setInterval(cargar,4000);
+
+setInterval(cargar,3000);
 cargar();
 </script>
 
