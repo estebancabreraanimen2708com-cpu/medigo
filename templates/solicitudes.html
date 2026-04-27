@@ -9,10 +9,12 @@
 
 <div class="contenedor-app">
 
-<div class="cabecera-azul"><h2>MediGo</h2></div>
+<div class="cabecera-azul">
+<h2>MediGo</h2>
+</div>
 
 <div class="contenido">
-<div style="display:flex; gap:10px; justify-content:center; margin-bottom:15px;">
+<div style="display:flex; gap:15px; justify-content:center; margin-bottom:15px;">
 <a href="/solicitudes"><button class="btn-principal">Solicitudes</button></a>
 <a href="/inspector"><button class="btn-principal">Inspector</button></a>
 <a href="/medico"><button class="btn-principal">Médico</button></a>
@@ -20,7 +22,6 @@
 </div>
 
 <div class="contenido">
-
 <form method="POST">
 
 <select name="estudiante">
@@ -43,7 +44,6 @@
 <button class="btn-principal">Enviar</button>
 
 </form>
-
 </div>
 
 <div class="contenido" id="contenedor"></div>
@@ -51,26 +51,52 @@
 </div>
 
 <script>
+Notification.requestPermission();
+
+let ultimoId = 0;
+
+function sonido(){
+    let audio = new Audio("/static/mixkit-correct-answer-tone-2870.wav");
+    audio.play();
+}
+
+function notificar(texto){
+    if (Notification.permission === "granted") {
+        new Notification("MediGo", { body: texto });
+    }
+}
+
 function cargar(){
 fetch('/api/solicitudes')
 .then(r=>r.json())
 .then(data=>{
-let c=document.getElementById("contenedor");
-c.innerHTML="";
 
-data.forEach(s=>{
-c.innerHTML+=`
-<div class="tarjeta-solicitud">
-<div class="fila-info">
-<span class="nombre-est">${s.nombre}</span>
-<span class="estado estado-${s.estado}">${s.estado}</span>
-</div>
+    if(data.length > 0){
+        let nueva = data[0];
 
-<div class="cuadro-motivo">${s.motivo}</div>
+        if(nueva.id_solicitud > ultimoId){
+            notificar("Nueva solicitud de " + nueva.nombre);
+            sonido();
+            ultimoId = nueva.id_solicitud;
+        }
+    }
 
-<small>${new Date(s.fecha).toLocaleString()}</small>
-</div>`;
-});
+    let c=document.getElementById("contenedor");
+    c.innerHTML="";
+
+    data.forEach(s=>{
+    c.innerHTML+=`
+    <div class="tarjeta-solicitud">
+    <div class="fila-info">
+    <span class="nombre-est">${s.nombre}</span>
+    <span>${s.estado}</span>
+    </div>
+
+    <div class="cuadro-motivo">${s.motivo}</div>
+    <small>${new Date(s.fecha).toLocaleString()}</small>
+    </div>`;
+    });
+
 });
 }
 
