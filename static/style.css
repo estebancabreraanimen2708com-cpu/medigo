@@ -1,69 +1,225 @@
 /* ========================= */
-/* 🔥 MEJORAS INTERACTIVAS 🔥 */
+/* 🎨 VARIABLES */
 /* ========================= */
-
-/* Animación general */
-* {
-    transition: all 0.2s ease;
+:root {
+    --azul: #0056b3;
+    --azul-oscuro: #003d80;
+    --amarillo: #ffcc00;
+    --blanco: #ffffff;
+    --gris-fondo: #f0f2f5;
+    --texto: #333;
 }
 
-/* Botones efecto hover */
+/* ========================= */
+/* RESET */
+/* ========================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* ========================= */
+/* BODY */
+/* ========================= */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #e9ecef, #f8f9fa);
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* ========================= */
+/* CONTENEDOR */
+/* ========================= */
+.contenedor-app {
+    width: 100%;
+    max-width: 420px;
+    background: var(--blanco);
+    border-radius: 35px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    animation: fadeIn 0.5s ease;
+}
+
+/* ========================= */
+/* CABECERA */
+/* ========================= */
+.cabecera-azul {
+    background: linear-gradient(135deg, var(--azul), var(--azul-oscuro));
+    padding: 30px 20px;
+    color: white;
+    text-align: center;
+    border-radius: 0 0 40px 40px;
+}
+
+/* ========================= */
+/* CONTENIDO */
+/* ========================= */
+.contenido {
+    padding: 25px;
+}
+
+/* ========================= */
+/* FORM */
+/* ========================= */
+label {
+    font-weight: bold;
+    margin-bottom: 8px;
+    display: block;
+}
+
+select, textarea, input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 15px;
+    border: 2px solid #eee;
+    background: #f8f9fa;
+    margin-bottom: 15px;
+    transition: 0.2s;
+}
+
+select:focus, textarea:focus, input:focus {
+    border-color: var(--azul);
+    outline: none;
+}
+
+/* ========================= */
+/* ESCALA DOLOR */
+/* ========================= */
+.escala-dolor {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.nivel-btn {
+    padding: 10px;
+    text-align: center;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.nivel-btn:hover {
+    transform: scale(1.08);
+}
+
+/* COLORES */
+.n-1, .n-2 { background: #d4edda; color: #155724; }
+.n-3, .n-4, .n-5 { background: #fff3cd; color: #856404; }
+.n-6, .n-7, .n-8 { background: #ffe5d0; color: #854800; }
+.n-9, .n-10 { background: #f8d7da; color: #721c24; }
+
+.nivel-btn input { display: none; }
+
+.nivel-btn input:checked + span {
+    border-bottom: 3px solid var(--azul);
+}
+
+/* ========================= */
+/* TARJETAS */
+/* ========================= */
+.tarjeta-solicitud {
+    background: white;
+    border-radius: 20px;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-left: 6px solid var(--amarillo);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    transition: 0.2s;
+}
+
+.tarjeta-solicitud:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+/* INFO */
+.fila-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.nombre-est {
+    font-weight: 800;
+    color: var(--azul);
+}
+
+.cuadro-motivo {
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 12px;
+    font-size: 0.9em;
+    margin: 8px 0;
+}
+
+/* ========================= */
+/* ESTADOS */
+/* ========================= */
+.estado {
+    padding: 4px 10px;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+
+.estado-pendiente { background: #fff3cd; color: #856404; }
+.estado-aprobado { background: #d4edda; color: #155724; }
+.estado-rechazado { background: #f8d7da; color: #721c24; }
+
+/* ========================= */
+/* BOTONES */
+/* ========================= */
+.btn-principal {
+    width: 100%;
+    padding: 16px;
+    background: var(--amarillo);
+    color: var(--azul);
+    border: none;
+    border-radius: 50px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
 .btn-principal:hover {
-    transform: scale(1.05);
     background: #ffd633;
+    transform: scale(1.03);
+}
+
+.btn-secundario {
+    display: block;
+    text-align: center;
+    background: var(--azul);
+    color: white;
+    padding: 14px;
+    border-radius: 50px;
+    font-weight: bold;
+    margin-top: 10px;
+    text-decoration: none;
 }
 
 .btn-secundario:hover {
-    transform: scale(1.05);
-    background: #003d80;
-}
-
-/* Tarjetas animadas */
-.tarjeta-solicitud:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-}
-
-/* Escala de dolor más interactiva */
-.nivel-btn:hover {
-    transform: scale(1.1);
-    opacity: 0.9;
-}
-
-/* Estado colores dinámicos */
-.estado-aprobado {
-    background: #d4edda;
-    color: #155724;
-    padding: 5px 10px;
-    border-radius: 10px;
-    font-weight: bold;
-}
-
-.estado-rechazado {
-    background: #f8d7da;
-    color: #721c24;
-    padding: 5px 10px;
-    border-radius: 10px;
-    font-weight: bold;
-}
-
-.estado-pendiente {
-    background: #fff3cd;
-    color: #856404;
-    padding: 5px 10px;
-    border-radius: 10px;
-    font-weight: bold;
-}
-
-/* Scroll suave */
-html {
-    scroll-behavior: smooth;
+    background: var(--azul-oscuro);
 }
 
 /* ========================= */
-/* 📱 RESPONSIVE REAL 📱 */
+/* ANIMACIÓN */
 /* ========================= */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px);}
+    to { opacity: 1; transform: translateY(0);}
+}
 
+/* ========================= */
+/* 📱 RESPONSIVE */
+/* ========================= */
 @media (max-width: 768px) {
 
     body {
@@ -72,57 +228,26 @@ html {
 
     .contenedor-app {
         max-width: 100%;
-        border-radius: 20px;
-    }
-
-    .cabecera-azul {
-        padding: 20px;
-        font-size: 18px;
+        border-radius: 25px;
     }
 
     .contenido {
-        padding: 15px;
+        padding: 18px;
     }
 
-    /* MENÚ */
-    .contenido div {
-        flex-direction: column !important;
-        gap: 10px !important;
-    }
-
-    /* BOTONES FULL */
-    .btn-principal, .btn-secundario {
-        width: 100%;
-        font-size: 14px;
-        padding: 14px;
-    }
-
-    /* ESCALA */
     .escala-dolor {
         grid-template-columns: repeat(5, 1fr);
     }
 
-    /* TEXTO */
-    h2 {
-        font-size: 20px;
-    }
-
-    label {
+    .btn-principal {
         font-size: 14px;
     }
 
-    textarea {
-        font-size: 14px;
-    }
-
-    /* TARJETAS */
     .tarjeta-solicitud {
-        padding: 12px;
         font-size: 14px;
     }
 }
 
-/* 📱 MÓVIL PEQUEÑO */
 @media (max-width: 480px) {
 
     .escala-dolor {
