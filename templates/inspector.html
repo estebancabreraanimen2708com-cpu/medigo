@@ -17,6 +17,14 @@
 </a>
 </div>
 
+<div class="contenido">
+<div style="display:flex; gap:10px; justify-content:center;">
+<a href="/solicitudes"><button class="btn-principal">Solicitudes</button></a>
+<a href="/inspector"><button class="btn-principal">Inspector</button></a>
+<a href="/medico"><button class="btn-principal">Médico</button></a>
+</div>
+</div>
+
 <div class="contenido" id="contenedor"></div>
 
 </div>
@@ -28,29 +36,23 @@ fetch('/api/solicitudes')
 .then(data=>{
 let c=document.getElementById("contenedor");
 c.innerHTML="";
-
 data.forEach(s=>{
 let botones="";
-
 if(s.estado==="pendiente"){
 botones=`
 <a href="/aprobar/${s.id_solicitud}"><button>Aprobar</button></a>
 <a href="/rechazar/${s.id_solicitud}"><button>Rechazar</button></a>`;
 }
-
-let fecha=new Date(s.fecha).toLocaleString();
-
 c.innerHTML+=`
 <div class="tarjeta-solicitud">
 <b>${s.nombre}</b> - ${s.estado}<br>
 ${s.motivo}<br>
-${fecha}<br>
+${new Date(s.fecha).toLocaleString()}<br>
 ${botones}
 </div>`;
 });
 });
 }
-
 setInterval(cargar,5000);
 cargar();
 </script>
