@@ -1,34 +1,25 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
-<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Solicitudes</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
-<!-- 🔔 PERMISO NOTIFICACIONES -->
 <script>
 if (Notification.permission !== "granted") {
     Notification.requestPermission();
 }
 </script>
-
 </head>
 
 <body>
 
 <div class="contenedor-app">
 
-<div class="cabecera-azul">
-<h2>MediGo</h2>
-</div>
+<div class="cabecera-azul"><h2>MediGo</h2></div>
 
 <div class="contenido">
-<div style="display:flex; gap:10px; justify-content:center;">
-<a href="/solicitudes"><button class="btn-principal">Solicitudes</button></a>
 <a href="/inspector"><button class="btn-principal">Inspector</button></a>
 <a href="/medico"><button class="btn-principal">Médico</button></a>
-</div>
 </div>
 
 <div class="contenido">
@@ -50,70 +41,44 @@ if (Notification.permission !== "granted") {
 {% endfor %}
 </div>
 
-<textarea name="motivo" required></textarea>
+<textarea name="motivo"></textarea>
 
 <button class="btn-principal">Enviar</button>
 
 </form>
-
 </div>
 
 </div>
 
-<!-- 🔔 SCRIPT NOTIFICACIONES -->
 <script>
 let ultimoId = 0;
 
 function sonido(){
-    let audio = new Audio("/static/notificacion.mp3");
-    audio.play();
+    new Audio("/static/notificacion.mp3").play();
 }
 
-function notificar(texto){
-    if (Notification.permission === "granted") {
-        new Notification("MediGo", { body: texto });
+function notificar(t){
+    if(Notification.permission==="granted"){
+        new Notification("MediGo",{body:t});
     }
 }
 
 function cargar(){
 fetch('/api/solicitudes')
 .then(r=>r.json())
-.then(data=>{
-
-    if(data.length > 0){
-        let nueva = data[0];
-
-        if(nueva.id_solicitud > ultimoId){
-
-            if(nueva.estado === "pendiente"){
-                notificar("Nueva solicitud de " + nueva.nombre);
-                sonido();
-            }
-
-            if(nueva.estado === "aprobado"){
-                notificar("Solicitud aprobada: " + nueva.nombre);
-                sonido();
-            }
-
-            if(nueva.estado === "rechazado"){
-                notificar("Solicitud rechazada: " + nueva.nombre);
-                sonido();
-            }
-
-            if(nueva.estado === "atendido"){
-                notificar("Paciente atendido: " + nueva.nombre);
-                sonido();
-            }
-
-            ultimoId = nueva.id_solicitud;
-        }
-    }
-
+.then(d=>{
+if(d.length>0){
+let n=d[0];
+if(n.id_solicitud>ultimoId){
+notificar("Nueva solicitud de "+n.nombre);
+sonido();
+ultimoId=n.id_solicitud;
+}
+}
 });
 }
 
-setInterval(cargar, 4000);
-cargar();
+setInterval(cargar,4000);
 </script>
 
 </body>
