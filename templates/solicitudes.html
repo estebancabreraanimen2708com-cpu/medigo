@@ -6,6 +6,7 @@
 <title>Solicitudes</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
+<!-- 🔔 PERMISO NOTIFICACIONES -->
 <script>
 if (Notification.permission !== "granted") {
     Notification.requestPermission();
@@ -31,6 +32,7 @@ if (Notification.permission !== "granted") {
 </div>
 
 <div class="contenido">
+
 <form method="POST">
 
 <select name="estudiante">
@@ -53,10 +55,12 @@ if (Notification.permission !== "granted") {
 <button class="btn-principal">Enviar</button>
 
 </form>
-</div>
 
 </div>
 
+</div>
+
+<!-- 🔔 SCRIPT NOTIFICACIONES -->
 <script>
 let ultimoId = 0;
 
