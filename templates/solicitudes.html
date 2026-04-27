@@ -3,12 +3,6 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
-<script>
-if (Notification.permission !== "granted") {
-    Notification.requestPermission();
-}
-</script>
 </head>
 
 <body>
@@ -18,12 +12,14 @@ if (Notification.permission !== "granted") {
 <div class="cabecera-azul"><h2>MediGo</h2></div>
 
 <div class="contenido">
+<div style="display:flex; gap:10px; justify-content:center; margin-bottom:15px;">
+<a href="/solicitudes"><button class="btn-principal">Solicitudes</button></a>
 <a href="/inspector"><button class="btn-principal">Inspector</button></a>
 <a href="/medico"><button class="btn-principal">Médico</button></a>
 </div>
+</div>
 
 <div class="contenido">
-
 <form method="POST">
 
 <select name="estudiante">
@@ -41,44 +37,43 @@ if (Notification.permission !== "granted") {
 {% endfor %}
 </div>
 
-<textarea name="motivo"></textarea>
+<textarea name="motivo" required></textarea>
 
 <button class="btn-principal">Enviar</button>
 
 </form>
 </div>
 
+<div class="contenido" id="contenedor"></div>
+
 </div>
 
 <script>
-let ultimoId = 0;
-
-function sonido(){
-    new Audio("/static/notificacion.mp3").play();
-}
-
-function notificar(t){
-    if(Notification.permission==="granted"){
-        new Notification("MediGo",{body:t});
-    }
-}
-
 function cargar(){
 fetch('/api/solicitudes')
 .then(r=>r.json())
-.then(d=>{
-if(d.length>0){
-let n=d[0];
-if(n.id_solicitud>ultimoId){
-notificar("Nueva solicitud de "+n.nombre);
-sonido();
-ultimoId=n.id_solicitud;
-}
-}
+.then(data=>{
+let c=document.getElementById("contenedor");
+c.innerHTML="";
+
+data.forEach(s=>{
+c.innerHTML+=`
+<div class="tarjeta-solicitud">
+<div class="fila-info">
+<span class="nombre-est">${s.nombre}</span>
+<span class="estado estado-${s.estado}">${s.estado}</span>
+</div>
+
+<div class="cuadro-motivo">${s.motivo}</div>
+
+<small>${new Date(s.fecha).toLocaleString()}</small>
+</div>`;
+});
 });
 }
 
-setInterval(cargar,4000);
+setInterval(cargar,3000);
+cargar();
 </script>
 
 </body>
