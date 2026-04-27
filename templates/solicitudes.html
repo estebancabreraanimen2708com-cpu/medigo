@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Solicitudes</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<script>
+if (Notification.permission !== "granted") {
+    Notification.requestPermission();
+}
+</script>
+
 </head>
 
 <body>
@@ -24,7 +31,6 @@
 </div>
 
 <div class="contenido">
-
 <form method="POST">
 
 <select name="estudiante">
@@ -45,47 +51,64 @@
 <textarea name="motivo" required></textarea>
 
 <button class="btn-principal">Enviar</button>
+
 </form>
-
-</div>
-
-<div class="contenido">
-<table id="tabla">
-<thead>
-<tr>
-<th>Nombre</th>
-<th>Motivo</th>
-<th>Dolor</th>
-<th>Estado</th>
-<th>Fecha</th>
-</tr>
-</thead>
-<tbody></tbody>
-</table>
 </div>
 
 </div>
 
 <script>
+let ultimoId = 0;
+
+function sonido(){
+    let audio = new Audio("/static/notificacion.mp3");
+    audio.play();
+}
+
+function notificar(texto){
+    if (Notification.permission === "granted") {
+        new Notification("MediGo", { body: texto });
+    }
+}
+
 function cargar(){
 fetch('/api/solicitudes')
 .then(r=>r.json())
 .then(data=>{
-let t=document.querySelector("#tabla tbody");
-t.innerHTML="";
-data.forEach(s=>{
-t.innerHTML+=`
-<tr>
-<td>${s.nombre}</td>
-<td>${s.motivo}</td>
-<td>${s.dolor}</td>
-<td>${s.estado}</td>
-<td>${new Date(s.fecha).toLocaleString()}</td>
-</tr>`;
-});
+
+    if(data.length > 0){
+        let nueva = data[0];
+
+        if(nueva.id_solicitud > ultimoId){
+
+            if(nueva.estado === "pendiente"){
+                notificar("Nueva solicitud de " + nueva.nombre);
+                sonido();
+            }
+
+            if(nueva.estado === "aprobado"){
+                notificar("Solicitud aprobada: " + nueva.nombre);
+                sonido();
+            }
+
+            if(nueva.estado === "rechazado"){
+                notificar("Solicitud rechazada: " + nueva.nombre);
+                sonido();
+            }
+
+            if(nueva.estado === "atendido"){
+                notificar("Paciente atendido: " + nueva.nombre);
+                sonido();
+            }
+
+            ultimoId = nueva.id_solicitud;
+        }
+    }
+
 });
 }
-setInterval(cargar,5000);
+
+setInterval(cargar, 4000);
 cargar();
 </script>
 
