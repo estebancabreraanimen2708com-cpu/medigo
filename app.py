@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from flask import Flask, render_template, request, redirect, session, jsonify
 import mysql.connector
 import os
 from datetime import datetime
@@ -20,6 +20,9 @@ def get_connection():
         database=os.getenv("DB_NAME"),
         port=int(os.getenv("DB_PORT"))
     )
+
+def proteger(rol):
+    return "rol" in session and session["rol"] == rol
 
 # API
 @app.route('/api/solicitudes')
@@ -47,7 +50,7 @@ def login(rol):
 
         if rol in USUARIOS and user == USUARIOS[rol]["user"] and password == USUARIOS[rol]["pass"]:
             session["rol"] = rol
-            return redirect(url_for(rol))
+            return redirect(f"/{rol}")
         else:
             return render_template("login.html", error="Credenciales incorrectas", rol=rol)
 
@@ -58,14 +61,10 @@ def logout():
     session.clear()
     return redirect("/")
 
-def proteger(rol):
-    return "rol" in session and session["rol"] == rol
-
 # SOLICITUDES
 @app.route('/', methods=["GET","POST"])
 @app.route('/solicitudes', methods=["GET","POST"])
 def solicitudes():
-
     conexion = get_connection()
     cursor = conexion.cursor(dictionary=True)
 
@@ -82,7 +81,7 @@ def solicitudes():
         """,(estudiante,motivo,dolor,fecha))
 
         conexion.commit()
-        return redirect("/")
+        return redirect("/solicitudes")
 
     cursor.execute("SELECT * FROM estudiantes")
     estudiantes = cursor.fetchall()
