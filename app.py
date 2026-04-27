@@ -7,11 +7,6 @@ import pytz
 app = Flask(__name__)
 app.secret_key = "supersecreto123"
 
-USUARIOS = {
-    "inspector": {"user": "admin", "pass": "1234"},
-    "medico": {"user": "doctor", "pass": "1234"}
-}
-
 def get_connection():
     return mysql.connector.connect(
         host=os.getenv("DB_HOST"),
@@ -21,9 +16,13 @@ def get_connection():
         port=int(os.getenv("DB_PORT"))
     )
 
+# 🔐 PROTEGER
 def proteger(rol):
-    return "rol" in session and session["rol"] == rol
+    if "rol" not in session:
+        return False
+    return session["rol"] == rol
 
+# 🔥 API
 @app.route('/api/solicitudes')
 def api_solicitudes():
     conexion = get_connection()
@@ -40,6 +39,7 @@ def api_solicitudes():
     conexion.close()
     return jsonify(data)
 
+# 🔐 LOGIN
 @app.route('/login/<rol>', methods=["GET","POST"])
 def login(rol):
     if request.method == "POST":
@@ -63,6 +63,7 @@ def logout():
     session.clear()
     return redirect("/solicitudes")
 
+# 📋 SOLICITUDES
 @app.route('/', methods=["GET","POST"])
 @app.route('/solicitudes', methods=["GET","POST"])
 def solicitudes():
@@ -90,18 +91,21 @@ def solicitudes():
     conexion.close()
     return render_template("solicitudes.html", estudiantes=estudiantes)
 
+# 👮 INSPECTOR
 @app.route('/inspector')
 def inspector():
     if not proteger("inspector"):
         return redirect("/login/inspector")
     return render_template("inspector.html")
 
+# 🏥 MÉDICO
 @app.route('/medico')
 def medico():
     if not proteger("medico"):
         return redirect("/login/medico")
     return render_template("medico.html")
 
+# ⚙️ ACCIONES
 @app.route('/aprobar/<int:id>')
 def aprobar(id):
     conexion = get_connection()
