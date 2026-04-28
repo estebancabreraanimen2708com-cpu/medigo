@@ -1,12 +1,18 @@
-from flask import Flask, render_template, request, redirect, session, jsonify
+from flask import Flask, render_template, request, redirect, session, jsonify, send_file
 import mysql.connector
 import os
 from datetime import datetime
 import pytz
+import io
+
+# PDF
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
+from reportlab.lib import colors
 
 app = Flask(__name__)
 app.secret_key = "supersecreto123"
 
+# 🔗 CONEXIÓN DB
 def get_connection():
     return mysql.connector.connect(
         host=os.getenv("DB_HOST"),
@@ -16,13 +22,13 @@ def get_connection():
         port=int(os.getenv("DB_PORT"))
     )
 
-# 🔐 PROTEGER
+# 🔐 PROTEGER RUTAS
 def proteger(rol):
     if "rol" not in session:
         return False
     return session["rol"] == rol
 
-# 🔥 API
+# 🔥 API PARA ACTUALIZAR TABLAS
 @app.route('/api/solicitudes')
 def api_solicitudes():
     conexion = get_connection()
@@ -58,12 +64,13 @@ def login(rol):
 
     return render_template("login.html", rol=rol)
 
+# 🔓 LOGOUT
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect("/solicitudes")
 
-# 📋 SOLICITUDES
+# 📋 SOLICITUDES (PROFESOR)
 @app.route('/', methods=["GET","POST"])
 @app.route('/solicitudes', methods=["GET","POST"])
 def solicitudes():
@@ -75,12 +82,13 @@ def solicitudes():
         motivo = request.form["motivo"]
         dolor = request.form["dolor"]
 
+        # 🇪🇨 HORA ECUADOR
         fecha = datetime.now(pytz.timezone('America/Guayaquil'))
 
         cursor.execute("""
         INSERT INTO solicitudes (id_estudiante, id_profesor, motivo, dolor, estado, fecha)
         VALUES (%s,(SELECT id_profesor FROM profesores LIMIT 1),%s,%s,'pendiente',%s)
-        """,(estudiante,motivo,dolor,fecha))
+        """,(estudiante, motivo, dolor, fecha))
 
         conexion.commit()
         return redirect("/solicitudes")
@@ -105,7 +113,7 @@ def medico():
         return redirect("/login/medico")
     return render_template("medico.html")
 
-# ⚙️ ACCIONES
+# ✅ APROBAR
 @app.route('/aprobar/<int:id>')
 def aprobar(id):
     conexion = get_connection()
@@ -115,6 +123,7 @@ def aprobar(id):
     conexion.close()
     return redirect("/inspector")
 
+# ❌ RECHAZAR
 @app.route('/rechazar/<int:id>')
 def rechazar(id):
     conexion = get_connection()
@@ -124,6 +133,7 @@ def rechazar(id):
     conexion.close()
     return redirect("/inspector")
 
+# 🏥 ATENDER
 @app.route('/atendido/<int:id>')
 def atendido(id):
     conexion = get_connection()
@@ -133,5 +143,59 @@ def atendido(id):
     conexion.close()
     return redirect("/medico")
 
+# 📄 PDF SOLO INSPECTOR
+@app.route('/descargar_pdf')
+def descargar_pdf():
+    if not proteger("inspector"):
+        return redirect("/login/inspector")
+
+    conexion = get_connection()
+    cursor = conexion.cursor()
+
+    cursor.execute("""
+    SELECT e.nombre, s.motivo, s.estado, s.fecha
+    FROM solicitudes s
+    JOIN estudiantes e ON s.id_estudiante = e.id_estudiante
+    ORDER BY s.fecha DESC
+    """)
+
+    datos = cursor.fetchall()
+    conexion.close()
+
+    buffer = io.BytesIO()
+
+    doc = SimpleDocTemplate(buffer)
+
+    tabla_data = [["Nombre", "Motivo", "Estado", "Fecha"]]
+
+    for fila in datos:
+        tabla_data.append([
+            fila[0],
+            fila[1],
+            fila[2],
+            str(fila[3])
+        ])
+
+    tabla = Table(tabla_data)
+
+    tabla.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), colors.grey),
+        ('TEXTCOLOR',(0,0),(-1,0),colors.white),
+        ('GRID', (0,0), (-1,-1), 1, colors.black)
+    ]))
+
+    elementos = [tabla]
+    doc.build(elementos)
+
+    buffer.seek(0)
+
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name="solicitudes.pdf",
+        mimetype='application/pdf'
+    )
+
+# 🚀 RUN
 if __name__ == '__main__':
     app.run(debug=True)
