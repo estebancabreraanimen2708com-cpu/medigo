@@ -12,7 +12,6 @@ from reportlab.lib import colors
 app = Flask(__name__)
 app.secret_key = "supersecreto123"
 
-# 🔗 CONEXIÓN DB
 def get_connection():
     return mysql.connector.connect(
         host=os.getenv("DB_HOST"),
@@ -22,13 +21,12 @@ def get_connection():
         port=int(os.getenv("DB_PORT"))
     )
 
-# 🔐 PROTEGER RUTAS
 def proteger(rol):
     if "rol" not in session:
         return False
     return session["rol"] == rol
 
-# 🔥 API PARA ACTUALIZAR TABLAS
+# API
 @app.route('/api/solicitudes')
 def api_solicitudes():
     conexion = get_connection()
@@ -45,7 +43,7 @@ def api_solicitudes():
     conexion.close()
     return jsonify(data)
 
-# 🔐 LOGIN
+# LOGIN
 @app.route('/login/<rol>', methods=["GET","POST"])
 def login(rol):
     if request.method == "POST":
@@ -64,13 +62,12 @@ def login(rol):
 
     return render_template("login.html", rol=rol)
 
-# 🔓 LOGOUT
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect("/solicitudes")
 
-# 📋 SOLICITUDES (PROFESOR)
+# SOLICITUDES
 @app.route('/', methods=["GET","POST"])
 @app.route('/solicitudes', methods=["GET","POST"])
 def solicitudes():
@@ -82,8 +79,8 @@ def solicitudes():
         motivo = request.form["motivo"]
         dolor = request.form["dolor"]
 
-        # 🇪🇨 HORA ECUADOR
-        fecha = datetime.now(pytz.timezone('America/Guayaquil'))
+        # 🇪🇨 HORA ECUADOR CORREGIDA
+        fecha = datetime.now(pytz.timezone('America/Guayaquil')).strftime('%Y-%m-%d %H:%M:%S')
 
         cursor.execute("""
         INSERT INTO solicitudes (id_estudiante, id_profesor, motivo, dolor, estado, fecha)
@@ -99,21 +96,21 @@ def solicitudes():
     conexion.close()
     return render_template("solicitudes.html", estudiantes=estudiantes)
 
-# 👮 INSPECTOR
+# INSPECTOR
 @app.route('/inspector')
 def inspector():
     if not proteger("inspector"):
         return redirect("/login/inspector")
     return render_template("inspector.html")
 
-# 🏥 MÉDICO
+# MEDICO
 @app.route('/medico')
 def medico():
     if not proteger("medico"):
         return redirect("/login/medico")
     return render_template("medico.html")
 
-# ✅ APROBAR
+# ACCIONES
 @app.route('/aprobar/<int:id>')
 def aprobar(id):
     conexion = get_connection()
@@ -123,7 +120,6 @@ def aprobar(id):
     conexion.close()
     return redirect("/inspector")
 
-# ❌ RECHAZAR
 @app.route('/rechazar/<int:id>')
 def rechazar(id):
     conexion = get_connection()
@@ -133,7 +129,6 @@ def rechazar(id):
     conexion.close()
     return redirect("/inspector")
 
-# 🏥 ATENDER
 @app.route('/atendido/<int:id>')
 def atendido(id):
     conexion = get_connection()
@@ -143,7 +138,7 @@ def atendido(id):
     conexion.close()
     return redirect("/medico")
 
-# 📄 PDF SOLO INSPECTOR
+# PDF
 @app.route('/descargar_pdf')
 def descargar_pdf():
     if not proteger("inspector"):
@@ -163,18 +158,12 @@ def descargar_pdf():
     conexion.close()
 
     buffer = io.BytesIO()
-
     doc = SimpleDocTemplate(buffer)
 
     tabla_data = [["Nombre", "Motivo", "Estado", "Fecha"]]
 
     for fila in datos:
-        tabla_data.append([
-            fila[0],
-            fila[1],
-            fila[2],
-            str(fila[3])
-        ])
+        tabla_data.append([fila[0], fila[1], fila[2], str(fila[3])])
 
     tabla = Table(tabla_data)
 
@@ -184,18 +173,10 @@ def descargar_pdf():
         ('GRID', (0,0), (-1,-1), 1, colors.black)
     ]))
 
-    elementos = [tabla]
-    doc.build(elementos)
-
+    doc.build([tabla])
     buffer.seek(0)
 
-    return send_file(
-        buffer,
-        as_attachment=True,
-        download_name="solicitudes.pdf",
-        mimetype='application/pdf'
-    )
+    return send_file(buffer, as_attachment=True, download_name="solicitudes.pdf", mimetype='application/pdf')
 
-# 🚀 RUN
 if __name__ == '__main__':
     app.run(debug=True)
