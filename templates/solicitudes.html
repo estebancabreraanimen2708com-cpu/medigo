@@ -12,15 +12,9 @@
 <div class="cabecera-azul"><h2>MediGo</h2></div>
 
 <div class="contenido">
-<div style="display:flex; gap:15px; justify-content:center;">
-<a href="/solicitudes"><button class="btn-principal">Solicitudes</button></a>
-<a href="/inspector"><button class="btn-principal">Inspector</button></a>
-<a href="/medico"><button class="btn-principal">Médico</button></a>
-</div>
-</div>
 
-<!-- FORMULARIO -->
-<div class="contenido">
+<div id="mensaje" style="display:none; background:#f8d7da; padding:10px; border-radius:10px; margin-bottom:10px;"></div>
+
 <form method="POST" onsubmit="return validarFormulario()">
 
 <select name="estudiante" id="estudiante">
@@ -41,12 +35,11 @@
 
 <textarea name="motivo" id="motivo" placeholder="Escriba el motivo"></textarea>
 
-<button type="submit" class="btn-principal">Enviar</button>
+<button class="btn-principal">Enviar</button>
 
 </form>
 </div>
 
-<!-- TABLA -->
 <div class="contenido" id="contenedor"></div>
 
 </div>
@@ -54,16 +47,23 @@
 <script>
 Notification.requestPermission();
 
-let ultimoEstado = {}; // 🔥 guarda estados anteriores
+let estados = {};
 
 function sonido(){
-    new Audio("/static/mixkit-correct-answer-tone-2870.wav").play();
+new Audio("/static/mixkit-correct-answer-tone-2870.wav").play();
 }
 
-function notificar(texto){
-    if(Notification.permission==="granted"){
-        new Notification("MediGo",{body:texto});
-    }
+function notificar(t){
+if(Notification.permission==="granted"){
+new Notification("MediGo",{body:t});
+}
+}
+
+function mostrarMensaje(texto){
+let m=document.getElementById("mensaje");
+m.innerText=texto;
+m.style.display="block";
+setTimeout(()=>m.style.display="none",3000);
 }
 
 function cargar(){
@@ -71,77 +71,53 @@ fetch('/api/solicitudes')
 .then(r=>r.json())
 .then(data=>{
 
-let contenedor = document.getElementById("contenedor");
-contenedor.innerHTML = "";
+let c=document.getElementById("contenedor");
+c.innerHTML="";
 
 data.forEach(s=>{
 
-    // 🔥 DETECTAR CAMBIO DE ESTADO
-    if(ultimoEstado[s.id_solicitud] && ultimoEstado[s.id_solicitud] !== s.estado){
+if(estados[s.id_solicitud] && estados[s.id_solicitud]!==s.estado){
 
-        if(s.estado === "aprobado"){
-            notificar("✅ Aprobado: " + s.nombre);
-            sonido();
-        }
+notificar("Estado actualizado: "+s.nombre+" → "+s.estado);
+sonido();
 
-        if(s.estado === "rechazado"){
-            notificar("❌ Rechazado: " + s.nombre);
-            sonido();
-        }
+}
 
-        if(s.estado === "atendido"){
-            notificar("🏥 Atendido: " + s.nombre);
-            sonido();
-        }
-    }
+estados[s.id_solicitud]=s.estado;
 
-    // guardar estado
-    ultimoEstado[s.id_solicitud] = s.estado;
+c.innerHTML+=`
+<div class="tarjeta-solicitud">
+<div class="fila-info">
+<span class="nombre-est">${s.nombre}</span>
+<span>${s.estado}</span>
+</div>
 
-    contenedor.innerHTML += `
-    <div class="tarjeta-solicitud">
-        <div class="fila-info">
-            <span class="nombre-est">${s.nombre}</span>
-            <span>${s.estado}</span>
-        </div>
+<div class="cuadro-motivo">${s.motivo}</div>
 
-        <div class="cuadro-motivo">${s.motivo}</div>
+<small>${s.fecha}</small>
+</div>
+`;
 
-        <small>${
-        new Date(s.fecha).toLocaleString('es-EC',{
-        timeZone:'America/Guayaquil'
-        })
-        }</small>
-    </div>
-    `;
 });
 
 });
 }
 
-// 🔄 actualizar cada 3 segundos
 setInterval(cargar,3000);
 cargar();
 
-
-// 🔥 VALIDACIÓN + CONFIRMACIÓN
 function validarFormulario(){
 
-let estudiante = document.getElementById("estudiante").value;
-let motivo = document.getElementById("motivo").value;
-let dolor = document.querySelector('input[name="dolor"]:checked');
+let estudiante=document.getElementById("estudiante").value;
+let motivo=document.getElementById("motivo").value;
+let dolor=document.querySelector('input[name="dolor"]:checked');
 
-if(estudiante === "" || motivo.trim() === "" || !dolor){
-alert("⚠️ Debe llenar todos los campos");
+if(estudiante===""||motivo.trim()===""||!dolor){
+mostrarMensaje("⚠️ Debe completar todos los campos");
 return false;
 }
 
-let confirmar = confirm("¿Deseas enviar la solicitud?");
-if(!confirmar){
-return false;
-}
-
-return true;
+return confirm("¿Confirmar envío?");
 }
 </script>
 
