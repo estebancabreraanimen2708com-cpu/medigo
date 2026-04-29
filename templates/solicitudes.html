@@ -9,10 +9,21 @@
 
 <div class="contenedor-app">
 
-<div class="cabecera-azul"><h2>MediGo</h2></div>
+<div class="cabecera-azul">
+<h2>MediGo</h2>
+</div>
 
+<!-- 🔥 MENÚ (NO SE QUITA) -->
 <div class="contenido">
+<div style="display:flex; gap:15px; justify-content:center; flex-wrap:wrap;">
+<a href="/solicitudes"><button class="btn-principal">Solicitudes</button></a>
+<a href="/inspector"><button class="btn-principal">Inspector</button></a>
+<a href="/medico"><button class="btn-principal">Médico</button></a>
+</div>
+</div>
 
+<!-- 🔥 MENSAJE BONITO -->
+<div class="contenido">
 <div id="mensaje" style="display:none; background:#f8d7da; padding:10px; border-radius:10px; margin-bottom:10px;"></div>
 
 <form method="POST" onsubmit="return validarFormulario()">
@@ -35,11 +46,12 @@
 
 <textarea name="motivo" id="motivo" placeholder="Escriba el motivo"></textarea>
 
-<button class="btn-principal">Enviar</button>
+<button type="submit" class="btn-principal">Enviar</button>
 
 </form>
 </div>
 
+<!-- 🔥 TABLA -->
 <div class="contenido" id="contenedor"></div>
 
 </div>
@@ -50,20 +62,20 @@ Notification.requestPermission();
 let estados = {};
 
 function sonido(){
-new Audio("/static/mixkit-correct-answer-tone-2870.wav").play();
+    new Audio("/static/mixkit-correct-answer-tone-2870.wav").play();
 }
 
-function notificar(t){
-if(Notification.permission==="granted"){
-new Notification("MediGo",{body:t});
-}
+function notificar(texto){
+    if(Notification.permission==="granted"){
+        new Notification("MediGo",{body:texto});
+    }
 }
 
 function mostrarMensaje(texto){
-let m=document.getElementById("mensaje");
-m.innerText=texto;
-m.style.display="block";
-setTimeout(()=>m.style.display="none",3000);
+    let m = document.getElementById("mensaje");
+    m.innerText = texto;
+    m.style.display = "block";
+    setTimeout(()=>m.style.display="none",3000);
 }
 
 function cargar(){
@@ -71,33 +83,44 @@ fetch('/api/solicitudes')
 .then(r=>r.json())
 .then(data=>{
 
-let c=document.getElementById("contenedor");
-c.innerHTML="";
+let c = document.getElementById("contenedor");
+c.innerHTML = "";
 
 data.forEach(s=>{
 
-if(estados[s.id_solicitud] && estados[s.id_solicitud]!==s.estado){
+    // 🔔 detectar cambios
+    if(estados[s.id_solicitud] && estados[s.id_solicitud] !== s.estado){
 
-notificar("Estado actualizado: "+s.nombre+" → "+s.estado);
-sonido();
+        if(s.estado === "aprobado"){
+            notificar("✅ Aprobado: " + s.nombre);
+            sonido();
+        }
 
-}
+        if(s.estado === "rechazado"){
+            notificar("❌ Rechazado: " + s.nombre);
+            sonido();
+        }
 
-estados[s.id_solicitud]=s.estado;
+        if(s.estado === "atendido"){
+            notificar("🏥 Atendido: " + s.nombre);
+            sonido();
+        }
+    }
 
-c.innerHTML+=`
-<div class="tarjeta-solicitud">
-<div class="fila-info">
-<span class="nombre-est">${s.nombre}</span>
-<span>${s.estado}</span>
-</div>
+    estados[s.id_solicitud] = s.estado;
 
-<div class="cuadro-motivo">${s.motivo}</div>
+    c.innerHTML += `
+    <div class="tarjeta-solicitud">
+        <div class="fila-info">
+            <span class="nombre-est">${s.nombre}</span>
+            <span>${s.estado}</span>
+        </div>
 
-<small>${s.fecha}</small>
-</div>
-`;
+        <div class="cuadro-motivo">${s.motivo}</div>
 
+        <small>${s.fecha}</small>
+    </div>
+    `;
 });
 
 });
@@ -108,16 +131,21 @@ cargar();
 
 function validarFormulario(){
 
-let estudiante=document.getElementById("estudiante").value;
-let motivo=document.getElementById("motivo").value;
-let dolor=document.querySelector('input[name="dolor"]:checked');
+let estudiante = document.getElementById("estudiante").value;
+let motivo = document.getElementById("motivo").value;
+let dolor = document.querySelector('input[name="dolor"]:checked');
 
-if(estudiante===""||motivo.trim()===""||!dolor){
+if(estudiante === "" || motivo.trim() === "" || !dolor){
 mostrarMensaje("⚠️ Debe completar todos los campos");
 return false;
 }
 
-return confirm("¿Confirmar envío?");
+let confirmar = confirm("¿Deseas enviar la solicitud?");
+if(!confirmar){
+return false;
+}
+
+return true;
 }
 </script>
 
