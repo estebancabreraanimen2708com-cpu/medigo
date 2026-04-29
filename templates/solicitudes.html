@@ -19,6 +19,7 @@
 </div>
 </div>
 
+<!-- FORMULARIO -->
 <div class="contenido">
 <form method="POST" onsubmit="return validarFormulario()">
 
@@ -45,11 +46,85 @@
 </form>
 </div>
 
+<!-- TABLA -->
 <div class="contenido" id="contenedor"></div>
 
 </div>
 
 <script>
+Notification.requestPermission();
+
+let ultimoEstado = {}; // 🔥 guarda estados anteriores
+
+function sonido(){
+    new Audio("/static/mixkit-correct-answer-tone-2870.wav").play();
+}
+
+function notificar(texto){
+    if(Notification.permission==="granted"){
+        new Notification("MediGo",{body:texto});
+    }
+}
+
+function cargar(){
+fetch('/api/solicitudes')
+.then(r=>r.json())
+.then(data=>{
+
+let contenedor = document.getElementById("contenedor");
+contenedor.innerHTML = "";
+
+data.forEach(s=>{
+
+    // 🔥 DETECTAR CAMBIO DE ESTADO
+    if(ultimoEstado[s.id_solicitud] && ultimoEstado[s.id_solicitud] !== s.estado){
+
+        if(s.estado === "aprobado"){
+            notificar("✅ Aprobado: " + s.nombre);
+            sonido();
+        }
+
+        if(s.estado === "rechazado"){
+            notificar("❌ Rechazado: " + s.nombre);
+            sonido();
+        }
+
+        if(s.estado === "atendido"){
+            notificar("🏥 Atendido: " + s.nombre);
+            sonido();
+        }
+    }
+
+    // guardar estado
+    ultimoEstado[s.id_solicitud] = s.estado;
+
+    contenedor.innerHTML += `
+    <div class="tarjeta-solicitud">
+        <div class="fila-info">
+            <span class="nombre-est">${s.nombre}</span>
+            <span>${s.estado}</span>
+        </div>
+
+        <div class="cuadro-motivo">${s.motivo}</div>
+
+        <small>${
+        new Date(s.fecha).toLocaleString('es-EC',{
+        timeZone:'America/Guayaquil'
+        })
+        }</small>
+    </div>
+    `;
+});
+
+});
+}
+
+// 🔄 actualizar cada 3 segundos
+setInterval(cargar,3000);
+cargar();
+
+
+// 🔥 VALIDACIÓN + CONFIRMACIÓN
 function validarFormulario(){
 
 let estudiante = document.getElementById("estudiante").value;
