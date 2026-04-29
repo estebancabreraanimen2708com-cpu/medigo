@@ -5,7 +5,6 @@ from datetime import datetime
 import pytz
 import io
 
-# PDF
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
 from reportlab.lib import colors
 
@@ -22,18 +21,18 @@ def get_connection():
     )
 
 def proteger(rol):
-    if "rol" not in session:
-        return False
-    return session["rol"] == rol
+    return "rol" in session and session["rol"] == rol
 
-# API
+# 🔥 API
 @app.route('/api/solicitudes')
 def api_solicitudes():
     conexion = get_connection()
     cursor = conexion.cursor(dictionary=True)
 
     cursor.execute("""
-    SELECT s.id_solicitud, e.nombre, s.motivo, s.estado, s.fecha, s.dolor
+    SELECT s.id_solicitud, e.nombre, s.motivo, s.estado,
+    DATE_FORMAT(s.fecha, '%Y-%m-%d %H:%i:%s') as fecha,
+    s.dolor
     FROM solicitudes s
     JOIN estudiantes e ON s.id_estudiante = e.id_estudiante
     ORDER BY s.id_solicitud DESC
@@ -43,7 +42,7 @@ def api_solicitudes():
     conexion.close()
     return jsonify(data)
 
-# LOGIN
+# 🔐 LOGIN
 @app.route('/login/<rol>', methods=["GET","POST"])
 def login(rol):
     if request.method == "POST":
@@ -54,7 +53,7 @@ def login(rol):
             session["rol"] = "inspector"
             return redirect("/inspector")
 
-        elif rol == "medico" and user == "doctor" and password == "1234":
+        if rol == "medico" and user == "doctor" and password == "1234":
             session["rol"] = "medico"
             return redirect("/medico")
 
@@ -67,7 +66,7 @@ def logout():
     session.clear()
     return redirect("/solicitudes")
 
-# SOLICITUDES
+# 📋 SOLICITUDES
 @app.route('/', methods=["GET","POST"])
 @app.route('/solicitudes', methods=["GET","POST"])
 def solicitudes():
@@ -79,8 +78,7 @@ def solicitudes():
         motivo = request.form["motivo"]
         dolor = request.form["dolor"]
 
-        # 🇪🇨 HORA ECUADOR CORREGIDA
-        fecha = datetime.now(pytz.timezone('America/Guayaquil')).strftime('%Y-%m-%d %H:%M:%S')
+        fecha = datetime.now(pytz.timezone('America/Guayaquil'))
 
         cursor.execute("""
         INSERT INTO solicitudes (id_estudiante, id_profesor, motivo, dolor, estado, fecha)
@@ -96,14 +94,14 @@ def solicitudes():
     conexion.close()
     return render_template("solicitudes.html", estudiantes=estudiantes)
 
-# INSPECTOR
+# 👮 INSPECTOR
 @app.route('/inspector')
 def inspector():
     if not proteger("inspector"):
         return redirect("/login/inspector")
     return render_template("inspector.html")
 
-# MEDICO
+# 🏥 MÉDICO
 @app.route('/medico')
 def medico():
     if not proteger("medico"):
@@ -151,7 +149,6 @@ def descargar_pdf():
     SELECT e.nombre, s.motivo, s.estado, s.fecha
     FROM solicitudes s
     JOIN estudiantes e ON s.id_estudiante = e.id_estudiante
-    ORDER BY s.fecha DESC
     """)
 
     datos = cursor.fetchall()
@@ -160,17 +157,15 @@ def descargar_pdf():
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer)
 
-    tabla_data = [["Nombre", "Motivo", "Estado", "Fecha"]]
-
+    tabla_data = [["Nombre","Motivo","Estado","Fecha"]]
     for fila in datos:
-        tabla_data.append([fila[0], fila[1], fila[2], str(fila[3])])
+        tabla_data.append([fila[0],fila[1],fila[2],str(fila[3])])
 
     tabla = Table(tabla_data)
-
     tabla.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (-1,0), colors.grey),
+        ('BACKGROUND',(0,0),(-1,0),colors.grey),
         ('TEXTCOLOR',(0,0),(-1,0),colors.white),
-        ('GRID', (0,0), (-1,-1), 1, colors.black)
+        ('GRID',(0,0),(-1,-1),1,colors.black)
     ]))
 
     doc.build([tabla])
