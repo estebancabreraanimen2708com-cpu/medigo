@@ -23,7 +23,18 @@ def get_connection():
 def proteger(rol):
     return "rol" in session and session["rol"] == rol
 
-# 🔥 API
+# 🔐 PROTECCIÓN GLOBAL (NUEVO)
+@app.before_request
+def proteger_rutas():
+    if request.path.startswith("/inspector"):
+        if "rol" not in session or session["rol"] != "inspector":
+            return redirect("/login/inspector")
+
+    if request.path.startswith("/medico"):
+        if "rol" not in session or session["rol"] != "medico":
+            return redirect("/login/medico")
+
+# API
 @app.route('/api/solicitudes')
 def api_solicitudes():
     conexion = get_connection()
@@ -42,7 +53,7 @@ def api_solicitudes():
     conexion.close()
     return jsonify(data)
 
-# 🔐 LOGIN
+# LOGIN
 @app.route('/login/<rol>', methods=["GET","POST"])
 def login(rol):
     if request.method == "POST":
@@ -66,7 +77,7 @@ def logout():
     session.clear()
     return redirect("/solicitudes")
 
-# 📋 SOLICITUDES
+# SOLICITUDES
 @app.route('/', methods=["GET","POST"])
 @app.route('/solicitudes', methods=["GET","POST"])
 def solicitudes():
@@ -94,18 +105,14 @@ def solicitudes():
     conexion.close()
     return render_template("solicitudes.html", estudiantes=estudiantes)
 
-# 👮 INSPECTOR
+# INSPECTOR
 @app.route('/inspector')
 def inspector():
-    if not proteger("inspector"):
-        return redirect("/login/inspector")
     return render_template("inspector.html")
 
-# 🏥 MÉDICO
+# MEDICO
 @app.route('/medico')
 def medico():
-    if not proteger("medico"):
-        return redirect("/login/medico")
     return render_template("medico.html")
 
 # ACCIONES
