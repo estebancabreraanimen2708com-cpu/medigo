@@ -9,9 +9,7 @@
 
 <div class="contenedor-app">
 
-<div class="cabecera-azul">
-<h2>MediGo</h2>
-</div>
+<div class="cabecera-azul"><h2>MediGo</h2></div>
 
 <!-- MENÚ -->
 <div class="contenido">
@@ -22,9 +20,10 @@
 </div>
 </div>
 
-<!-- MENSAJE -->
+<!-- FORM -->
 <div class="contenido">
-<div id="mensaje" style="display:none; background:#f8d7da; padding:10px; border-radius:10px; margin-bottom:10px;"></div>
+
+<div id="mensaje" style="display:none; background:#f8d7da; padding:10px; border-radius:10px;"></div>
 
 <form method="POST" onsubmit="return validarFormulario()">
 
@@ -44,9 +43,9 @@
 {% endfor %}
 </div>
 
-<textarea name="motivo" id="motivo" placeholder="Escriba el motivo"></textarea>
+<textarea name="motivo" id="motivo"></textarea>
 
-<button type="submit" class="btn-principal">Enviar</button>
+<button class="btn-principal">Enviar</button>
 
 </form>
 </div>
@@ -58,35 +57,43 @@
 
 <script>
 
-// 🔥 PERMISO BIEN HECHO
 if (Notification.permission !== "granted") {
     Notification.requestPermission();
 }
 
 let estados = {};
+let ultimoId = 0;
 
 function sonido(){
     new Audio("/static/mixkit-correct-answer-tone-2870.wav").play();
 }
 
-// 🔥 NOTIFICACIÓN CORREGIDA
 function notificar(texto){
-    if (Notification.permission === "granted") {
-        try{
-            new Notification("MediGo", {
-                body: texto
-            });
-        } catch(e){
-            console.log("Error notificación:", e);
-        }
+    if(Notification.permission==="granted"){
+        new Notification("MediGo",{body:texto});
     }
+
+    let div=document.createElement("div");
+    div.innerText=texto;
+    div.style.position="fixed";
+    div.style.bottom="20px";
+    div.style.left="50%";
+    div.style.transform="translateX(-50%)";
+    div.style.background="#0056b3";
+    div.style.color="white";
+    div.style.padding="10px 20px";
+    div.style.borderRadius="20px";
+    document.body.appendChild(div);
+    setTimeout(()=>div.remove(),3000);
+
+    sonido();
 }
 
 function mostrarMensaje(texto){
-    let m = document.getElementById("mensaje");
-    m.innerText = texto;
-    m.style.display = "block";
-    setTimeout(()=>m.style.display="none",3000);
+let m=document.getElementById("mensaje");
+m.innerText=texto;
+m.style.display="block";
+setTimeout(()=>m.style.display="none",3000);
 }
 
 function cargar(){
@@ -94,64 +101,50 @@ fetch('/api/solicitudes')
 .then(r=>r.json())
 .then(data=>{
 
-let c = document.getElementById("contenedor");
-c.innerHTML = "";
+let c=document.getElementById("contenedor");
+c.innerHTML="";
+
+// NUEVA SOLICITUD
+if(data.length>0){
+let n=data[0];
+if(n.id_solicitud>ultimoId){
+notificar("📨 Nueva solicitud de "+n.nombre);
+ultimoId=n.id_solicitud;
+}
+}
 
 data.forEach(s=>{
 
-    // 🔥 DETECTAR CAMBIO DE ESTADO
-    if(estados[s.id_solicitud] && estados[s.id_solicitud] !== s.estado){
+if(estados[s.id_solicitud] && estados[s.id_solicitud]!==s.estado){
+notificar("🔔 Estado actualizado: "+s.nombre+" → "+s.estado);
+}
 
-        let texto = "";
+estados[s.id_solicitud]=s.estado;
 
-        if(s.estado === "aprobado"){
-            texto = "✅ Aprobado: " + s.nombre;
-        }
-
-        if(s.estado === "rechazado"){
-            texto = "❌ Rechazado: " + s.nombre;
-        }
-
-        if(s.estado === "atendido"){
-            texto = "🏥 Atendido: " + s.nombre;
-        }
-
-        if(texto !== ""){
-            notificar(texto);
-            sonido();
-        }
-    }
-
-    estados[s.id_solicitud] = s.estado;
-
-    c.innerHTML += `
-    <div class="tarjeta-solicitud">
-        <div class="fila-info">
-            <span class="nombre-est">${s.nombre}</span>
-            <span>${s.estado}</span>
-        </div>
-
-        <div class="cuadro-motivo">${s.motivo}</div>
-
-        <small>${s.fecha}</small>
-    </div>
-    `;
+c.innerHTML+=`
+<div class="tarjeta-solicitud">
+<div class="fila-info">
+<span class="nombre-est">${s.nombre}</span>
+<span>${s.estado}</span>
+</div>
+<div class="cuadro-motivo">${s.motivo}</div>
+<small>${s.fecha}</small>
+</div>`;
 });
 
 });
 }
 
-// 🔄 ACTUALIZA SOLO
 setInterval(cargar,3000);
 cargar();
 
 function validarFormulario(){
 
-let estudiante = document.getElementById("estudiante").value;
-let motivo = document.getElementById("motivo").value;
-let dolor = document.querySelector('input[name="dolor"]:checked');
+let estudiante=document.getElementById("estudiante").value;
+let motivo=document.getElementById("motivo").value;
+let dolor=document.querySelector('input[name="dolor"]:checked');
 
-if(estudiante === "" || motivo.trim() === "" || !dolor){
+if(estudiante===""||motivo.trim()===""||!dolor){
 mostrarMensaje("⚠️ Debe completar todos los campos");
 return false;
 }
