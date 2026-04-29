@@ -13,7 +13,7 @@
 <h2>MediGo</h2>
 </div>
 
-<!-- 🔥 MENÚ (NO SE QUITA) -->
+<!-- MENÚ -->
 <div class="contenido">
 <div style="display:flex; gap:15px; justify-content:center; flex-wrap:wrap;">
 <a href="/solicitudes"><button class="btn-principal">Solicitudes</button></a>
@@ -22,7 +22,7 @@
 </div>
 </div>
 
-<!-- 🔥 MENSAJE BONITO -->
+<!-- MENSAJE -->
 <div class="contenido">
 <div id="mensaje" style="display:none; background:#f8d7da; padding:10px; border-radius:10px; margin-bottom:10px;"></div>
 
@@ -51,13 +51,17 @@
 </form>
 </div>
 
-<!-- 🔥 TABLA -->
+<!-- TABLA -->
 <div class="contenido" id="contenedor"></div>
 
 </div>
 
 <script>
-Notification.requestPermission();
+
+// 🔥 PERMISO BIEN HECHO
+if (Notification.permission !== "granted") {
+    Notification.requestPermission();
+}
 
 let estados = {};
 
@@ -65,9 +69,16 @@ function sonido(){
     new Audio("/static/mixkit-correct-answer-tone-2870.wav").play();
 }
 
+// 🔥 NOTIFICACIÓN CORREGIDA
 function notificar(texto){
-    if(Notification.permission==="granted"){
-        new Notification("MediGo",{body:texto});
+    if (Notification.permission === "granted") {
+        try{
+            new Notification("MediGo", {
+                body: texto
+            });
+        } catch(e){
+            console.log("Error notificación:", e);
+        }
     }
 }
 
@@ -88,21 +99,25 @@ c.innerHTML = "";
 
 data.forEach(s=>{
 
-    // 🔔 detectar cambios
+    // 🔥 DETECTAR CAMBIO DE ESTADO
     if(estados[s.id_solicitud] && estados[s.id_solicitud] !== s.estado){
 
+        let texto = "";
+
         if(s.estado === "aprobado"){
-            notificar("✅ Aprobado: " + s.nombre);
-            sonido();
+            texto = "✅ Aprobado: " + s.nombre;
         }
 
         if(s.estado === "rechazado"){
-            notificar("❌ Rechazado: " + s.nombre);
-            sonido();
+            texto = "❌ Rechazado: " + s.nombre;
         }
 
         if(s.estado === "atendido"){
-            notificar("🏥 Atendido: " + s.nombre);
+            texto = "🏥 Atendido: " + s.nombre;
+        }
+
+        if(texto !== ""){
+            notificar(texto);
             sonido();
         }
     }
@@ -126,6 +141,7 @@ data.forEach(s=>{
 });
 }
 
+// 🔄 ACTUALIZA SOLO
 setInterval(cargar,3000);
 cargar();
 
@@ -140,13 +156,9 @@ mostrarMensaje("⚠️ Debe completar todos los campos");
 return false;
 }
 
-let confirmar = confirm("¿Deseas enviar la solicitud?");
-if(!confirmar){
-return false;
+return confirm("¿Deseas enviar la solicitud?");
 }
 
-return true;
-}
 </script>
 
 </body>
