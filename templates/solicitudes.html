@@ -3,28 +3,44 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<title>Solicitudes</title>
 </head>
 
 <body>
 
 <div class="contenedor-app">
 
+<!-- CABECERA -->
 <div class="cabecera-azul">
-<h2>Solicitudes</h2>
+<h2>Solicitudes Médicas</h2>
 </div>
 
+<!-- 🔥 MENÚ (RESTAURADO) -->
+<div class="contenido">
+<div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+<a href="/solicitudes"><button class="btn-principal">Solicitudes</button></a>
+<a href="/inspector"><button class="btn-principal">Inspector</button></a>
+<a href="/medico"><button class="btn-principal">Médico</button></a>
+</div>
+</div>
+
+<!-- FORMULARIO -->
 <div class="contenido">
 
-<form method="POST">
+<form method="POST" onsubmit="return confirmar()">
 
+<label>Estudiante</label>
 <select name="estudiante" required>
-<option value="">Seleccionar</option>
+<option value="">Seleccionar...</option>
 {% for e in estudiantes %}
 <option value="{{ e.id_estudiante }}">{{ e.nombre }}</option>
 {% endfor %}
 </select>
 
-<textarea name="motivo" placeholder="Motivo" required></textarea>
+<label>Motivo</label>
+<textarea name="motivo" required></textarea>
+
+<label>Nivel de dolor</label>
 
 <div class="escala-dolor">
 {% for i in range(1,11) %}
@@ -41,56 +57,70 @@
 
 </div>
 
+<!-- 🔥 TABLA (RESTAURADA BIEN) -->
 <div class="contenido">
-<table id="tablaSolicitudes" style="width:100%">
+
+<h3>Historial de Solicitudes</h3>
+
+<table id="tablaSolicitudes" style="width:100%; border-collapse:collapse;">
 <thead>
-<tr>
+<tr style="background:#0056b3; color:white;">
 <th>Nombre</th>
 <th>Motivo</th>
 <th>Estado</th>
 <th>Fecha</th>
 </tr>
 </thead>
+
 <tbody></tbody>
+
 </table>
+
 </div>
 
 </div>
 
 <script>
 
-let cargando = false;
+// ⚠️ IMPORTANTE: evitar múltiples ejecuciones
+let intervalActivo = false;
 
 function cargar(){
-
-if(cargando) return;
-cargando = true;
 
 fetch('/api/solicitudes')
 .then(r=>r.json())
 .then(data=>{
 
 let tbody = document.querySelector("#tablaSolicitudes tbody");
-tbody.innerHTML="";
+tbody.innerHTML = ""; // 🔥 limpia antes de cargar
 
 data.forEach(s=>{
 tbody.innerHTML += `
-<tr>
+<tr style="border-bottom:1px solid #ccc;">
 <td>${s.nombre}</td>
 <td>${s.motivo}</td>
 <td>${s.estado}</td>
 <td>${s.fecha}</td>
-</tr>`;
+</tr>
+`;
 });
-
-cargando = false;
 
 });
 
 }
 
+// 🔥 SOLO UN INTERVAL (evita duplicados)
+if(!intervalActivo){
 setInterval(cargar,3000);
+intervalActivo = true;
+}
+
 cargar();
+
+// CONFIRMAR
+function confirmar(){
+return confirm("¿Enviar solicitud?");
+}
 
 </script>
 
