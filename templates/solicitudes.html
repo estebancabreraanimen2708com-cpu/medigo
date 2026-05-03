@@ -3,14 +3,16 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<title>Solicitudes</title>
 </head>
 
 <body>
 
 <div class="contenedor-app">
 
+<!-- CABECERA -->
 <div class="cabecera-azul">
-<h2>MediGo</h2>
+<h2>Enviar Solicitud Médica</h2>
 </div>
 
 <!-- MENÚ -->
@@ -22,50 +24,73 @@
 </div>
 </div>
 
-<!-- FORM -->
+<!-- FORMULARIO -->
 <div class="contenido">
 
-<div id="mensaje" style="display:none; background:#f8d7da; padding:10px; border-radius:10px;"></div>
+<form method="POST" onsubmit="return confirmar()">
 
-<form method="POST" onsubmit="return validarFormulario()">
-
-<select name="estudiante" id="estudiante">
-<option value="">Seleccione estudiante</option>
+<label>Estudiante</label>
+<select name="estudiante" id="estudiante" required>
+<option value="">Seleccionar...</option>
 {% for e in estudiantes %}
-<option value="{{e.id_estudiante}}">{{e.nombre}}</option>
+<option value="{{ e.id_estudiante }}">{{ e.nombre }}</option>
 {% endfor %}
 </select>
+
+<label>Motivo</label>
+<textarea name="motivo" id="motivo" required></textarea>
+
+<label>Nivel de dolor</label>
 
 <div class="escala-dolor">
 {% for i in range(1,11) %}
 <label class="nivel-btn n-{{i}}">
-<input type="radio" name="dolor" value="{{i}}">
+<input type="radio" name="dolor" value="{{i}}" required>
 <span>{{i}}</span>
 </label>
 {% endfor %}
 </div>
 
-<textarea name="motivo" id="motivo" placeholder="Escriba el motivo"></textarea>
-
 <button class="btn-principal">Enviar</button>
 
 </form>
+
 </div>
 
 <!-- TABLA -->
-<div class="contenido" id="contenedor"></div>
+<div class="contenido">
+
+<h3>Historial de Solicitudes</h3>
+
+<table style="width:100%; border-collapse:collapse;" id="tablaSolicitudes">
+
+<thead>
+<tr style="background:#0056b3; color:white;">
+<th>Nombre</th>
+<th>Motivo</th>
+<th>Estado</th>
+<th>Fecha</th>
+</tr>
+</thead>
+
+<tbody></tbody>
+
+</table>
+
+</div>
 
 </div>
 
 <script>
 
-// 🔐 permiso notificaciones
+// 🔔 permisos notificaciones
 if (Notification.permission !== "granted") {
     Notification.requestPermission();
 }
 
-let estados = {};
+let ultimoEstado = {};
 
+// 🔊 sonido
 function sonido(){
     new Audio("/static/mixkit-correct-answer-tone-2870.wav").play();
 }
@@ -75,77 +100,71 @@ function notificar(texto){
     if(Notification.permission==="granted"){
         new Notification("MediGo",{body:texto});
     }
-
-    let div=document.createElement("div");
-    div.innerText=texto;
-    div.style.position="fixed";
-    div.style.bottom="20px";
-    div.style.left="50%";
-    div.style.transform="translateX(-50%)";
-    div.style.background="#0056b3";
-    div.style.color="white";
-    div.style.padding="10px 20px";
-    div.style.borderRadius="20px";
-    div.style.zIndex="9999";
-    document.body.appendChild(div);
-    setTimeout(()=>div.remove(),3000);
-
     sonido();
 }
 
-// 🔄 cargar datos
+// 📋 cargar tabla
 function cargar(){
 fetch('/api/solicitudes')
 .then(r=>r.json())
 .then(data=>{
 
-let c=document.getElementById("contenedor");
-c.innerHTML="";
+let tbody = document.querySelector("#tablaSolicitudes tbody");
+tbody.innerHTML="";
 
 data.forEach(s=>{
 
-    // 🔔 SOLO cuando inspector responde
-    if(estados[s.id_solicitud] && estados[s.id_solicitud]!==s.estado){
-        if(s.estado !== "pendiente"){
-            notificar("📢 "+s.nombre+" → "+s.estado);
-        }
-    }
+// 🔔 detectar cambios de estado
+if(ultimoEstado[s.id_solicitud] && ultimoEstado[s.id_solicitud] !== s.estado){
 
-    estados[s.id_solicitud]=s.estado;
+if(s.estado==="aprobado"){
+notificar("Solicitud aprobada: "+s.nombre);
+}
 
-    c.innerHTML+=`
-    <div class="tarjeta-solicitud">
-    <div class="fila-info">
-    <span class="nombre-est">${s.nombre}</span>
-    <span>${s.estado}</span>
-    </div>
-    <div class="cuadro-motivo">${s.motivo}</div>
-    <small>${s.fecha}</small>
-    </div>`;
+if(s.estado==="rechazado"){
+notificar("Solicitud rechazada: "+s.nombre);
+}
+
+if(s.estado==="atendido"){
+notificar("Paciente atendido: "+s.nombre);
+}
+
+}
+
+ultimoEstado[s.id_solicitud] = s.estado;
+
+// 📋 tabla
+tbody.innerHTML+=`
+<tr style="border-bottom:1px solid #ccc;">
+<td>${s.nombre}</td>
+<td>${s.motivo}</td>
+<td>${s.estado}</td>
+<td>${s.fecha}</td>
+</tr>
+`;
+
 });
 
 });
 }
 
+// 🔁 actualizar
 setInterval(cargar,3000);
 cargar();
 
-// validación
-function validarFormulario(){
+// ⚠️ confirmar envío
+function confirmar(){
 
-let estudiante=document.getElementById("estudiante").value;
-let motivo=document.getElementById("motivo").value;
-let dolor=document.querySelector('input[name="dolor"]:checked');
+let est = document.getElementById("estudiante").value;
+let mot = document.getElementById("motivo").value;
+let dolor = document.querySelector('input[name="dolor"]:checked');
 
-if(estudiante===""||motivo.trim()===""||!dolor){
-let m=document.getElementById("mensaje");
-m.innerText="⚠️ Debe completar todos los campos";
-m.style.display="block";
-setTimeout(()=>m.style.display="none",3000);
+if(!est || !mot || !dolor){
+alert("Debes completar todos los campos");
 return false;
 }
 
-return confirm("¿Deseas enviar la solicitud?");
+return confirm("¿Enviar solicitud?");
 }
 
 </script>
