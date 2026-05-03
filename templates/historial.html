@@ -57,7 +57,60 @@ Dolor: {{ s.dolor }}
 
 </div>
 
+</div><!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="contenedor-app">
+
+<div class="cabecera-azul">
+<h2>Historial del Estudiante</h2>
 </div>
+
+<!-- SOLO VOLVER -->
+<div class="contenido">
+<a href="/inspector">
+<button class="btn-principal">Volver</button>
+</a>
+</div>
+
+<div class="contenido">
+
+{% if data %}
+
+{% for s in data %}
+<div class="tarjeta-solicitud">
+
+<div class="fila-info">
+<span class="nombre-est">{{ s.nombre }}</span>
+<span>{{ s.estado }}</span>
+</div>
+
+<div class="cuadro-motivo">{{ s.motivo }}</div>
+
+<small>
+Fecha: {{ s.fecha }} <br>
+Dolor: {{ s.dolor }}
+</small>
+
+</div>
+{% endfor %}
+
+{% else %}
+<p>No hay historial</p>
+{% endif %}
+
+</div>
+
+</div>
+
+</body>
+</html>
 
 </body>
 </html>
