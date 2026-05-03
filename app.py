@@ -20,21 +20,24 @@ def get_connection():
         port=int(os.getenv("DB_PORT"))
     )
 
-def proteger(rol):
-    return "rol" in session and session["rol"] == rol
-
-# 🔐 PROTECCIÓN GLOBAL (NUEVO)
+# 🔐 PROTECCIÓN FUERTE (NO deja entrar sin login)
 @app.before_request
 def proteger_rutas():
-    if request.path.startswith("/inspector"):
+    ruta = request.path
+
+    # evita bucles
+    if ruta.startswith("/static") or ruta.startswith("/login") or ruta.startswith("/api"):
+        return
+
+    if ruta.startswith("/inspector"):
         if "rol" not in session or session["rol"] != "inspector":
             return redirect("/login/inspector")
 
-    if request.path.startswith("/medico"):
+    if ruta.startswith("/medico"):
         if "rol" not in session or session["rol"] != "medico":
             return redirect("/login/medico")
 
-# API
+# 🔥 API
 @app.route('/api/solicitudes')
 def api_solicitudes():
     conexion = get_connection()
@@ -53,7 +56,7 @@ def api_solicitudes():
     conexion.close()
     return jsonify(data)
 
-# LOGIN
+# 🔐 LOGIN
 @app.route('/login/<rol>', methods=["GET","POST"])
 def login(rol):
     if request.method == "POST":
@@ -77,7 +80,7 @@ def logout():
     session.clear()
     return redirect("/solicitudes")
 
-# SOLICITUDES
+# 📋 SOLICITUDES
 @app.route('/', methods=["GET","POST"])
 @app.route('/solicitudes', methods=["GET","POST"])
 def solicitudes():
@@ -105,12 +108,12 @@ def solicitudes():
     conexion.close()
     return render_template("solicitudes.html", estudiantes=estudiantes)
 
-# INSPECTOR
+# 👮 INSPECTOR
 @app.route('/inspector')
 def inspector():
     return render_template("inspector.html")
 
-# MEDICO
+# 🏥 MÉDICO
 @app.route('/medico')
 def medico():
     return render_template("medico.html")
@@ -146,7 +149,7 @@ def atendido(id):
 # PDF
 @app.route('/descargar_pdf')
 def descargar_pdf():
-    if not proteger("inspector"):
+    if "rol" not in session or session["rol"] != "inspector":
         return redirect("/login/inspector")
 
     conexion = get_connection()
@@ -181,4 +184,5 @@ def descargar_pdf():
     return send_file(buffer, as_attachment=True, download_name="solicitudes.pdf", mimetype='application/pdf')
 
 if __name__ == '__main__':
+    app.run(debug=True)
     app.run(debug=True)
