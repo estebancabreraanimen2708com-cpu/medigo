@@ -9,33 +9,46 @@
 
 <div class="contenedor-app">
 
-<div class="cabecera-azul"><h2>Médico</h2></div>
+<div class="cabecera-azul">
+<h2>Médico</h2>
+</div>
 
+<!-- MENÚ -->
 <div class="contenido">
-<div style="display:flex; gap:15px; justify-content:center;">
+<div style="display:flex; gap:15px; justify-content:center; flex-wrap:wrap;">
 <a href="/solicitudes"><button class="btn-principal">Solicitudes</button></a>
 <a href="/inspector"><button class="btn-principal">Inspector</button></a>
 <a href="/medico"><button class="btn-principal">Médico</button></a>
 </div>
 </div>
 
-<div class="contenido" id="contenedor"></div>
+<!-- SELECT -->
+<div class="contenido">
+<select id="selectEstudiante">
+<option value="">Ver historial</option>
+</select>
+</div>
+
+<!-- TABLA -->
+<div class="contenido" id="tabla"></div>
 
 </div>
 
 <script>
-Notification.requestPermission();
 
-let ultimoId=0;
+if (Notification.permission !== "granted") {
+    Notification.requestPermission();
+}
 
 function sonido(){
-new Audio("/static/mixkit-correct-answer-tone-2870.wav").play();
+    new Audio("/static/mixkit-correct-answer-tone-2870.wav").play();
 }
 
 function notificar(t){
-if(Notification.permission==="granted"){
-new Notification("MediGo",{body:t});
-}
+    if(Notification.permission==="granted"){
+        new Notification("MediGo",{body:t});
+    }
+    sonido();
 }
 
 function cargar(){
@@ -43,41 +56,63 @@ fetch('/api/solicitudes')
 .then(r=>r.json())
 .then(data=>{
 
-if(data.length>0){
-let n=data[0];
-if(n.id_solicitud>ultimoId){
-notificar("Actualización");
-sonido();
-ultimoId=n.id_solicitud;
-}
-}
+let tabla = document.getElementById("tabla");
+let select = document.getElementById("selectEstudiante");
 
-let c=document.getElementById("contenedor");
-c.innerHTML="";
+tabla.innerHTML="";
+select.innerHTML='<option value="">Ver historial</option>';
+
+let usados=[];
 
 data.forEach(s=>{
+
+// select
+if(!usados.includes(s.id_estudiante)){
+usados.push(s.id_estudiante);
+
+select.innerHTML+=`
+<option value="${s.id_estudiante}">
+${s.nombre}
+</option>`;
+}
+
+// mostrar solo aprobados
 if(s.estado==="aprobado"){
-c.innerHTML+=`
+
+tabla.innerHTML+=`
 <div class="tarjeta-solicitud">
-<b>${s.nombre}</b><br>
-${s.motivo}<br>
-<small>${
-new Date(s.fecha).toLocaleString('es-EC',{timeZone:'America/Guayaquil'})
-}</small><br>
+
+<div class="fila-info">
+<a href="/historial/${s.id_estudiante}">
+<span class="nombre-est">${s.nombre}</span>
+</a>
+<span>${s.estado}</span>
+</div>
+
+<div class="cuadro-motivo">${s.motivo}</div>
 
 <a href="/atendido/${s.id_solicitud}">
-<button class="btn-principal">Atender</button>
+<button class="btn-principal">Atendido</button>
 </a>
 
-</div>`;
+</div>
+`;
 }
+
 });
+
+select.onchange=function(){
+if(this.value){
+window.location.href="/historial/"+this.value;
+}
+}
 
 });
 }
 
 setInterval(cargar,3000);
 cargar();
+
 </script>
 
 </body>
