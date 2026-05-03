@@ -10,12 +10,10 @@
 
 <div class="contenedor-app">
 
-<!-- CABECERA -->
 <div class="cabecera-azul">
 <h2>Enviar Solicitud Médica</h2>
 </div>
 
-<!-- MENÚ -->
 <div class="contenido">
 <div style="display:flex; gap:15px; justify-content:center; flex-wrap:wrap;">
 <a href="/solicitudes"><button class="btn-principal">Solicitudes</button></a>
@@ -24,7 +22,6 @@
 </div>
 </div>
 
-<!-- FORMULARIO -->
 <div class="contenido">
 
 <form method="POST" onsubmit="return confirmar()">
@@ -57,7 +54,6 @@
 
 </div>
 
-<!-- TABLA -->
 <div class="contenido">
 
 <h3>Historial de Solicitudes</h3>
@@ -83,27 +79,6 @@
 
 <script>
 
-// 🔔 permisos notificaciones
-if (Notification.permission !== "granted") {
-    Notification.requestPermission();
-}
-
-let ultimoEstado = {};
-
-// 🔊 sonido
-function sonido(){
-    new Audio("/static/mixkit-correct-answer-tone-2870.wav").play();
-}
-
-// 🔔 notificación
-function notificar(texto){
-    if(Notification.permission==="granted"){
-        new Notification("MediGo",{body:texto});
-    }
-    sonido();
-}
-
-// 📋 cargar tabla
 function cargar(){
 fetch('/api/solicitudes')
 .then(r=>r.json())
@@ -113,57 +88,22 @@ let tbody = document.querySelector("#tablaSolicitudes tbody");
 tbody.innerHTML="";
 
 data.forEach(s=>{
-
-// 🔔 detectar cambios de estado
-if(ultimoEstado[s.id_solicitud] && ultimoEstado[s.id_solicitud] !== s.estado){
-
-if(s.estado==="aprobado"){
-notificar("Solicitud aprobada: "+s.nombre);
-}
-
-if(s.estado==="rechazado"){
-notificar("Solicitud rechazada: "+s.nombre);
-}
-
-if(s.estado==="atendido"){
-notificar("Paciente atendido: "+s.nombre);
-}
-
-}
-
-ultimoEstado[s.id_solicitud] = s.estado;
-
-// 📋 tabla
 tbody.innerHTML+=`
-<tr style="border-bottom:1px solid #ccc;">
+<tr>
 <td>${s.nombre}</td>
 <td>${s.motivo}</td>
 <td>${s.estado}</td>
 <td>${s.fecha}</td>
-</tr>
-`;
-
+</tr>`;
 });
 
 });
 }
 
-// 🔁 actualizar
 setInterval(cargar,3000);
 cargar();
 
-// ⚠️ confirmar envío
 function confirmar(){
-
-let est = document.getElementById("estudiante").value;
-let mot = document.getElementById("motivo").value;
-let dolor = document.querySelector('input[name="dolor"]:checked');
-
-if(!est || !mot || !dolor){
-alert("Debes completar todos los campos");
-return false;
-}
-
 return confirm("¿Enviar solicitud?");
 }
 
