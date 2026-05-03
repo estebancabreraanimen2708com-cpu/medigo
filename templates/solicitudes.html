@@ -9,7 +9,9 @@
 
 <div class="contenedor-app">
 
-<div class="cabecera-azul"><h2>MediGo</h2></div>
+<div class="cabecera-azul">
+<h2>MediGo</h2>
+</div>
 
 <!-- MENÚ -->
 <div class="contenido">
@@ -43,7 +45,7 @@
 {% endfor %}
 </div>
 
-<textarea name="motivo" id="motivo"></textarea>
+<textarea name="motivo" id="motivo" placeholder="Escriba el motivo"></textarea>
 
 <button class="btn-principal">Enviar</button>
 
@@ -57,17 +59,18 @@
 
 <script>
 
+// 🔐 permiso notificaciones
 if (Notification.permission !== "granted") {
     Notification.requestPermission();
 }
 
 let estados = {};
-let ultimoId = 0;
 
 function sonido(){
     new Audio("/static/mixkit-correct-answer-tone-2870.wav").play();
 }
 
+// 🔔 notificación
 function notificar(texto){
     if(Notification.permission==="granted"){
         new Notification("MediGo",{body:texto});
@@ -83,19 +86,14 @@ function notificar(texto){
     div.style.color="white";
     div.style.padding="10px 20px";
     div.style.borderRadius="20px";
+    div.style.zIndex="9999";
     document.body.appendChild(div);
     setTimeout(()=>div.remove(),3000);
 
     sonido();
 }
 
-function mostrarMensaje(texto){
-let m=document.getElementById("mensaje");
-m.innerText=texto;
-m.style.display="block";
-setTimeout(()=>m.style.display="none",3000);
-}
-
+// 🔄 cargar datos
 function cargar(){
 fetch('/api/solicitudes')
 .then(r=>r.json())
@@ -104,32 +102,26 @@ fetch('/api/solicitudes')
 let c=document.getElementById("contenedor");
 c.innerHTML="";
 
-// NUEVA SOLICITUD
-if(data.length>0){
-let n=data[0];
-if(n.id_solicitud>ultimoId){
-notificar("📨 Nueva solicitud de "+n.nombre);
-ultimoId=n.id_solicitud;
-}
-}
-
 data.forEach(s=>{
 
-if(estados[s.id_solicitud] && estados[s.id_solicitud]!==s.estado){
-notificar("🔔 Estado actualizado: "+s.nombre+" → "+s.estado);
-}
+    // 🔔 SOLO cuando inspector responde
+    if(estados[s.id_solicitud] && estados[s.id_solicitud]!==s.estado){
+        if(s.estado !== "pendiente"){
+            notificar("📢 "+s.nombre+" → "+s.estado);
+        }
+    }
 
-estados[s.id_solicitud]=s.estado;
+    estados[s.id_solicitud]=s.estado;
 
-c.innerHTML+=`
-<div class="tarjeta-solicitud">
-<div class="fila-info">
-<span class="nombre-est">${s.nombre}</span>
-<span>${s.estado}</span>
-</div>
-<div class="cuadro-motivo">${s.motivo}</div>
-<small>${s.fecha}</small>
-</div>`;
+    c.innerHTML+=`
+    <div class="tarjeta-solicitud">
+    <div class="fila-info">
+    <span class="nombre-est">${s.nombre}</span>
+    <span>${s.estado}</span>
+    </div>
+    <div class="cuadro-motivo">${s.motivo}</div>
+    <small>${s.fecha}</small>
+    </div>`;
 });
 
 });
@@ -138,6 +130,7 @@ c.innerHTML+=`
 setInterval(cargar,3000);
 cargar();
 
+// validación
 function validarFormulario(){
 
 let estudiante=document.getElementById("estudiante").value;
@@ -145,7 +138,10 @@ let motivo=document.getElementById("motivo").value;
 let dolor=document.querySelector('input[name="dolor"]:checked');
 
 if(estudiante===""||motivo.trim()===""||!dolor){
-mostrarMensaje("⚠️ Debe completar todos los campos");
+let m=document.getElementById("mensaje");
+m.innerText="⚠️ Debe completar todos los campos";
+m.style.display="block";
+setTimeout(()=>m.style.display="none",3000);
 return false;
 }
 
