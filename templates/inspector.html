@@ -13,10 +13,30 @@
 <h2>Inspector</h2>
 </div>
 
+<!-- ✅ MENÚ (ARREGLADO) -->
 <div class="contenido">
-<select id="selectEstudiante"></select>
+<div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+<a href="/solicitudes"><button class="btn-principal">Solicitudes</button></a>
+<a href="/inspector"><button class="btn-principal">Inspector</button></a>
+<a href="/medico"><button class="btn-principal">Médico</button></a>
+</div>
 </div>
 
+<!-- ✅ SELECT SIN DUPLICADOS -->
+<div class="contenido">
+<select id="selectEstudiante">
+<option value="">Ver historial</option>
+</select>
+</div>
+
+<!-- ✅ PDF -->
+<div class="contenido">
+<a href="/pdf_hoy">
+<button class="btn-principal">Descargar PDF del día</button>
+</a>
+</div>
+
+<!-- ✅ TABLA -->
 <div class="contenido">
 <div id="tablaHoy"></div>
 </div>
@@ -25,27 +45,45 @@
 
 <script>
 
+let hoy = new Date().toDateString();
+
 function cargar(){
 
+// 🔹 ESTUDIANTES SIN DUPLICADOS
 fetch('/api/estudiantes')
 .then(r=>r.json())
-.then(est=>{
-let select=document.getElementById("selectEstudiante");
+.then(estudiantes=>{
+
+let select = document.getElementById("selectEstudiante");
 select.innerHTML='<option value="">Ver historial</option>';
 
-est.forEach(e=>{
-select.innerHTML+=`<option value="${e.id_estudiante}">${e.nombre}</option>`;
-});
+estudiantes.forEach(e=>{
+select.innerHTML += `<option value="${e.id_estudiante}">${e.nombre}</option>`;
 });
 
+});
+
+// 🔹 SOLICITUDES
 fetch('/api/solicitudes')
 .then(r=>r.json())
 .then(data=>{
-let tabla=document.getElementById("tablaHoy");
+
+let tabla = document.getElementById("tablaHoy");
 tabla.innerHTML="";
 
+// ❗ evitar duplicados visuales
+let vistos = [];
+
 data.forEach(s=>{
-tabla.innerHTML+=`
+
+if(vistos.includes(s.id_solicitud)) return;
+vistos.push(s.id_solicitud);
+
+let fecha = new Date(s.fecha).toDateString();
+
+if(fecha === hoy){
+
+tabla.innerHTML += `
 <div class="tarjeta-solicitud">
 
 <div class="fila-info">
@@ -57,14 +95,30 @@ tabla.innerHTML+=`
 
 <div class="cuadro-motivo">${s.motivo}</div>
 
+${s.estado==="pendiente" ? `
+<div style="display:flex; gap:10px; margin-top:10px;">
+<a href="/aprobar/${s.id_solicitud}">
+<button class="btn-principal">Aprobar</button>
+</a>
+
+<a href="/rechazar/${s.id_solicitud}">
+<button class="btn-principal">Rechazar</button>
+</a>
+</div>
+` : ``}
+
 </div>
 `;
-});
+}
+
 });
 
-document.getElementById("selectEstudiante").onchange=function(){
+});
+
+// 🔽 SELECT REDIRECT
+document.getElementById("selectEstudiante").onchange = function(){
 if(this.value){
-window.location.href="/historial/"+this.value;
+window.location.href = "/historial/" + this.value;
 }
 }
 
