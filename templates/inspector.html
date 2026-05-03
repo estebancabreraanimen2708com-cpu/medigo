@@ -9,40 +9,56 @@
 
 <div class="contenedor-app">
 
-<div class="cabecera-azul"><h2>Inspector</h2></div>
+<div class="cabecera-azul">
+<h2>Inspector</h2>
+</div>
 
+<!-- MENÚ -->
 <div class="contenido">
-<div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
-
+<div style="display:flex; gap:15px; justify-content:center; flex-wrap:wrap;">
 <a href="/solicitudes"><button class="btn-principal">Solicitudes</button></a>
 <a href="/inspector"><button class="btn-principal">Inspector</button></a>
 <a href="/medico"><button class="btn-principal">Médico</button></a>
-
-<!-- 🔥 BOTÓN PDF -->
-<a href="/descargar_pdf">
-<button class="btn-secundario">Descargar PDF</button>
-</a>
-
 </div>
 </div>
 
+<!-- TABLA -->
 <div class="contenido" id="contenedor"></div>
 
 </div>
 
 <script>
-Notification.requestPermission();
 
-let ultimoId=0;
+if (Notification.permission !== "granted") {
+    Notification.requestPermission();
+}
+
+let ultimoId = null;
 
 function sonido(){
-new Audio("/static/mixkit-correct-answer-tone-2870.wav").play();
+    new Audio("/static/mixkit-correct-answer-tone-2870.wav").play();
 }
 
-function notificar(t){
-if(Notification.permission==="granted"){
-new Notification("MediGo",{body:t});
-}
+function notificar(texto){
+    if(Notification.permission==="granted"){
+        new Notification("MediGo",{body:texto});
+    }
+
+    let div=document.createElement("div");
+    div.innerText=texto;
+    div.style.position="fixed";
+    div.style.bottom="20px";
+    div.style.left="50%";
+    div.style.transform="translateX(-50%)";
+    div.style.background="#0056b3";
+    div.style.color="white";
+    div.style.padding="10px 20px";
+    div.style.borderRadius="20px";
+    div.style.zIndex="9999";
+    document.body.appendChild(div);
+    setTimeout(()=>div.remove(),3000);
+
+    sonido();
 }
 
 function cargar(){
@@ -50,32 +66,38 @@ fetch('/api/solicitudes')
 .then(r=>r.json())
 .then(data=>{
 
-if(data.length>0){
-let n=data[0];
-if(n.id_solicitud>ultimoId){
-notificar("Nueva solicitud");
-sonido();
-ultimoId=n.id_solicitud;
-}
-}
-
 let c=document.getElementById("contenedor");
 c.innerHTML="";
 
+if(data.length>0){
+let nueva=data[0];
+
+// 🔥 SOLO suena si ya había datos antes
+if(ultimoId !== null && nueva.id_solicitud > ultimoId){
+    notificar("📨 Nueva solicitud de "+nueva.nombre);
+}
+
+ultimoId = nueva.id_solicitud;
+}
+
 data.forEach(s=>{
+
 c.innerHTML+=`
 <div class="tarjeta-solicitud">
-<b>${s.nombre}</b><br>
-${s.motivo}<br>
-${s.estado}<br>
-<small>${
-new Date(s.fecha).toLocaleString('es-EC',{timeZone:'America/Guayaquil'})
-}</small><br>
+<div class="fila-info">
+<span class="nombre-est">${s.nombre}</span>
+<span>${s.estado}</span>
+</div>
 
-${s.estado==="pendiente"?`
-<a href="/aprobar/${s.id_solicitud}"><button>Aprobar</button></a>
-<a href="/rechazar/${s.id_solicitud}"><button>Rechazar</button></a>
-`:""}
+<div class="cuadro-motivo">${s.motivo}</div>
+
+<a href="/aprobar/${s.id_solicitud}">
+<button class="btn-principal">Aprobar</button>
+</a>
+
+<a href="/rechazar/${s.id_solicitud}">
+<button class="btn-principal">Rechazar</button>
+</a>
 
 </div>`;
 });
@@ -85,6 +107,7 @@ ${s.estado==="pendiente"?`
 
 setInterval(cargar,3000);
 cargar();
+
 </script>
 
 </body>
