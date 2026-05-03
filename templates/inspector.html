@@ -13,30 +13,11 @@
 <h2>Inspector</h2>
 </div>
 
-<!-- MENÚ -->
 <div class="contenido">
-<div style="display:flex; gap:15px; justify-content:center; flex-wrap:wrap;">
-<a href="/solicitudes"><button class="btn-principal">Solicitudes</button></a>
-<a href="/inspector"><button class="btn-principal">Inspector</button></a>
-<a href="/medico"><button class="btn-principal">Médico</button></a>
-</div>
+<select id="selectEstudiante"></select>
 </div>
 
-<!-- 🔽 SELECT ESTUDIANTES -->
 <div class="contenido">
-<select id="selectEstudiante">
-<option value="">Ver historial de estudiante</option>
-</select>
-</div>
-
-<!-- TABLA -->
-<div class="contenido">
-<h3>Solicitudes de hoy</h3>
-
-<a href="/pdf_hoy">
-<button class="btn-principal">PDF del día</button>
-</a>
-
 <div id="tablaHoy"></div>
 </div>
 
@@ -44,62 +25,26 @@
 
 <script>
 
-if (Notification.permission !== "granted") {
-    Notification.requestPermission();
-}
-
-let hoy = new Date().toDateString();
-let ultimoId = null;
-
-function sonido(){
-    new Audio("/static/mixkit-correct-answer-tone-2870.wav").play();
-}
-
-function notificar(texto){
-    if(Notification.permission==="granted"){
-        new Notification("MediGo",{body:texto});
-    }
-    sonido();
-}
-
 function cargar(){
+
+fetch('/api/estudiantes')
+.then(r=>r.json())
+.then(est=>{
+let select=document.getElementById("selectEstudiante");
+select.innerHTML='<option value="">Ver historial</option>';
+
+est.forEach(e=>{
+select.innerHTML+=`<option value="${e.id_estudiante}">${e.nombre}</option>`;
+});
+});
+
 fetch('/api/solicitudes')
 .then(r=>r.json())
 .then(data=>{
-
-let tabla = document.getElementById("tablaHoy");
-let select = document.getElementById("selectEstudiante");
-
+let tabla=document.getElementById("tablaHoy");
 tabla.innerHTML="";
-select.innerHTML='<option value="">Ver historial de estudiante</option>';
-
-// 🔔 nueva solicitud
-if(data.length>0){
-let n = data[0];
-if(ultimoId !== null && n.id_solicitud > ultimoId){
-    notificar("Nueva solicitud de "+n.nombre);
-}
-ultimoId = n.id_solicitud;
-}
-
-// llenar select sin duplicados
-let usados = [];
 
 data.forEach(s=>{
-
-if(!usados.includes(s.id_estudiante)){
-    usados.push(s.id_estudiante);
-
-    select.innerHTML+=`
-    <option value="${s.id_estudiante}">
-    ${s.nombre}
-    </option>`;
-}
-
-let fecha = new Date(s.fecha).toDateString();
-
-if(fecha === hoy){
-
 tabla.innerHTML+=`
 <div class="tarjeta-solicitud">
 
@@ -112,34 +57,17 @@ tabla.innerHTML+=`
 
 <div class="cuadro-motivo">${s.motivo}</div>
 
-<div style="display:flex; gap:10px;">
-
-${s.estado==="pendiente"?`
-<a href="/aprobar/${s.id_solicitud}">
-<button class="btn-principal">Aprobar</button>
-</a>
-
-<a href="/rechazar/${s.id_solicitud}">
-<button class="btn-principal">Rechazar</button>
-</a>
-`:``}
-
-</div>
-
 </div>
 `;
-}
-
+});
 });
 
-// 🔽 cambio select
-select.onchange = function(){
+document.getElementById("selectEstudiante").onchange=function(){
 if(this.value){
-window.location.href = "/historial/" + this.value;
+window.location.href="/historial/"+this.value;
 }
 }
 
-});
 }
 
 setInterval(cargar,3000);
