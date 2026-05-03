@@ -1,48 +1,181 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
+from flask import Flask, render_template, request, redirect, session, jsonify, send_file
+import mysql.connector
+import os
+from datetime import datetime
+import pytz
+import io
 
-<body>
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
+from reportlab.lib import colors
 
-<div class="contenedor-app">
+app = Flask(__name__)
+app.secret_key = "secreto"
 
-<div class="cabecera-azul">
-<h2>Historial del Estudiante</h2>
-</div>
+def get_connection():
+    return mysql.connector.connect(
+        host=os.getenv("DB_HOST"),
+        user=os.getenv("DB_USER"),
+        password=os.getenv("DB_PASSWORD"),
+        database=os.getenv("DB_NAME"),
+        port=int(os.getenv("DB_PORT"))
+    )
 
-<!-- 🔙 BOTÓN INTELIGENTE -->
-<div class="contenido">
-<button class="btn-principal" onclick="window.history.back()">
-Volver
-</button>
-</div>
+# 🔐 PROTECCIÓN
+@app.before_request
+def proteger():
+    ruta = request.path
 
-<div class="contenido">
+    if ruta.startswith("/static") or ruta.startswith("/login") or ruta.startswith("/api"):
+        return
 
-{% for s in data %}
-<div class="tarjeta-solicitud">
+    if ruta.startswith("/inspector"):
+        if "rol" not in session or session["rol"] != "inspector":
+            return redirect("/login/inspector")
 
-<div class="fila-info">
-<span class="nombre-est">{{ s.nombre }}</span>
-<span>{{ s.estado }}</span>
-</div>
+    if ruta.startswith("/medico"):
+        if "rol" not in session or session["rol"] != "medico":
+            return redirect("/login/medico")
 
-<div class="cuadro-motivo">{{ s.motivo }}</div>
+# 🔥 API SOLICITUDES
+@app.route('/api/solicitudes')
+def api_solicitudes():
+    con = get_connection()
+    cur = con.cursor(dictionary=True)
 
-<small>
-Fecha: {{ s.fecha }} <br>
-Dolor: {{ s.dolor }}
-</small>
+    cur.execute("""
+    SELECT s.id_solicitud, e.id_estudiante, e.nombre,
+           s.motivo, s.estado,
+           DATE_FORMAT(s.fecha, '%Y-%m-%d %H:%i:%s') as fecha
+    FROM solicitudes s
+    JOIN estudiantes e ON s.id_estudiante = e.id_estudiante
+    ORDER BY s.id_solicitud DESC
+    """)
 
-</div>
-{% endfor %}
+    data = cur.fetchall()
+    con.close()
+    return jsonify(data)
 
-</div>
+# 🔥 API ESTUDIANTES (TODOS)
+@app.route('/api/estudiantes')
+def api_estudiantes():
+    con = get_connection()
+    cur = con.cursor(dictionary=True)
 
-</div>
+    cur.execute("SELECT id_estudiante, nombre FROM estudiantes ORDER BY nombre")
 
-</body>
-</html>
+    data = cur.fetchall()
+    con.close()
+    return jsonify(data)
+
+# 🔐 LOGIN
+@app.route('/login/<rol>', methods=["GET","POST"])
+def login(rol):
+    if request.method == "POST":
+        user = request.form["user"]
+        password = request.form["pass"]
+
+        if rol == "inspector" and user == "admin" and password == "1234":
+            session["rol"] = "inspector"
+            return redirect("/inspector")
+
+        if rol == "medico" and user == "doctor" and password == "1234":
+            session["rol"] = "medico"
+            return redirect("/medico")
+
+        return render_template("login.html", error="Error", rol=rol)
+
+    return render_template("login.html", rol=rol)
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect("/solicitudes")
+
+# 📋 SOLICITUDES
+@app.route('/', methods=["GET","POST"])
+@app.route('/solicitudes', methods=["GET","POST"])
+def solicitudes():
+    con = get_connection()
+    cur = con.cursor(dictionary=True)
+
+    if request.method == "POST":
+        est = request.form["estudiante"]
+        mot = request.form["motivo"]
+        dolor = request.form["dolor"]
+
+        fecha = datetime.now(pytz.timezone('America/Guayaquil'))
+
+        cur.execute("""
+        INSERT INTO solicitudes (id_estudiante, id_profesor, motivo, dolor, estado, fecha)
+        VALUES (%s,(SELECT id_profesor FROM profesores LIMIT 1),%s,%s,'pendiente',%s)
+        """,(est,mot,dolor,fecha))
+
+        con.commit()
+        return redirect("/solicitudes")
+
+    # 🔥 AQUÍ SE ARREGLA TODO
+    cur.execute("SELECT id_estudiante, nombre FROM estudiantes ORDER BY nombre")
+    estudiantes = cur.fetchall()
+
+    con.close()
+    return render_template("solicitudes.html", estudiantes=estudiantes)
+
+# 👮 INSPECTOR
+@app.route('/inspector')
+def inspector():
+    return render_template("inspector.html")
+
+# 🏥 MEDICO
+@app.route('/medico')
+def medico():
+    return render_template("medico.html")
+
+# 📊 HISTORIAL
+@app.route('/historial/<int:id>')
+def historial(id):
+    con = get_connection()
+    cur = con.cursor(dictionary=True)
+
+    cur.execute("""
+    SELECT e.nombre, s.motivo, s.estado, s.fecha, s.dolor
+    FROM solicitudes s
+    JOIN estudiantes e ON s.id_estudiante = e.id_estudiante
+    WHERE e.id_estudiante = %s
+    ORDER BY s.fecha DESC
+    """,(id,))
+
+    data = cur.fetchall()
+    con.close()
+
+    return render_template("historial.html", data=data)
+
+# ACCIONES
+@app.route('/aprobar/<int:id>')
+def aprobar(id):
+    con = get_connection()
+    cur = con.cursor()
+    cur.execute("UPDATE solicitudes SET estado='aprobado' WHERE id_solicitud=%s",(id,))
+    con.commit()
+    con.close()
+    return redirect("/inspector")
+
+@app.route('/rechazar/<int:id>')
+def rechazar(id):
+    con = get_connection()
+    cur = con.cursor()
+    cur.execute("UPDATE solicitudes SET estado='rechazado' WHERE id_solicitud=%s",(id,))
+    con.commit()
+    con.close()
+    return redirect("/inspector")
+
+@app.route('/atendido/<int:id>')
+def atendido(id):
+    con = get_connection()
+    cur = con.cursor()
+    cur.execute("UPDATE solicitudes SET estado='atendido' WHERE id_solicitud=%s",(id,))
+    con.commit()
+    con.close()
+    return redirect("/medico")
+
+if __name__ == '__main__':
+    app.run(debug=True)
