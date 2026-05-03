@@ -1,224 +1,48 @@
-from flask import Flask, render_template, request, redirect, session, jsonify, send_file
-import mysql.connector
-import os
-from datetime import datetime
-import pytz
-import io
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
 
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
-from reportlab.lib import colors
+<body>
 
-app = Flask(__name__)
-app.secret_key = "secreto"
+<div class="contenedor-app">
 
-def get_connection():
-    return mysql.connector.connect(
-        host=os.getenv("DB_HOST"),
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD"),
-        database=os.getenv("DB_NAME"),
-        port=int(os.getenv("DB_PORT"))
-    )
+<div class="cabecera-azul">
+<h2>Historial del Estudiante</h2>
+</div>
 
-# 🔐 PROTEGER RUTAS
-@app.before_request
-def proteger():
-    ruta = request.path
+<!-- 🔙 BOTÓN INTELIGENTE -->
+<div class="contenido">
+<button class="btn-principal" onclick="window.history.back()">
+Volver
+</button>
+</div>
 
-    if ruta.startswith("/static") or ruta.startswith("/login") or ruta.startswith("/api"):
-        return
+<div class="contenido">
 
-    if ruta.startswith("/inspector"):
-        if "rol" not in session or session["rol"] != "inspector":
-            return redirect("/login/inspector")
+{% for s in data %}
+<div class="tarjeta-solicitud">
 
-    if ruta.startswith("/medico"):
-        if "rol" not in session or session["rol"] != "medico":
-            return redirect("/login/medico")
+<div class="fila-info">
+<span class="nombre-est">{{ s.nombre }}</span>
+<span>{{ s.estado }}</span>
+</div>
 
-# 🔥 API (AQUÍ ESTÁ EL CAMBIO IMPORTANTE)
-@app.route('/api/solicitudes')
-def api():
-    con = get_connection()
-    cur = con.cursor(dictionary=True)
+<div class="cuadro-motivo">{{ s.motivo }}</div>
 
-    cur.execute("""
-    SELECT s.id_solicitud, e.id_estudiante, e.nombre,
-           s.motivo, s.estado,
-           DATE_FORMAT(s.fecha, '%Y-%m-%d %H:%i:%s') as fecha
-    FROM solicitudes s
-    JOIN estudiantes e ON s.id_estudiante = e.id_estudiante
-    ORDER BY s.id_solicitud DESC
-    """)
+<small>
+Fecha: {{ s.fecha }} <br>
+Dolor: {{ s.dolor }}
+</small>
 
-    data = cur.fetchall()
-    con.close()
-    return jsonify(data)
+</div>
+{% endfor %}
 
-# 🔐 LOGIN
-@app.route('/login/<rol>', methods=["GET","POST"])
-def login(rol):
-    if request.method == "POST":
-        user = request.form["user"]
-        password = request.form["pass"]
+</div>
 
-        if rol == "inspector" and user == "admin" and password == "1234":
-            session["rol"] = "inspector"
-            return redirect("/inspector")
+</div>
 
-        if rol == "medico" and user == "doctor" and password == "1234":
-            session["rol"] = "medico"
-            return redirect("/medico")
-
-        return render_template("login.html", error="Error", rol=rol)
-
-    return render_template("login.html", rol=rol)
-
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect("/solicitudes")
-
-# 📋 SOLICITUDES
-@app.route('/', methods=["GET","POST"])
-@app.route('/solicitudes', methods=["GET","POST"])
-def solicitudes():
-    con = get_connection()
-    cur = con.cursor(dictionary=True)
-
-    if request.method == "POST":
-        est = request.form["estudiante"]
-        mot = request.form["motivo"]
-        dolor = request.form["dolor"]
-
-        fecha = datetime.now(pytz.timezone('America/Guayaquil'))
-
-        cur.execute("""
-        INSERT INTO solicitudes (id_estudiante, id_profesor, motivo, dolor, estado, fecha)
-        VALUES (%s,(SELECT id_profesor FROM profesores LIMIT 1),%s,%s,'pendiente',%s)
-        """,(est,mot,dolor,fecha))
-
-        con.commit()
-        return redirect("/solicitudes")
-
-    cur.execute("SELECT * FROM estudiantes")
-    est = cur.fetchall()
-
-    con.close()
-    return render_template("solicitudes.html", estudiantes=est)
-
-# 👮 INSPECTOR
-@app.route('/inspector')
-def inspector():
-    return render_template("inspector.html")
-
-# 🏥 MEDICO
-@app.route('/medico')
-def medico():
-    return render_template("medico.html")
-
-# 🔥 HISTORIAL POR ESTUDIANTE
-@app.route('/historial/<int:id>')
-def historial(id):
-    con = get_connection()
-    cur = con.cursor(dictionary=True)
-
-    cur.execute("""
-    SELECT e.nombre, s.motivo, s.estado, s.fecha, s.dolor
-    FROM solicitudes s
-    JOIN estudiantes e ON s.id_estudiante = e.id_estudiante
-    WHERE e.id_estudiante = %s
-    ORDER BY s.fecha DESC
-    """,(id,))
-
-    data = cur.fetchall()
-    con.close()
-
-    return render_template("historial.html", data=data)
-
-# ACCIONES
-@app.route('/aprobar/<int:id>')
-def aprobar(id):
-    con = get_connection()
-    cur = con.cursor()
-    cur.execute("UPDATE solicitudes SET estado='aprobado' WHERE id_solicitud=%s",(id,))
-    con.commit()
-    con.close()
-    return redirect("/inspector")
-
-@app.route('/rechazar/<int:id>')
-def rechazar(id):
-    con = get_connection()
-    cur = con.cursor()
-    cur.execute("UPDATE solicitudes SET estado='rechazado' WHERE id_solicitud=%s",(id,))
-    con.commit()
-    con.close()
-    return redirect("/inspector")
-
-# PDF DÍA
-@app.route('/pdf_hoy')
-def pdf_hoy():
-    con = get_connection()
-    cur = con.cursor()
-
-    cur.execute("""
-    SELECT e.nombre, s.motivo, s.estado, s.fecha
-    FROM solicitudes s
-    JOIN estudiantes e ON s.id_estudiante = e.id_estudiante
-    WHERE DATE(s.fecha) = CURDATE()
-    """)
-
-    datos = cur.fetchall()
-    con.close()
-
-    buffer = io.BytesIO()
-    doc = SimpleDocTemplate(buffer)
-
-    tabla_data = [["Nombre","Motivo","Estado","Fecha"]]
-    for f in datos:
-        tabla_data.append([f[0],f[1],f[2],str(f[3])])
-
-    tabla = Table(tabla_data)
-    tabla.setStyle(TableStyle([('GRID',(0,0),(-1,-1),1,colors.black)]))
-
-    doc.build([tabla])
-    buffer.seek(0)
-
-    return send_file(buffer, as_attachment=True, download_name="hoy.pdf")
-
-# PDF INDIVIDUAL
-@app.route('/pdf/<int:id>')
-def pdf_individual(id):
-    con = get_connection()
-    cur = con.cursor()
-
-    cur.execute("""
-    SELECT e.nombre, s.motivo, s.estado, s.fecha
-    FROM solicitudes s
-    JOIN estudiantes e ON s.id_estudiante = e.id_estudiante
-    WHERE s.id_solicitud=%s
-    """,(id,))
-
-    f = cur.fetchone()
-    con.close()
-
-    buffer = io.BytesIO()
-    doc = SimpleDocTemplate(buffer)
-
-    data = [
-        ["Nombre",f[0]],
-        ["Motivo",f[1]],
-        ["Estado",f[2]],
-        ["Fecha",str(f[3])]
-    ]
-
-    tabla = Table(data)
-    tabla.setStyle(TableStyle([('GRID',(0,0),(-1,-1),1,colors.black)]))
-
-    doc.build([tabla])
-    buffer.seek(0)
-
-    return send_file(buffer, as_attachment=True, download_name="ficha.pdf")
-
-if __name__ == '__main__':
-    app.run(debug=True)
+</body>
+</html>
