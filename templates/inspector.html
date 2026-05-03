@@ -22,10 +22,11 @@
 </div>
 </div>
 
-<!-- 🔍 BUSCADOR -->
+<!-- 🔽 SELECT ESTUDIANTES -->
 <div class="contenido">
-<input type="text" id="buscador" placeholder="Buscar estudiante..."
-style="width:100%; padding:10px; border-radius:10px; border:1px solid #ccc;">
+<select id="selectEstudiante">
+<option value="">Ver historial de estudiante</option>
+</select>
 </div>
 
 <!-- TABLA -->
@@ -43,51 +44,67 @@ style="width:100%; padding:10px; border-radius:10px; border:1px solid #ccc;">
 
 <script>
 
+if (Notification.permission !== "granted") {
+    Notification.requestPermission();
+}
+
 let hoy = new Date().toDateString();
-let datosGlobal = [];
+let ultimoId = null;
+
+function sonido(){
+    new Audio("/static/mixkit-correct-answer-tone-2870.wav").play();
+}
+
+function notificar(texto){
+    if(Notification.permission==="granted"){
+        new Notification("MediGo",{body:texto});
+    }
+    sonido();
+}
 
 function cargar(){
 fetch('/api/solicitudes')
 .then(r=>r.json())
 .then(data=>{
 
-datosGlobal = data;
+let tabla = document.getElementById("tablaHoy");
+let select = document.getElementById("selectEstudiante");
 
-render(data);
+tabla.innerHTML="";
+select.innerHTML='<option value="">Ver historial de estudiante</option>';
 
-});
+// 🔔 nueva solicitud
+if(data.length>0){
+let n = data[0];
+if(ultimoId !== null && n.id_solicitud > ultimoId){
+    notificar("Nueva solicitud de "+n.nombre);
+}
+ultimoId = n.id_solicitud;
 }
 
-// 🔍 FILTRO BUSCADOR
-document.getElementById("buscador").addEventListener("keyup", function(){
-
-let texto = this.value.toLowerCase();
-
-let filtrados = datosGlobal.filter(s =>
-s.nombre.toLowerCase().includes(texto)
-);
-
-render(filtrados);
-
-});
-
-// 🔄 RENDER
-function render(data){
-
-let div = document.getElementById("tablaHoy");
-div.innerHTML="";
+// llenar select sin duplicados
+let usados = [];
 
 data.forEach(s=>{
+
+if(!usados.includes(s.id_estudiante)){
+    usados.push(s.id_estudiante);
+
+    select.innerHTML+=`
+    <option value="${s.id_estudiante}">
+    ${s.nombre}
+    </option>`;
+}
 
 let fecha = new Date(s.fecha).toDateString();
 
 if(fecha === hoy){
 
-div.innerHTML+=`
+tabla.innerHTML+=`
 <div class="tarjeta-solicitud">
 
 <div class="fila-info">
-<a href="/historial/${s.id_estudiante}" style="text-decoration:none;">
+<a href="/historial/${s.id_estudiante}">
 <span class="nombre-est">${s.nombre}</span>
 </a>
 <span>${s.estado}</span>
@@ -115,6 +132,14 @@ ${s.estado==="pendiente"?`
 
 });
 
+// 🔽 cambio select
+select.onchange = function(){
+if(this.value){
+window.location.href = "/historial/" + this.value;
+}
+}
+
+});
 }
 
 setInterval(cargar,3000);
