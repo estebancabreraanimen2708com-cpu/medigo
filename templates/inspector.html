@@ -13,7 +13,6 @@
 <h2>Inspector</h2>
 </div>
 
-<!-- MENÚ -->
 <div class="contenido">
 <div style="display:flex; gap:15px; justify-content:center; flex-wrap:wrap;">
 <a href="/solicitudes"><button class="btn-principal">Solicitudes</button></a>
@@ -22,21 +21,14 @@
 </div>
 </div>
 
-<!-- HOY -->
 <div class="contenido">
 <h3>Solicitudes de hoy</h3>
 
 <a href="/pdf_hoy">
-<button class="btn-principal">Descargar PDF del día</button>
+<button class="btn-principal">PDF del día</button>
 </a>
 
 <div id="tablaHoy"></div>
-</div>
-
-<!-- HISTORICO -->
-<div class="contenido">
-<h3>Histórico</h3>
-<div id="historico"></div>
 </div>
 
 </div>
@@ -50,13 +42,8 @@ fetch('/api/solicitudes')
 .then(r=>r.json())
 .then(data=>{
 
-let hoyDiv = document.getElementById("tablaHoy");
-let histDiv = document.getElementById("historico");
-
-hoyDiv.innerHTML="";
-histDiv.innerHTML="";
-
-let guardado = JSON.parse(localStorage.getItem("historial")||"[]");
+let div = document.getElementById("tablaHoy");
+div.innerHTML="";
 
 data.forEach(s=>{
 
@@ -64,16 +51,20 @@ let fecha = new Date(s.fecha).toDateString();
 
 if(fecha === hoy){
 
-hoyDiv.innerHTML+=`
+div.innerHTML+=`
 <div class="tarjeta-solicitud">
+
 <div class="fila-info">
+<a href="/historial/${s.id_estudiante}" style="text-decoration:none;">
 <span class="nombre-est">${s.nombre}</span>
+</a>
 <span>${s.estado}</span>
 </div>
 
 <div class="cuadro-motivo">${s.motivo}</div>
 
 <div style="display:flex; gap:10px;">
+
 <a href="/pdf/${s.id_solicitud}">
 <button class="btn-principal">Ficha</button>
 </a>
@@ -82,43 +73,18 @@ ${s.estado==="pendiente"?`
 <a href="/aprobar/${s.id_solicitud}">
 <button class="btn-principal">Aprobar</button>
 </a>
+
 <a href="/rechazar/${s.id_solicitud}">
 <button class="btn-principal">Rechazar</button>
 </a>
 `:``}
-</div>
 
 </div>
-`;
-
-}else{
-
-if(!guardado.find(x=>x.id_solicitud===s.id_solicitud)){
-    guardado.push(s);
-}
-
-}
-
-});
-
-localStorage.setItem("historial", JSON.stringify(guardado));
-
-guardado.forEach(s=>{
-histDiv.innerHTML+=`
-<div class="tarjeta-solicitud">
-<div class="fila-info">
-<span class="nombre-est">${s.nombre}</span>
-<span>${s.estado}</span>
-</div>
-
-<div class="cuadro-motivo">${s.motivo}</div>
-
-<a href="/pdf/${s.id_solicitud}">
-<button class="btn-principal">Descargar ficha</button>
-</a>
 
 </div>
 `;
+}
+
 });
 
 });
