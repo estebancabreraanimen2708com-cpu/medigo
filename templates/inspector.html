@@ -22,168 +22,104 @@
 </div>
 </div>
 
-<!-- 🔥 SOLICITUDES ACTIVAS -->
+<!-- HOY -->
 <div class="contenido">
-<h3>Solicitudes</h3>
-<div id="contenedor"></div>
-</div>
+<h3>Solicitudes de hoy</h3>
 
-<!-- 🔥 HISTORIAL DEL DÍA -->
-<div class="contenido">
-<h3>Historial del día</h3>
-
-<a href="/descargar_pdf">
-<button class="btn-principal">Descargar PDF</button>
+<a href="/pdf_hoy">
+<button class="btn-principal">Descargar PDF del día</button>
 </a>
 
-<div id="historial"></div>
+<div id="tablaHoy"></div>
+</div>
+
+<!-- HISTORICO -->
+<div class="contenido">
+<h3>Histórico</h3>
+<div id="historico"></div>
 </div>
 
 </div>
 
 <script>
 
-if (Notification.permission !== "granted") {
-    Notification.requestPermission();
-}
-
-let ultimoId = null;
-
-// 🔥 CONTROL DE DÍA
 let hoy = new Date().toDateString();
 
-function resetearSiEsNuevoDia(){
-    let actual = new Date().toDateString();
-    if(actual !== hoy){
-        localStorage.removeItem("historial");
-        hoy = actual;
-    }
-}
-
-// 🔊 sonido
-function sonido(){
-    new Audio("/static/mixkit-correct-answer-tone-2870.wav").play();
-}
-
-// 🔔 notificación
-function notificar(texto){
-    if(Notification.permission==="granted"){
-        new Notification("MediGo",{body:texto});
-    }
-
-    let div=document.createElement("div");
-    div.innerText=texto;
-    div.style.position="fixed";
-    div.style.bottom="20px";
-    div.style.left="50%";
-    div.style.transform="translateX(-50%)";
-    div.style.background="#0056b3";
-    div.style.color="white";
-    div.style.padding="10px 20px";
-    div.style.borderRadius="20px";
-    div.style.zIndex="9999";
-    document.body.appendChild(div);
-    setTimeout(()=>div.remove(),3000);
-
-    sonido();
-}
-
-// 💾 guardar historial
-function guardarHistorial(data){
-    localStorage.setItem("historial", JSON.stringify(data));
-}
-
-// 📥 cargar historial
-function cargarHistorial(){
-    let data = JSON.parse(localStorage.getItem("historial") || "[]");
-
-    let h = document.getElementById("historial");
-    h.innerHTML = "";
-
-    data.forEach(s=>{
-        h.innerHTML += `
-        <div class="tarjeta-solicitud">
-            <div class="fila-info">
-                <span class="nombre-est">${s.nombre}</span>
-                <span>${s.estado}</span>
-            </div>
-            <div class="cuadro-motivo">${s.motivo}</div>
-            <small>${s.fecha}</small>
-        </div>
-        `;
-    });
-}
-
-// 🔄 cargar solicitudes
 function cargar(){
-resetearSiEsNuevoDia();
-
 fetch('/api/solicitudes')
 .then(r=>r.json())
 .then(data=>{
 
-let c=document.getElementById("contenedor");
-c.innerHTML="";
+let hoyDiv = document.getElementById("tablaHoy");
+let histDiv = document.getElementById("historico");
 
-let historial = [];
+hoyDiv.innerHTML="";
+histDiv.innerHTML="";
 
-if(data.length>0){
-let nueva=data[0];
-
-// 🔔 nueva solicitud
-if(ultimoId !== null && nueva.id_solicitud > ultimoId){
-    notificar("📨 Nueva solicitud de "+nueva.nombre);
-}
-
-ultimoId = nueva.id_solicitud;
-}
+let guardado = JSON.parse(localStorage.getItem("historial")||"[]");
 
 data.forEach(s=>{
 
-// 🔥 si ya fue procesada → va al historial
-if(s.estado !== "pendiente"){
-    historial.push(s);
+let fecha = new Date(s.fecha).toDateString();
 
-    c.innerHTML += `
-    <div class="tarjeta-solicitud">
-        <div class="fila-info">
-            <span class="nombre-est">${s.nombre}</span>
-            <span>${s.estado}</span>
-        </div>
-        <div class="cuadro-motivo">${s.motivo}</div>
-        <small>${s.fecha}</small>
-    </div>
-    `;
-}else{
+if(fecha === hoy){
 
-// 🔥 pendientes → con botones separados
-c.innerHTML += `
+hoyDiv.innerHTML+=`
 <div class="tarjeta-solicitud">
-    <div class="fila-info">
-        <span class="nombre-est">${s.nombre}</span>
-        <span>${s.estado}</span>
-    </div>
+<div class="fila-info">
+<span class="nombre-est">${s.nombre}</span>
+<span>${s.estado}</span>
+</div>
 
-    <div class="cuadro-motivo">${s.motivo}</div>
+<div class="cuadro-motivo">${s.motivo}</div>
 
-    <div style="display:flex; gap:10px; margin-top:10px;">
-        <a href="/aprobar/${s.id_solicitud}" style="flex:1;">
-        <button class="btn-principal">Aprobar</button>
-        </a>
+<div style="display:flex; gap:10px;">
+<a href="/pdf/${s.id_solicitud}">
+<button class="btn-principal">Ficha</button>
+</a>
 
-        <a href="/rechazar/${s.id_solicitud}" style="flex:1;">
-        <button class="btn-principal">Rechazar</button>
-        </a>
-    </div>
+${s.estado==="pendiente"?`
+<a href="/aprobar/${s.id_solicitud}">
+<button class="btn-principal">Aprobar</button>
+</a>
+<a href="/rechazar/${s.id_solicitud}">
+<button class="btn-principal">Rechazar</button>
+</a>
+`:``}
+</div>
+
 </div>
 `;
+
+}else{
+
+if(!guardado.find(x=>x.id_solicitud===s.id_solicitud)){
+    guardado.push(s);
+}
+
 }
 
 });
 
-// guardar historial diario
-guardarHistorial(historial);
-cargarHistorial();
+localStorage.setItem("historial", JSON.stringify(guardado));
+
+guardado.forEach(s=>{
+histDiv.innerHTML+=`
+<div class="tarjeta-solicitud">
+<div class="fila-info">
+<span class="nombre-est">${s.nombre}</span>
+<span>${s.estado}</span>
+</div>
+
+<div class="cuadro-motivo">${s.motivo}</div>
+
+<a href="/pdf/${s.id_solicitud}">
+<button class="btn-principal">Descargar ficha</button>
+</a>
+
+</div>
+`;
+});
 
 });
 }
