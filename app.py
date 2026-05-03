@@ -36,15 +36,16 @@ def proteger():
         if "rol" not in session or session["rol"] != "medico":
             return redirect("/login/medico")
 
-# 🔥 API
+# 🔥 API (AQUÍ ESTÁ EL CAMBIO IMPORTANTE)
 @app.route('/api/solicitudes')
 def api():
     con = get_connection()
     cur = con.cursor(dictionary=True)
 
     cur.execute("""
-    SELECT s.id_solicitud, e.nombre, s.motivo, s.estado,
-    DATE_FORMAT(s.fecha, '%Y-%m-%d %H:%i:%s') as fecha
+    SELECT s.id_solicitud, e.id_estudiante, e.nombre,
+           s.motivo, s.estado,
+           DATE_FORMAT(s.fecha, '%Y-%m-%d %H:%i:%s') as fecha
     FROM solicitudes s
     JOIN estudiantes e ON s.id_estudiante = e.id_estudiante
     ORDER BY s.id_solicitud DESC
@@ -116,6 +117,25 @@ def inspector():
 def medico():
     return render_template("medico.html")
 
+# 🔥 HISTORIAL POR ESTUDIANTE
+@app.route('/historial/<int:id>')
+def historial(id):
+    con = get_connection()
+    cur = con.cursor(dictionary=True)
+
+    cur.execute("""
+    SELECT e.nombre, s.motivo, s.estado, s.fecha, s.dolor
+    FROM solicitudes s
+    JOIN estudiantes e ON s.id_estudiante = e.id_estudiante
+    WHERE e.id_estudiante = %s
+    ORDER BY s.fecha DESC
+    """,(id,))
+
+    data = cur.fetchall()
+    con.close()
+
+    return render_template("historial.html", data=data)
+
 # ACCIONES
 @app.route('/aprobar/<int:id>')
 def aprobar(id):
@@ -135,7 +155,7 @@ def rechazar(id):
     con.close()
     return redirect("/inspector")
 
-# 📄 PDF DEL DÍA
+# PDF DÍA
 @app.route('/pdf_hoy')
 def pdf_hoy():
     con = get_connection()
@@ -166,7 +186,7 @@ def pdf_hoy():
 
     return send_file(buffer, as_attachment=True, download_name="hoy.pdf")
 
-# 📄 PDF INDIVIDUAL
+# PDF INDIVIDUAL
 @app.route('/pdf/<int:id>')
 def pdf_individual(id):
     con = get_connection()
