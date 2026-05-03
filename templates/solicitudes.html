@@ -14,20 +14,22 @@
 <h2>Enviar Solicitud Médica</h2>
 </div>
 
+<!-- MENÚ -->
 <div class="contenido">
-<div style="display:flex; gap:15px; justify-content:center; flex-wrap:wrap;">
+<div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
 <a href="/solicitudes"><button class="btn-principal">Solicitudes</button></a>
 <a href="/inspector"><button class="btn-principal">Inspector</button></a>
 <a href="/medico"><button class="btn-principal">Médico</button></a>
 </div>
 </div>
 
+<!-- FORM -->
 <div class="contenido">
 
 <form method="POST" onsubmit="return confirmar()">
 
 <label>Estudiante</label>
-<select name="estudiante" id="estudiante" required>
+<select name="estudiante" required>
 <option value="">Seleccionar...</option>
 {% for e in estudiantes %}
 <option value="{{ e.id_estudiante }}">{{ e.nombre }}</option>
@@ -35,7 +37,7 @@
 </select>
 
 <label>Motivo</label>
-<textarea name="motivo" id="motivo" required></textarea>
+<textarea name="motivo" required></textarea>
 
 <label>Nivel de dolor</label>
 
@@ -54,6 +56,7 @@
 
 </div>
 
+<!-- TABLA -->
 <div class="contenido">
 
 <h3>Historial de Solicitudes</h3>
@@ -87,14 +90,22 @@ fetch('/api/solicitudes')
 let tbody = document.querySelector("#tablaSolicitudes tbody");
 tbody.innerHTML="";
 
+let vistos = [];
+
 data.forEach(s=>{
+
+if(vistos.includes(s.id_solicitud)) return;
+vistos.push(s.id_solicitud);
+
 tbody.innerHTML+=`
 <tr>
 <td>${s.nombre}</td>
 <td>${s.motivo}</td>
 <td>${s.estado}</td>
 <td>${s.fecha}</td>
-</tr>`;
+</tr>
+`;
+
 });
 
 });
