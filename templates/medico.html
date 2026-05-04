@@ -15,7 +15,7 @@
 
 <!-- MENÚ -->
 <div class="contenido">
-<div style="display:flex; gap:15px; justify-content:center; flex-wrap:wrap;">
+<div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
 <a href="/solicitudes"><button class="btn-principal">Solicitudes</button></a>
 <a href="/inspector"><button class="btn-principal">Inspector</button></a>
 <a href="/medico"><button class="btn-principal">Médico</button></a>
@@ -25,93 +25,36 @@
 <!-- SELECT -->
 <div class="contenido">
 <select id="selectEstudiante">
-<option value="">Ver historial</option>
+<option value="">Seleccionar estudiante</option>
 </select>
 </div>
-
-<!-- TABLA -->
-<div class="contenido" id="tabla"></div>
 
 </div>
 
 <script>
 
-if (Notification.permission !== "granted") {
-    Notification.requestPermission();
-}
-
-function sonido(){
-    new Audio("/static/mixkit-correct-answer-tone-2870.wav").play();
-}
-
-function notificar(t){
-    if(Notification.permission==="granted"){
-        new Notification("MediGo",{body:t});
-    }
-    sonido();
-}
-
-function cargar(){
-fetch('/api/solicitudes')
+// 🔥 SOLO ESTUDIANTES (NO SOLICITUDES)
+fetch('/api/estudiantes')
 .then(r=>r.json())
 .then(data=>{
 
-let tabla = document.getElementById("tabla");
 let select = document.getElementById("selectEstudiante");
 
-tabla.innerHTML="";
-select.innerHTML='<option value="">Ver historial</option>';
-
-let usados=[];
-
-data.forEach(s=>{
-
-// select
-if(!usados.includes(s.id_estudiante)){
-usados.push(s.id_estudiante);
-
-select.innerHTML+=`
-<option value="${s.id_estudiante}">
-${s.nombre}
+data.forEach(e=>{
+select.innerHTML += `
+<option value="${e.id_estudiante}">
+${e.nombre}
 </option>`;
-}
-
-// mostrar solo aprobados
-if(s.estado==="aprobado"){
-
-tabla.innerHTML+=`
-<div class="tarjeta-solicitud">
-
-<div class="fila-info">
-<a href="/historial/${s.id_estudiante}">
-<span class="nombre-est">${s.nombre}</span>
-</a>
-<span>${s.estado}</span>
-</div>
-
-<div class="cuadro-motivo">${s.motivo}</div>
-
-<a href="/atendido/${s.id_solicitud}">
-<button class="btn-principal">Atendido</button>
-</a>
-
-</div>
-`;
-}
+});
 
 });
 
-select.onchange=function(){
+// ir al historial
+document.getElementById("selectEstudiante").onchange = function(){
 if(this.value){
-window.location.href="/historial/"+this.value;
+window.location.href = "/historial/" + this.value;
 }
 }
-
-});
-}
-
-setInterval(cargar,3000);
-cargar();
 
 </script>
 
