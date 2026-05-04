@@ -1,12 +1,8 @@
-from flask import Flask, render_template, request, redirect, session, jsonify, send_file
+from flask import Flask, render_template, request, redirect, session, jsonify
 import mysql.connector
 import os
 from datetime import datetime
 import pytz
-import io
-
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
-from reportlab.lib import colors
 
 app = Flask(__name__)
 app.secret_key = "secreto"
@@ -36,32 +32,20 @@ def proteger():
         if "rol" not in session or session["rol"] != "medico":
             return redirect("/login/medico")
 
-# 🔥 API SOLICITUDES (SIN TOCAR SQL)
+# 🔥 API SOLICITUDES
 @app.route('/api/solicitudes')
 def api_solicitudes():
     con = get_connection()
     cur = con.cursor(dictionary=True)
 
     cur.execute("""
-    SELECT s.id_solicitud, e.id_estudiante, e.nombre,
+    SELECT s.id_solicitud, e.nombre,
            s.motivo, s.estado,
            DATE_FORMAT(s.fecha, '%Y-%m-%d %H:%i:%s') as fecha
     FROM solicitudes s
     JOIN estudiantes e ON s.id_estudiante = e.id_estudiante
     ORDER BY s.id_solicitud DESC
     """)
-
-    data = cur.fetchall()
-    con.close()
-    return jsonify(data)
-
-# 🔥 API ESTUDIANTES
-@app.route('/api/estudiantes')
-def api_estudiantes():
-    con = get_connection()
-    cur = con.cursor(dictionary=True)
-
-    cur.execute("SELECT id_estudiante, nombre FROM estudiantes ORDER BY nombre")
 
     data = cur.fetchall()
     con.close()
@@ -85,11 +69,6 @@ def login(rol):
         return render_template("login.html", error="Error", rol=rol)
 
     return render_template("login.html", rol=rol)
-
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect("/solicitudes")
 
 # 📋 SOLICITUDES
 @app.route('/', methods=["GET","POST"])
