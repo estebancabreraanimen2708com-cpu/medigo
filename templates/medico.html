@@ -1,5 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="contenedor-app">
+
+<div class="cabecera-azul">
+<h2>Médico</h2>
+</div>
+
+<div class="contenido">
+<div style="display:flex; gap:10px; justify-content:center;">
+<a href="/solicitudes"><button class="btn-principal">Solicitudes</button></a>
+<a href="/inspector"><button class="btn-principal">Inspector</button></a>
+<a href="/medico"><button class="btn-principal">Médico</button></a>
+</div>
+</div>
+
+<div id="tablaMedico" class="contenido"></div>
+
+</div>
+
 <script>
+
+let cargando = false;
+
 function cargar(){
+
+if(cargando) return;
+cargando = true;
 
 fetch('/api/solicitudes')
 .then(r=>r.json())
@@ -8,12 +40,7 @@ fetch('/api/solicitudes')
 let cont = document.getElementById("tablaMedico");
 cont.innerHTML = "";
 
-let ids = new Set();
-
 data.forEach(s=>{
-
-if(ids.has(s.id_solicitud)) return;
-ids.add(s.id_solicitud);
 
 cont.innerHTML += `
 <div class="tarjeta-solicitud">
@@ -33,11 +60,22 @@ ${s.estado==="aprobado" ? `
 
 </div>
 `;
-});
 
 });
+
+cargando = false;
+
+});
+
 }
 
-setInterval(cargar,3000);
+if(!window.intervalMedico){
+window.intervalMedico = setInterval(cargar,3000);
+}
+
 cargar();
+
 </script>
+
+</body>
+</html>
