@@ -20,7 +20,7 @@ def get_connection():
         port=int(os.getenv("DB_PORT"))
     )
 
-# 🔐 PROTECCIÓN
+# 🔐 PROTEGER
 @app.before_request
 def proteger():
     ruta = request.path
@@ -43,11 +43,16 @@ def api_solicitudes():
     cur = con.cursor(dictionary=True)
 
     cur.execute("""
-    SELECT DISTINCT s.id_solicitud, e.id_estudiante, e.nombre,
-           s.motivo, s.estado,
-           DATE_FORMAT(s.fecha, '%Y-%m-%d %H:%i:%s') as fecha
+    SELECT 
+        s.id_solicitud,
+        e.id_estudiante,
+        e.nombre,
+        s.motivo,
+        s.estado,
+        DATE_FORMAT(s.fecha, '%Y-%m-%d %H:%i:%s') as fecha
     FROM solicitudes s
-    JOIN estudiantes e ON s.id_estudiante = e.id_estudiante
+    INNER JOIN estudiantes e ON s.id_estudiante = e.id_estudiante
+    GROUP BY s.id_solicitud
     ORDER BY s.id_solicitud DESC
     """)
 
@@ -61,7 +66,7 @@ def api_estudiantes():
     con = get_connection()
     cur = con.cursor(dictionary=True)
 
-    cur.execute("SELECT DISTINCT id_estudiante, nombre FROM estudiantes ORDER BY nombre")
+    cur.execute("SELECT id_estudiante, nombre FROM estudiantes ORDER BY nombre")
 
     data = cur.fetchall()
     con.close()
@@ -175,6 +180,37 @@ def atendido(id):
     con.commit()
     con.close()
     return redirect("/medico")
+
+# PDF
+@app.route('/pdf_hoy')
+def pdf_hoy():
+    con = get_connection()
+    cur = con.cursor()
+
+    cur.execute("""
+    SELECT e.nombre, s.motivo, s.estado, s.fecha
+    FROM solicitudes s
+    JOIN estudiantes e ON s.id_estudiante = e.id_estudiante
+    WHERE DATE(s.fecha) = CURDATE()
+    """)
+
+    datos = cur.fetchall()
+    con.close()
+
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer)
+
+    tabla_data = [["Nombre","Motivo","Estado","Fecha"]]
+    for f in datos:
+        tabla_data.append([f[0],f[1],f[2],str(f[3])])
+
+    tabla = Table(tabla_data)
+    tabla.setStyle(TableStyle([('GRID',(0,0),(-1,-1),1,colors.black)]))
+
+    doc.build([tabla])
+    buffer.seek(0)
+
+    return send_file(buffer, as_attachment=True, download_name="hoy.pdf")
 
 if __name__ == '__main__':
     app.run(debug=True)
