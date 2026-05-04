@@ -1,62 +1,43 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-
-<body>
-
-<div class="contenedor-app">
-
-<div class="cabecera-azul">
-<h2>Médico</h2>
-</div>
-
-<!-- MENÚ -->
-<div class="contenido">
-<div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
-<a href="/solicitudes"><button class="btn-principal">Solicitudes</button></a>
-<a href="/inspector"><button class="btn-principal">Inspector</button></a>
-<a href="/medico"><button class="btn-principal">Médico</button></a>
-</div>
-</div>
-
-<!-- SELECT -->
-<div class="contenido">
-<select id="selectEstudiante">
-<option value="">Seleccionar estudiante</option>
-</select>
-</div>
-
-</div>
-
 <script>
+function cargar(){
 
-// 🔥 SOLO ESTUDIANTES (NO SOLICITUDES)
-fetch('/api/estudiantes')
+fetch('/api/solicitudes')
 .then(r=>r.json())
 .then(data=>{
 
-let select = document.getElementById("selectEstudiante");
+let cont = document.getElementById("tablaMedico");
+cont.innerHTML = "";
 
-data.forEach(e=>{
-select.innerHTML += `
-<option value="${e.id_estudiante}">
-${e.nombre}
-</option>`;
+let ids = new Set();
+
+data.forEach(s=>{
+
+if(ids.has(s.id_solicitud)) return;
+ids.add(s.id_solicitud);
+
+cont.innerHTML += `
+<div class="tarjeta-solicitud">
+
+<div class="fila-info">
+<span class="nombre-est">${s.nombre}</span>
+<span>${s.estado}</span>
+</div>
+
+<div>${s.motivo}</div>
+
+${s.estado==="aprobado" ? `
+<a href="/atendido/${s.id_solicitud}">
+<button>Atender</button>
+</a>
+` : ``}
+
+</div>
+`;
 });
 
 });
-
-// ir al historial
-document.getElementById("selectEstudiante").onchange = function(){
-if(this.value){
-window.location.href = "/historial/" + this.value;
-}
 }
 
+setInterval(cargar,3000);
+cargar();
 </script>
-
-</body>
-</html>
