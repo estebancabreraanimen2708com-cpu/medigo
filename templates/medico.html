@@ -5,7 +5,6 @@
 </head>
 
 <body>
-
 <div class="contenedor-app">
 
 <div class="cabecera-azul">
@@ -13,11 +12,7 @@
 </div>
 
 <div class="contenido">
-<div style="display:flex; gap:10px; justify-content:center;">
-<a href="/solicitudes"><button class="btn-principal">Solicitudes</button></a>
-<a href="/inspector"><button class="btn-principal">Inspector</button></a>
-<a href="/medico"><button class="btn-principal">Médico</button></a>
-</div>
+<a href="/logout" class="btn-secundario">Cerrar sesión</a>
 </div>
 
 <div id="tablaMedico" class="contenido"></div>
@@ -25,56 +20,38 @@
 </div>
 
 <script>
-
-let cargando = false;
+let cargando=false;
 
 function cargar(){
-
 if(cargando) return;
-cargando = true;
+cargando=true;
 
 fetch('/api/solicitudes')
 .then(r=>r.json())
 .then(data=>{
-
-let cont = document.getElementById("tablaMedico");
-cont.innerHTML = "";
+let cont=document.getElementById("tablaMedico");
+cont.innerHTML="";
 
 data.forEach(s=>{
-
-cont.innerHTML += `
+cont.innerHTML+=`
 <div class="tarjeta-solicitud">
+<b>${s.nombre}</b> - ${s.estado}<br>
+${s.motivo}<br>
 
-<div class="fila-info">
-<span class="nombre-est">${s.nombre}</span>
-<span>${s.estado}</span>
-</div>
-
-<div>${s.motivo}</div>
-
-${s.estado==="aprobado" ? `
+${s.estado==="aprobado"?`
 <a href="/atendido/${s.id_solicitud}">
 <button>Atender</button>
-</a>
-` : ``}
+</a>`:""}
 
-</div>
-`;
-
+</div>`;
 });
 
-cargando = false;
-
+cargando=false;
 });
-
 }
 
-if(!window.intervalMedico){
-window.intervalMedico = setInterval(cargar,3000);
-}
-
+setInterval(cargar,3000);
 cargar();
-
 </script>
 
 </body>
