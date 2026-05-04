@@ -1,19 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="contenedor-app">
+
+<div class="cabecera-azul">
+<h2>Solicitudes</h2>
+</div>
+
+<!-- MENÚ -->
+<div class="contenido">
+<div style="display:flex; gap:10px; justify-content:center;">
+<a href="/solicitudes"><button class="btn-principal">Solicitudes</button></a>
+<a href="/inspector"><button class="btn-principal">Inspector</button></a>
+<a href="/medico"><button class="btn-principal">Médico</button></a>
+</div>
+</div>
+
+<div class="contenido">
+
+<form method="POST">
+
+<select name="estudiante" required>
+<option value="">Seleccionar</option>
+{% for e in estudiantes %}
+<option value="{{ e.id_estudiante }}">{{ e.nombre }}</option>
+{% endfor %}
+</select>
+
+<textarea name="motivo" required></textarea>
+
+<div class="escala-dolor">
+{% for i in range(1,11) %}
+<label class="nivel-btn n-{{i}}">
+<input type="radio" name="dolor" value="{{i}}" required>
+<span>{{i}}</span>
+</label>
+{% endfor %}
+</div>
+
+<button class="btn-principal">Enviar</button>
+
+</form>
+
+</div>
+
+<div class="contenido">
+<table id="tablaSolicitudes" style="width:100%">
+<thead>
+<tr>
+<th>Nombre</th>
+<th>Motivo</th>
+<th>Estado</th>
+<th>Fecha</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+
+</div>
+
 <script>
+
+let cargando = false;
 let ultimoEstado = {};
-let iniciado = false;
 
 function sonido(){
-    new Audio("/static/mixkit-correct-answer-tone-2870.wav").play();
+    new Audio("/static/notificacion.mp3").play();
 }
 
-function notificar(msg){
+function notificar(texto){
     if(Notification.permission === "granted"){
-        new Notification("MediGo",{body:msg});
+        new Notification("MediGo",{body:texto});
     }
     sonido();
 }
 
 function cargar(){
+
+if(cargando) return;
+cargando = true;
 
 fetch('/api/solicitudes')
 .then(r=>r.json())
@@ -22,14 +94,8 @@ fetch('/api/solicitudes')
 let tbody = document.querySelector("#tablaSolicitudes tbody");
 tbody.innerHTML = "";
 
-let ids = new Set();
-
 data.forEach(s=>{
 
-if(ids.has(s.id_solicitud)) return;
-ids.add(s.id_solicitud);
-
-// 🔔 detectar cambios
 if(ultimoEstado[s.id_solicitud] && ultimoEstado[s.id_solicitud] !== s.estado){
 
 if(s.estado==="aprobado") notificar("Aprobado: "+s.nombre);
@@ -49,13 +115,14 @@ tbody.innerHTML += `
 </tr>`;
 });
 
+cargando = false;
+
 });
+
 }
 
-// 🔥 SOLO UNA VEZ
-if(!iniciado){
-setInterval(cargar,3000);
-iniciado = true;
+if(!window.intervalSolicitudes){
+window.intervalSolicitudes = setInterval(cargar,3000);
 }
 
 if(Notification.permission !== "granted"){
@@ -63,4 +130,8 @@ Notification.requestPermission();
 }
 
 cargar();
+
 </script>
+
+</body>
+</html>
