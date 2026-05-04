@@ -6,16 +6,14 @@
 </head>
 
 <body>
-
 <div class="contenedor-app">
 
 <div class="cabecera-azul">
 <h2>Solicitudes</h2>
 </div>
 
-<!-- MENÚ -->
 <div class="contenido">
-<div style="display:flex; gap:10px; justify-content:center;">
+<div style="display:flex; gap:10px;">
 <a href="/solicitudes"><button class="btn-principal">Solicitudes</button></a>
 <a href="/inspector"><button class="btn-principal">Inspector</button></a>
 <a href="/medico"><button class="btn-principal">Médico</button></a>
@@ -25,7 +23,6 @@
 <div class="contenido">
 
 <form method="POST">
-
 <select name="estudiante" required>
 <option value="">Seleccionar</option>
 {% for e in estudiantes %}
@@ -33,7 +30,7 @@
 {% endfor %}
 </select>
 
-<textarea name="motivo" required></textarea>
+<textarea name="motivo" placeholder="Motivo" required></textarea>
 
 <div class="escala-dolor">
 {% for i in range(1,11) %}
@@ -45,20 +42,14 @@
 </div>
 
 <button class="btn-principal">Enviar</button>
-
 </form>
 
 </div>
 
 <div class="contenido">
-<table id="tablaSolicitudes" style="width:100%">
+<table id="tablaSolicitudes">
 <thead>
-<tr>
-<th>Nombre</th>
-<th>Motivo</th>
-<th>Estado</th>
-<th>Fecha</th>
-</tr>
+<tr><th>Nombre</th><th>Motivo</th><th>Estado</th><th>Fecha</th></tr>
 </thead>
 <tbody></tbody>
 </table>
@@ -67,46 +58,39 @@
 </div>
 
 <script>
-
-let cargando = false;
 let ultimoEstado = {};
+let cargando = false;
 
 function sonido(){
-    new Audio("/static/notificacion.mp3").play();
+    new Audio("/static/mixkit-correct-answer-tone-2870.wav").play();
 }
 
-function notificar(texto){
-    if(Notification.permission === "granted"){
-        new Notification("MediGo",{body:texto});
+function notificar(msg){
+    if(Notification.permission==="granted"){
+        new Notification("MediGo",{body:msg});
     }
     sonido();
 }
 
 function cargar(){
-
 if(cargando) return;
-cargando = true;
+cargando=true;
 
 fetch('/api/solicitudes')
 .then(r=>r.json())
 .then(data=>{
-
-let tbody = document.querySelector("#tablaSolicitudes tbody");
-tbody.innerHTML = "";
+let tbody=document.querySelector("#tablaSolicitudes tbody");
+tbody.innerHTML="";
 
 data.forEach(s=>{
 
-if(ultimoEstado[s.id_solicitud] && ultimoEstado[s.id_solicitud] !== s.estado){
-
-if(s.estado==="aprobado") notificar("Aprobado: "+s.nombre);
-if(s.estado==="rechazado") notificar("Rechazado: "+s.nombre);
-if(s.estado==="atendido") notificar("Atendido: "+s.nombre);
-
+if(ultimoEstado[s.id_solicitud] && ultimoEstado[s.id_solicitud]!==s.estado){
+notificar("Estado actualizado: "+s.nombre);
 }
 
-ultimoEstado[s.id_solicitud] = s.estado;
+ultimoEstado[s.id_solicitud]=s.estado;
 
-tbody.innerHTML += `
+tbody.innerHTML+=`
 <tr>
 <td>${s.nombre}</td>
 <td>${s.motivo}</td>
@@ -115,22 +99,16 @@ tbody.innerHTML += `
 </tr>`;
 });
 
-cargando = false;
-
+cargando=false;
 });
-
 }
 
 if(!window.intervalSolicitudes){
-window.intervalSolicitudes = setInterval(cargar,3000);
+window.intervalSolicitudes=setInterval(cargar,3000);
 }
 
-if(Notification.permission !== "granted"){
 Notification.requestPermission();
-}
-
 cargar();
-
 </script>
 
 </body>
