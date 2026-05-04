@@ -10,12 +10,11 @@
 
 <div class="contenedor-app">
 
-<!-- CABECERA -->
 <div class="cabecera-azul">
 <h2>Solicitudes Médicas</h2>
 </div>
 
-<!-- 🔥 MENÚ (RESTAURADO) -->
+<!-- MENÚ -->
 <div class="contenido">
 <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
 <a href="/solicitudes"><button class="btn-principal">Solicitudes</button></a>
@@ -24,7 +23,7 @@
 </div>
 </div>
 
-<!-- FORMULARIO -->
+<!-- FORM -->
 <div class="contenido">
 
 <form method="POST" onsubmit="return confirmar()">
@@ -57,7 +56,7 @@
 
 </div>
 
-<!-- 🔥 TABLA (RESTAURADA BIEN) -->
+<!-- TABLA -->
 <div class="contenido">
 
 <h3>Historial de Solicitudes</h3>
@@ -73,7 +72,6 @@
 </thead>
 
 <tbody></tbody>
-
 </table>
 
 </div>
@@ -82,9 +80,6 @@
 
 <script>
 
-// ⚠️ IMPORTANTE: evitar múltiples ejecuciones
-let intervalActivo = false;
-
 function cargar(){
 
 fetch('/api/solicitudes')
@@ -92,32 +87,25 @@ fetch('/api/solicitudes')
 .then(data=>{
 
 let tbody = document.querySelector("#tablaSolicitudes tbody");
-tbody.innerHTML = ""; // 🔥 limpia antes de cargar
+tbody.innerHTML = "";
 
 data.forEach(s=>{
 tbody.innerHTML += `
-<tr style="border-bottom:1px solid #ccc;">
+<tr>
 <td>${s.nombre}</td>
 <td>${s.motivo}</td>
 <td>${s.estado}</td>
 <td>${s.fecha}</td>
-</tr>
-`;
+</tr>`;
 });
 
 });
 
 }
 
-// 🔥 SOLO UN INTERVAL (evita duplicados)
-if(!intervalActivo){
 setInterval(cargar,3000);
-intervalActivo = true;
-}
-
 cargar();
 
-// CONFIRMAR
 function confirmar(){
 return confirm("¿Enviar solicitud?");
 }
