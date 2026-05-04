@@ -16,7 +16,7 @@ def get_connection():
         port=int(os.getenv("DB_PORT"))
     )
 
-# 🔐 PROTECCIÓN
+# 🔐 PROTECCIÓN DE RUTAS
 @app.before_request
 def proteger():
     ruta = request.path
@@ -25,14 +25,14 @@ def proteger():
         return
 
     if ruta.startswith("/inspector"):
-        if "rol" not in session or session["rol"] != "inspector":
+        if session.get("rol") != "inspector":
             return redirect("/login/inspector")
 
     if ruta.startswith("/medico"):
-        if "rol" not in session or session["rol"] != "medico":
+        if session.get("rol") != "medico":
             return redirect("/login/medico")
 
-# 🔥 API SOLICITUDES
+# 🔥 API SOLICITUDES (SIN DUPLICADOS)
 @app.route('/api/solicitudes')
 def api_solicitudes():
     con = get_connection()
@@ -51,6 +51,22 @@ def api_solicitudes():
     con.close()
     return jsonify(data)
 
+# 🔥 LISTA DE ESTUDIANTES SIN DUPLICADOS
+def obtener_estudiantes():
+    con = get_connection()
+    cur = con.cursor(dictionary=True)
+
+    cur.execute("""
+    SELECT MIN(id_estudiante) as id_estudiante, nombre
+    FROM estudiantes
+    GROUP BY nombre
+    ORDER BY nombre
+    """)
+
+    data = cur.fetchall()
+    con.close()
+    return data
+
 # 🔐 LOGIN
 @app.route('/login/<rol>', methods=["GET","POST"])
 def login(rol):
@@ -66,7 +82,7 @@ def login(rol):
             session["rol"] = "medico"
             return redirect("/medico")
 
-        return render_template("login.html", error="Error", rol=rol)
+        return render_template("login.html", rol=rol, error="Credenciales incorrectas")
 
     return render_template("login.html", rol=rol)
 
@@ -75,7 +91,7 @@ def login(rol):
 @app.route('/solicitudes', methods=["GET","POST"])
 def solicitudes():
     con = get_connection()
-    cur = con.cursor(dictionary=True)
+    cur = con.cursor()
 
     if request.method == "POST":
         est = request.form["estudiante"]
@@ -92,10 +108,7 @@ def solicitudes():
         con.commit()
         return redirect("/solicitudes")
 
-    cur.execute("SELECT id_estudiante, nombre FROM estudiantes ORDER BY nombre")
-    estudiantes = cur.fetchall()
-
-    con.close()
+    estudiantes = obtener_estudiantes()
     return render_template("solicitudes.html", estudiantes=estudiantes)
 
 # 👮 INSPECTOR
@@ -135,6 +148,11 @@ def atendido(id):
     con.commit()
     con.close()
     return redirect("/medico")
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect("/solicitudes")
 
 if __name__ == '__main__':
     app.run(debug=True)
