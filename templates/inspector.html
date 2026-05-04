@@ -1,133 +1,42 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-
-<body>
-
-<div class="contenedor-app">
-
-<div class="cabecera-azul">
-<h2>Inspector</h2>
-</div>
-
-<!-- ✅ MENÚ (ARREGLADO) -->
-<div class="contenido">
-<div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
-<a href="/solicitudes"><button class="btn-principal">Solicitudes</button></a>
-<a href="/inspector"><button class="btn-principal">Inspector</button></a>
-<a href="/medico"><button class="btn-principal">Médico</button></a>
-</div>
-</div>
-
-<!-- ✅ SELECT SIN DUPLICADOS -->
-<div class="contenido">
-<select id="selectEstudiante">
-<option value="">Ver historial</option>
-</select>
-</div>
-
-<!-- ✅ PDF -->
-<div class="contenido">
-<a href="/pdf_hoy">
-<button class="btn-principal">Descargar PDF del día</button>
-</a>
-</div>
-
-<!-- ✅ TABLA -->
-<div class="contenido">
-<div id="tablaHoy"></div>
-</div>
-
-</div>
-
 <script>
-
-let hoy = new Date().toDateString();
-
 function cargar(){
 
-// 🔹 ESTUDIANTES SIN DUPLICADOS
-fetch('/api/estudiantes')
-.then(r=>r.json())
-.then(estudiantes=>{
-
-let select = document.getElementById("selectEstudiante");
-select.innerHTML='<option value="">Ver historial</option>';
-
-estudiantes.forEach(e=>{
-select.innerHTML += `<option value="${e.id_estudiante}">${e.nombre}</option>`;
-});
-
-});
-
-// 🔹 SOLICITUDES
 fetch('/api/solicitudes')
 .then(r=>r.json())
 .then(data=>{
 
-let tabla = document.getElementById("tablaHoy");
-tabla.innerHTML="";
+let cont = document.getElementById("tablaHoy");
+cont.innerHTML = "";
 
-// ❗ evitar duplicados visuales
-let vistos = [];
+let ids = new Set();
 
 data.forEach(s=>{
 
-if(vistos.includes(s.id_solicitud)) return;
-vistos.push(s.id_solicitud);
+if(ids.has(s.id_solicitud)) return;
+ids.add(s.id_solicitud);
 
-let fecha = new Date(s.fecha).toDateString();
-
-if(fecha === hoy){
-
-tabla.innerHTML += `
+cont.innerHTML += `
 <div class="tarjeta-solicitud">
 
 <div class="fila-info">
-<a href="/historial/${s.id_estudiante}">
 <span class="nombre-est">${s.nombre}</span>
-</a>
 <span>${s.estado}</span>
 </div>
 
 <div class="cuadro-motivo">${s.motivo}</div>
 
 ${s.estado==="pendiente" ? `
-<div style="display:flex; gap:10px; margin-top:10px;">
-<a href="/aprobar/${s.id_solicitud}">
-<button class="btn-principal">Aprobar</button>
-</a>
-
-<a href="/rechazar/${s.id_solicitud}">
-<button class="btn-principal">Rechazar</button>
-</a>
-</div>
+<a href="/aprobar/${s.id_solicitud}"><button>Aprobar</button></a>
+<a href="/rechazar/${s.id_solicitud}"><button>Rechazar</button></a>
 ` : ``}
 
 </div>
 `;
-}
-
 });
 
 });
-
-// 🔽 SELECT REDIRECT
-document.getElementById("selectEstudiante").onchange = function(){
-if(this.value){
-window.location.href = "/historial/" + this.value;
-}
-}
-
 }
 
 setInterval(cargar,3000);
 cargar();
-
 </script>
-
-</body>
-</html>
