@@ -3,112 +3,204 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<title>Solicitudes</title>
 </head>
 
 <body>
+
 <div class="contenedor-app">
 
-<div class="cabecera-azul">
-<h2>Solicitudes</h2>
-</div>
+<!-- 🔥 LOGO -->
+<img src="{{ url_for('static', filename='logo.png') }}" class="logo">
 
-<div class="contenido">
-<div style="display:flex; gap:10px;">
-<a href="/solicitudes"><button class="btn-principal">Solicitudes</button></a>
-<a href="/inspector"><button class="btn-principal">Inspector</button></a>
-<a href="/medico"><button class="btn-principal">Médico</button></a>
-</div>
-</div>
+<h2>Solicitudes Médicas</h2>
 
 <div class="contenido">
 
 <form method="POST">
+
 <select name="estudiante" required>
-<option value="">Seleccionar</option>
+<option value="">Seleccionar estudiante</option>
+
 {% for e in estudiantes %}
-<option value="{{ e.id_estudiante }}">{{ e.nombre }}</option>
+<option value="{{ e.id_estudiante }}">
+{{ e.nombre }}
+</option>
 {% endfor %}
+
 </select>
 
-<textarea name="motivo" placeholder="Motivo" required></textarea>
+<textarea
+name="motivo"
+placeholder="Describe el motivo..."
+required></textarea>
+
+<!-- 🔥 ESCALA DOLOR PRO -->
+<label class="titulo-dolor">
+Nivel de dolor
+</label>
 
 <div class="escala-dolor">
-{% for i in range(1,11) %}
-<label class="nivel-btn n-{{i}}">
-<input type="radio" name="dolor" value="{{i}}" required>
-<span>{{i}}</span>
+
+<label class="dolor d1">
+<input type="radio" name="dolor" value="1" required>
+<span>1</span>
 </label>
-{% endfor %}
+
+<label class="dolor d2">
+<input type="radio" name="dolor" value="2">
+<span>2</span>
+</label>
+
+<label class="dolor d3">
+<input type="radio" name="dolor" value="3">
+<span>3</span>
+</label>
+
+<label class="dolor d4">
+<input type="radio" name="dolor" value="4">
+<span>4</span>
+</label>
+
+<label class="dolor d5">
+<input type="radio" name="dolor" value="5">
+<span>5</span>
+</label>
+
+<label class="dolor d6">
+<input type="radio" name="dolor" value="6">
+<span>6</span>
+</label>
+
+<label class="dolor d7">
+<input type="radio" name="dolor" value="7">
+<span>7</span>
+</label>
+
+<label class="dolor d8">
+<input type="radio" name="dolor" value="8">
+<span>8</span>
+</label>
+
+<label class="dolor d9">
+<input type="radio" name="dolor" value="9">
+<span>9</span>
+</label>
+
+<label class="dolor d10">
+<input type="radio" name="dolor" value="10">
+<span>10</span>
+</label>
+
 </div>
 
-<button class="btn-principal">Enviar</button>
+<button type="submit">
+Enviar Solicitud
+</button>
+
 </form>
 
 </div>
 
 <div class="contenido">
+
 <table id="tablaSolicitudes">
+
 <thead>
-<tr><th>Nombre</th><th>Motivo</th><th>Estado</th><th>Fecha</th></tr>
+<tr>
+<th>Nombre</th>
+<th>Estado</th>
+<th>Fecha</th>
+</tr>
 </thead>
+
 <tbody></tbody>
+
 </table>
+
 </div>
 
 </div>
 
 <script>
+
 let ultimoEstado = {};
-let cargando = false;
 
 function sonido(){
-    new Audio("/static/mixkit-correct-answer-tone-2870.wav").play();
+new Audio("/static/mixkit-correct-answer-tone-2870.wav").play();
 }
 
-function notificar(msg){
-    if(Notification.permission==="granted"){
-        new Notification("MediGo",{body:msg});
-    }
-    sonido();
+function alerta(msg){
+
+let div=document.createElement("div");
+
+div.className="notificacion-pro";
+
+div.innerText=msg;
+
+document.body.appendChild(div);
+
+setTimeout(()=>{
+div.remove();
+},3000);
+
+sonido();
+
 }
 
 function cargar(){
-if(cargando) return;
-cargando=true;
 
 fetch('/api/solicitudes')
 .then(r=>r.json())
 .then(data=>{
+
 let tbody=document.querySelector("#tablaSolicitudes tbody");
+
 tbody.innerHTML="";
 
 data.forEach(s=>{
 
-if(ultimoEstado[s.id_solicitud] && ultimoEstado[s.id_solicitud]!==s.estado){
-notificar("Estado actualizado: "+s.nombre);
+if(
+ultimoEstado[s.id_solicitud]
+&& ultimoEstado[s.id_solicitud]!=s.estado
+){
+
+if(s.estado==="aprobado"){
+alerta("✅ Solicitud aprobada");
+}
+
+if(s.estado==="rechazado"){
+alerta("❌ Solicitud rechazada");
+}
+
+if(s.estado==="atendido"){
+alerta("🏥 Atención completada");
+}
+
 }
 
 ultimoEstado[s.id_solicitud]=s.estado;
 
 tbody.innerHTML+=`
+
 <tr>
 <td>${s.nombre}</td>
-<td>${s.motivo}</td>
 <td>${s.estado}</td>
 <td>${s.fecha}</td>
-</tr>`;
+</tr>
+
+`;
+
 });
 
-cargando=false;
 });
+
 }
 
-if(!window.intervalSolicitudes){
-window.intervalSolicitudes=setInterval(cargar,3000);
-}
+setInterval(cargar,1000);
 
-Notification.requestPermission();
 cargar();
+
 </script>
 
 </body>
