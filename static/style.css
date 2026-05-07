@@ -16,14 +16,28 @@
 }
 
 body{
-    background:linear-gradient(135deg,#0f172a,#1e293b);
+
+    background:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(135deg,#0f172a,#1e293b);
+
+    background-size:40px 40px,40px 40px,cover;
+
     font-family:'Segoe UI',sans-serif;
+
     min-height:100vh;
+
     display:flex;
+
     justify-content:center;
+
     align-items:center;
+
     padding:20px;
+
     color:var(--texto);
+
     overflow-x:hidden;
 }
 
@@ -189,8 +203,6 @@ button:hover{
 .atendido{
     color:#38bdf8;
 }
-
-/* 🔥 URGENTE */
 
 .urgente{
     background:#7f1d1d;
