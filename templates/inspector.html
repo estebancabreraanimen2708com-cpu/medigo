@@ -3,31 +3,22 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<title>Inspector</title>
 </head>
 
 <body>
 
 <div class="contenedor-app">
 
+<img src="{{ url_for('static', filename='logo.png') }}" class="logo">
+
 <h2>Inspector</h2>
-
-<div class="botones">
-
-<a href="/solicitudes">
-<button>Solicitudes</button>
-</a>
-
-<a href="/logout">
-<button>Salir</button>
-</a>
-
-</div>
 
 <a href="/descargar_pdf">
 <button>📄 Descargar PDF</button>
 </a>
 
-<br>
+<br><br>
 
 <div id="tablaHoy"></div>
 
@@ -35,8 +26,26 @@
 
 <script>
 
+let ultimaCantidad = 0;
+
 function sonido(){
     new Audio("/static/mixkit-correct-answer-tone-2870.wav").play();
+}
+
+function alerta(msg){
+
+    let div = document.createElement("div");
+
+    div.className = "notificacion-pro";
+
+    div.innerText = msg;
+
+    document.body.appendChild(div);
+
+    setTimeout(()=>{
+        div.remove();
+    },3000);
+
 }
 
 function cargar(){
@@ -45,12 +54,30 @@ fetch('/api/solicitudes')
 .then(r=>r.json())
 .then(data=>{
 
-let cont=document.getElementById("tablaHoy");
-cont.innerHTML="";
+// 🔔 NUEVA SOLICITUD
+if(data.length > ultimaCantidad){
+
+    let nueva = data[0];
+
+    if(nueva.estado === "pendiente"){
+
+        sonido();
+
+        alerta("Nueva solicitud de " + nueva.nombre);
+
+    }
+
+}
+
+ultimaCantidad = data.length;
+
+let cont = document.getElementById("tablaHoy");
+
+cont.innerHTML = "";
 
 data.forEach(s=>{
 
-cont.innerHTML+=`
+cont.innerHTML += `
 
 <div class="tarjeta-solicitud">
 
@@ -64,7 +91,7 @@ ${s.estado}
 
 <br>
 
-${s.estado==="pendiente"?`
+${s.estado === "pendiente" ? `
 
 <a href="/aprobar/${s.id_solicitud}">
 <button>✔ Aprobar</button>
@@ -76,8 +103,8 @@ ${s.estado==="pendiente"?`
 <button>✖ Rechazar</button>
 </a>
 
-`:`
-<b>Solicitud procesada</b>
+` : `
+<b>✔ Solicitud procesada</b>
 `}
 
 </div>
@@ -90,7 +117,8 @@ ${s.estado==="pendiente"?`
 
 }
 
-setInterval(cargar,3000);
+// ⚡ CASI TIEMPO REAL
+setInterval(cargar,1000);
 
 cargar();
 
