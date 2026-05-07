@@ -3,43 +3,40 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<title>Historial</title>
 </head>
 
 <body>
 
 <div class="contenedor-app">
 
-<div class="cabecera-azul">
-<h2>Historial del Estudiante</h2>
-</div>
+<img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
 
-<div class="contenido">
-<button class="btn-principal" onclick="window.history.back()">
-Volver
-</button>
-</div>
+<h2>Historial Clínico</h2>
 
-<div class="contenido">
+<a href="/inspector">
+<button>⬅ Volver</button>
+</a>
 
-{% for s in data %}
+<br><br>
+
+{% for h in historial %}
+
 <div class="tarjeta-solicitud">
 
-<div class="fila-info">
-<span class="nombre-est">{{ s.nombre }}</span>
-<span>{{ s.estado }}</span>
-</div>
+<h3>{{ h.nombre }}</h3>
 
-<div class="cuadro-motivo">{{ s.motivo }}</div>
+<p>{{ h.motivo }}</p>
 
-<small>
-Fecha: {{ s.fecha }} <br>
-Dolor: {{ s.dolor }}
-</small>
+<p><b>Dolor:</b> {{ h.dolor }}</p>
+
+<p><b>Estado:</b> {{ h.estado }}</p>
+
+<p><b>Fecha:</b> {{ h.fecha }}</p>
 
 </div>
+
 {% endfor %}
-
-</div>
 
 </div>
 
