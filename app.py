@@ -12,11 +12,11 @@ app = Flask(__name__)
 
 def conectar_bd():
     return mysql.connector.connect(
-        host="TU_HOST_REAL",
-        user="TU_USER_REAL",
-        password="TU_PASSWORD_REAL",
-        database="TU_DATABASE_REAL",
-        port=12345
+        host="mysql.railway.internal",
+        user="root",
+        password="wYbBPSlKSxHuYpUKYiYSfWzMnnqUyAVJ",
+        database="railway",
+        port=3306
     )
 
 # =========================================
