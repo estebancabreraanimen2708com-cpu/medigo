@@ -1,175 +1,105 @@
-from flask import Flask, render_template, request, redirect, session, jsonify, send_file
+from flask import Flask, render_template, request, redirect, jsonify, send_file
 import mysql.connector
-import os
+from fpdf import FPDF
 from datetime import datetime
 import pytz
-import io
-
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
-from reportlab.lib import colors
-from reportlab.lib.styles import getSampleStyleSheet
 
 app = Flask(__name__)
-app.secret_key = "medigo_secret"
 
 # 🔥 CONEXIÓN MYSQL
-def get_connection():
+
+def conectar_bd():
     return mysql.connector.connect(
-        host=os.getenv("DB_HOST"),
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD"),
-        database=os.getenv("DB_NAME"),
-        port=int(os.getenv("DB_PORT"))
+        host="TU_HOST",
+        user="TU_USUARIO",
+        password="TU_PASSWORD",
+        database="TU_DATABASE"
     )
 
-# 🔐 PROTECCIÓN
-@app.before_request
-def proteger():
+# 🔥 HORA ECUADOR
 
-    ruta = request.path
+ecuador = pytz.timezone("America/Guayaquil")
 
-    # rutas públicas
-    publicas = [
-        '/',
-        '/roles',
-        '/solicitudes'
-    ]
+def hora_ecuador():
+    return datetime.now(ecuador).strftime("%Y-%m-%d %H:%M:%S")
 
-    if (
-        ruta in publicas
-        or ruta.startswith('/static')
-        or ruta.startswith('/api')
-        or ruta.startswith('/login')
-    ):
-        return
+# 🔥 INICIO
 
-    # inspector
-    if ruta.startswith('/inspector'):
-        if session.get("rol") != "inspector":
-            return redirect('/login/inspector')
-
-    # medico
-    if ruta.startswith('/medico'):
-        if session.get("rol") != "medico":
-            return redirect('/login/medico')
-
-# 🔥 PANTALLA INICIO
 @app.route('/')
 def inicio():
     return render_template('inicio.html')
 
 # 🔥 ROLES
+
 @app.route('/roles')
 def roles():
     return render_template('roles.html')
 
-# 🔥 LOGIN
-@app.route('/login/<rol>', methods=['GET', 'POST'])
-def login(rol):
+# 🔥 LOGIN INSPECTOR
+
+@app.route('/login/inspector', methods=['GET','POST'])
+def login_inspector():
 
     if request.method == 'POST':
 
-        usuario = request.form['user']
-        password = request.form['pass']
+        usuario = request.form['usuario']
+        clave = request.form['clave']
 
-        # 👮 inspector
-        if rol == "inspector":
-            if usuario == "admin" and password == "1234":
-                session["rol"] = "inspector"
-                return redirect('/inspector')
+        if usuario == "inspector" and clave == "123":
 
-        # 🏥 medico
-        if rol == "medico":
-            if usuario == "doctor" and password == "1234":
-                session["rol"] = "medico"
-                return redirect('/medico')
+            return redirect('/inspector')
 
-        return render_template(
-            'login.html',
-            rol=rol,
-            error="Credenciales incorrectas"
-        )
+    return render_template('login_inspector.html')
 
-    return render_template('login.html', rol=rol)
+# 🔥 LOGIN MEDICO
 
-# 🔥 LOGOUT
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect('/')
+@app.route('/login/medico', methods=['GET','POST'])
+def login_medico():
 
-# 🔥 OBTENER ESTUDIANTES SIN DUPLICADOS
-def obtener_estudiantes():
+    if request.method == 'POST':
 
-    con = get_connection()
-    cur = con.cursor(dictionary=True)
+        usuario = request.form['usuario']
+        clave = request.form['clave']
 
-    cur.execute("""
-        SELECT MIN(id_estudiante) as id_estudiante, nombre
-        FROM estudiantes
-        GROUP BY nombre
-        ORDER BY nombre
-    """)
+        if usuario == "medico" and clave == "123":
 
-    estudiantes = cur.fetchall()
+            return redirect('/medico')
 
-    con.close()
-
-    return estudiantes
+    return render_template('login_medico.html')
 
 # 🔥 SOLICITUDES
-@app.route('/solicitudes', methods=['GET', 'POST'])
+
+@app.route('/solicitudes', methods=['GET','POST'])
 def solicitudes():
 
-    con = get_connection()
-    cur = con.cursor()
+    conn = conectar_bd()
+    cursor = conn.cursor(dictionary=True)
 
-    # guardar solicitud
     if request.method == 'POST':
 
         estudiante = request.form['estudiante']
         motivo = request.form['motivo']
         dolor = request.form['dolor']
 
-        fecha = datetime.now(
-            pytz.timezone('America/Guayaquil')
-        )
+        fecha = hora_ecuador()
 
-        cur.execute("""
-            INSERT INTO solicitudes
-            (
-                id_estudiante,
-                id_profesor,
-                motivo,
-                dolor,
-                estado,
-                fecha
-            )
-            VALUES
-            (
-                %s,
-                (SELECT id_profesor FROM profesores LIMIT 1),
-                %s,
-                %s,
-                'pendiente',
-                %s
-            )
-        """, (
-            estudiante,
-            motivo,
-            dolor,
-            fecha
-        ))
+        cursor.execute("""
+        INSERT INTO solicitudes
+        (id_estudiante,motivo,dolor,estado,fecha)
+        VALUES(%s,%s,%s,%s,%s)
+        """,(estudiante,motivo,dolor,"pendiente",fecha))
 
-        con.commit()
-
-        con.close()
+        conn.commit()
 
         return redirect('/solicitudes')
 
-    estudiantes = obtener_estudiantes()
+    cursor.execute("""
+    SELECT DISTINCT id_estudiante,nombre
+    FROM estudiantes
+    ORDER BY nombre
+    """)
 
-    con.close()
+    estudiantes = cursor.fetchall()
 
     return render_template(
         'solicitudes.html',
@@ -177,189 +107,228 @@ def solicitudes():
     )
 
 # 🔥 API SOLICITUDES
+
 @app.route('/api/solicitudes')
 def api_solicitudes():
 
-    con = get_connection()
-    cur = con.cursor(dictionary=True)
+    conn = conectar_bd()
+    cursor = conn.cursor(dictionary=True)
 
-    cur.execute("""
-        SELECT
-            s.id_solicitud,
-            e.nombre,
-            s.motivo,
-            s.estado,
-            DATE_FORMAT(
-                s.fecha,
-                '%Y-%m-%d %H:%i:%s'
-            ) as fecha
-        FROM solicitudes s
-        JOIN estudiantes e
-        ON s.id_estudiante = e.id_estudiante
-        ORDER BY s.id_solicitud DESC
+    cursor.execute("""
+    SELECT
+    s.id_solicitud,
+    e.id_estudiante,
+    e.nombre,
+    s.motivo,
+    s.dolor,
+    s.estado,
+    s.fecha
+    FROM solicitudes s
+    JOIN estudiantes e
+    ON s.id_estudiante=e.id_estudiante
+    ORDER BY s.id_solicitud DESC
     """)
 
-    solicitudes = cur.fetchall()
+    datos = cursor.fetchall()
 
-    con.close()
+    return jsonify(datos)
 
-    return jsonify(solicitudes)
+# 🔥 INSPECTOR
 
-# 👮 INSPECTOR
 @app.route('/inspector')
 def inspector():
     return render_template('inspector.html')
 
-# 🏥 MEDICO
+# 🔥 MÉDICO
+
 @app.route('/medico')
 def medico():
     return render_template('medico.html')
 
-# ✅ APROBAR
+# 🔥 APROBAR
+
 @app.route('/aprobar/<int:id>')
 def aprobar(id):
 
-    con = get_connection()
-    cur = con.cursor()
+    conn = conectar_bd()
+    cursor = conn.cursor()
 
-    cur.execute("""
-        UPDATE solicitudes
-        SET estado='aprobado'
-        WHERE id_solicitud=%s
-    """, (id,))
+    cursor.execute("""
+    UPDATE solicitudes
+    SET estado='aprobado'
+    WHERE id_solicitud=%s
+    """,(id,))
 
-    con.commit()
-
-    con.close()
+    conn.commit()
 
     return redirect('/inspector')
 
-# ❌ RECHAZAR
+# 🔥 RECHAZAR
+
 @app.route('/rechazar/<int:id>')
 def rechazar(id):
 
-    con = get_connection()
-    cur = con.cursor()
+    conn = conectar_bd()
+    cursor = conn.cursor()
 
-    cur.execute("""
-        UPDATE solicitudes
-        SET estado='rechazado'
-        WHERE id_solicitud=%s
-    """, (id,))
+    cursor.execute("""
+    UPDATE solicitudes
+    SET estado='rechazado'
+    WHERE id_solicitud=%s
+    """,(id,))
 
-    con.commit()
-
-    con.close()
+    conn.commit()
 
     return redirect('/inspector')
 
-# 🏥 ATENDIDO
+# 🔥 ATENDIDO
+
 @app.route('/atendido/<int:id>')
 def atendido(id):
 
-    con = get_connection()
-    cur = con.cursor()
+    conn = conectar_bd()
+    cursor = conn.cursor()
 
-    cur.execute("""
-        UPDATE solicitudes
-        SET estado='atendido'
-        WHERE id_solicitud=%s
-    """, (id,))
+    cursor.execute("""
+    UPDATE solicitudes
+    SET estado='atendido'
+    WHERE id_solicitud=%s
+    """,(id,))
 
-    con.commit()
-
-    con.close()
+    conn.commit()
 
     return redirect('/medico')
 
-# 📄 PDF
+# 🔥 HISTORIAL CLINICO
+
+@app.route('/historial/<int:id_estudiante>')
+def historial(id_estudiante):
+
+    conn = conectar_bd()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+    SELECT
+    e.nombre,
+    s.motivo,
+    s.dolor,
+    s.estado,
+    s.fecha
+    FROM solicitudes s
+    JOIN estudiantes e
+    ON s.id_estudiante=e.id_estudiante
+    WHERE e.id_estudiante=%s
+    ORDER BY s.fecha DESC
+    """,(id_estudiante,))
+
+    historial = cursor.fetchall()
+
+    return render_template(
+        'historial.html',
+        historial=historial
+    )
+
+# 🔥 PDF PROFESIONAL
+
 @app.route('/descargar_pdf')
 def descargar_pdf():
 
-    if session.get("rol") != "inspector":
-        return redirect('/login/inspector')
+    conn = conectar_bd()
+    cursor = conn.cursor(dictionary=True)
 
-    con = get_connection()
-    cur = con.cursor(dictionary=True)
+    cursor.execute("""
+    SELECT
+    e.nombre,
+    s.motivo,
+    s.dolor,
+    s.estado,
+    s.fecha
+    FROM solicitudes s
+    JOIN estudiantes e
+    ON s.id_estudiante=e.id_estudiante
+    ORDER BY s.fecha DESC
+    """)
 
-    hoy = datetime.now(
-        pytz.timezone('America/Guayaquil')
-    ).strftime('%Y-%m-%d')
+    datos = cursor.fetchall()
 
-    cur.execute("""
-        SELECT
-            e.nombre,
-            s.motivo,
-            s.estado,
-            DATE_FORMAT(
-                s.fecha,
-                '%H:%i'
-            ) as hora
-        FROM solicitudes s
-        JOIN estudiantes e
-        ON s.id_estudiante = e.id_estudiante
-        WHERE DATE(s.fecha) = %s
-        ORDER BY s.fecha DESC
-    """, (hoy,))
+    pdf = FPDF()
 
-    datos = cur.fetchall()
+    pdf.add_page()
 
-    con.close()
+    # 🔥 LOGO
+    pdf.image("static/logo.jpg",70,8,70)
 
-    # PDF
-    buffer = io.BytesIO()
+    pdf.ln(50)
 
-    doc = SimpleDocTemplate(buffer)
+    # 🔥 TITULO
+    pdf.set_font("Arial","B",20)
 
-    elementos = []
-
-    estilos = getSampleStyleSheet()
-
-    titulo = Paragraph(
-        f"<b>Reporte MediGo - {hoy}</b>",
-        estilos['Title']
+    pdf.cell(
+        200,
+        10,
+        "REPORTE MEDIGO",
+        ln=True,
+        align="C"
     )
 
-    elementos.append(titulo)
-    elementos.append(Spacer(1, 20))
+    pdf.set_font("Arial","",12)
 
-    tabla_data = [
-        ['Nombre', 'Motivo', 'Estado', 'Hora']
-    ]
+    pdf.cell(
+        200,
+        10,
+        "Quito - Ecuador",
+        ln=True,
+        align="C"
+    )
+
+    pdf.ln(10)
+
+    # 🔥 TABLA
+    pdf.set_fill_color(56,189,248)
+
+    pdf.set_font("Arial","B",11)
+
+    pdf.cell(40,10,"Nombre",1,0,"C",True)
+    pdf.cell(55,10,"Motivo",1,0,"C",True)
+    pdf.cell(20,10,"Dolor",1,0,"C",True)
+    pdf.cell(30,10,"Estado",1,0,"C",True)
+    pdf.cell(45,10,"Fecha",1,1,"C",True)
+
+    pdf.set_font("Arial","",10)
 
     for d in datos:
-        tabla_data.append([
-            d['nombre'],
-            d['motivo'],
-            d['estado'],
-            d['hora']
-        ])
 
-    tabla = Table(tabla_data)
+        pdf.cell(40,10,str(d["nombre"]),1)
+        pdf.cell(55,10,str(d["motivo"][:20]),1)
+        pdf.cell(20,10,str(d["dolor"]),1)
+        pdf.cell(30,10,str(d["estado"]),1)
+        pdf.cell(45,10,str(d["fecha"]),1,1)
 
-    tabla.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#0f172a')),
-        ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+    pdf.ln(20)
 
-        ('GRID', (0,0), (-1,-1), 1, colors.black),
+    pdf.set_font("Arial","B",12)
 
-        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+    pdf.cell(
+        200,
+        10,
+        "Firma automatica - MediGo",
+        ln=True,
+        align="R"
+    )
 
-        ('BACKGROUND', (0,1), (-1,-1), colors.HexColor('#e2e8f0'))
-    ]))
+    archivo = "reporte_medigo.pdf"
 
-    elementos.append(tabla)
-
-    doc.build(elementos)
-
-    buffer.seek(0)
+    pdf.output(archivo)
 
     return send_file(
-        buffer,
-        as_attachment=True,
-        download_name=f"Reporte_{hoy}.pdf",
-        mimetype='application/pdf'
+        archivo,
+        as_attachment=True
     )
+
+# 🔥 RUN
+
+if __name__ == '__main__':
+    app.run(debug=True)
 
 # 🚀 EJECUTAR
 if __name__ == '__main__':
