@@ -1,57 +1,74 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<title>Médico</title>
 </head>
 
 <body>
+
 <div class="contenedor-app">
 
-<div class="cabecera-azul">
+<img src="{{ url_for('static', filename='logo.png') }}" class="logo">
+
 <h2>Médico</h2>
-</div>
 
-<div class="contenido">
-<a href="/logout" class="btn-secundario">Cerrar sesión</a>
-</div>
-
-<div id="tablaMedico" class="contenido"></div>
+<div id="tablaMedico"></div>
 
 </div>
 
 <script>
-let cargando=false;
 
 function cargar(){
-if(cargando) return;
-cargando=true;
 
 fetch('/api/solicitudes')
 .then(r=>r.json())
 .then(data=>{
-let cont=document.getElementById("tablaMedico");
-cont.innerHTML="";
+
+let cont = document.getElementById("tablaMedico");
+
+cont.innerHTML = "";
 
 data.forEach(s=>{
-cont.innerHTML+=`
+
+cont.innerHTML += `
+
 <div class="tarjeta-solicitud">
-<b>${s.nombre}</b> - ${s.estado}<br>
-${s.motivo}<br>
 
-${s.estado==="aprobado"?`
+<h3>${s.nombre}</h3>
+
+<p>${s.motivo}</p>
+
+<div class="estado ${s.estado}">
+${s.estado}
+</div>
+
+<br>
+
+${s.estado === "aprobado" ? `
+
 <a href="/atendido/${s.id_solicitud}">
-<button>Atender</button>
-</a>`:""}
+<button>🏥 Atender</button>
+</a>
 
-</div>`;
+` : ``}
+
+</div>
+
+`;
+
 });
 
-cargando=false;
 });
+
 }
 
-setInterval(cargar,3000);
+// ⚡ MÁS RÁPIDO
+setInterval(cargar,1000);
+
 cargar();
+
 </script>
 
 </body>
