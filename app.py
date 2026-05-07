@@ -3,10 +3,11 @@ import mysql.connector
 from fpdf import FPDF
 from datetime import datetime
 import pytz
+import os
 
 app = Flask(__name__)
 
-# 🔥 CONEXION MYSQL
+# 🔥 MYSQL
 
 def conectar_bd():
     return mysql.connector.connect(
@@ -104,7 +105,7 @@ def solicitudes():
         estudiantes=estudiantes
     )
 
-# 🔥 API
+# 🔥 API SOLICITUDES
 
 @app.route('/api/solicitudes')
 def api_solicitudes():
@@ -197,7 +198,7 @@ def atendido(id):
 
     return redirect('/medico')
 
-# 🔥 HISTORIAL
+# 🔥 HISTORIAL CLINICO
 
 @app.route('/historial/<int:id_estudiante>')
 def historial(id_estudiante):
@@ -254,10 +255,14 @@ def descargar_pdf():
     pdf.add_page()
 
     # 🔥 LOGO
-    pdf.image("static/logo.jpg",70,8,70)
+    logo_path = "static/logo.jpg"
+
+    if os.path.exists(logo_path):
+        pdf.image(logo_path,70,8,70)
 
     pdf.ln(50)
 
+    # 🔥 TITULO
     pdf.set_font("Arial","B",20)
 
     pdf.cell(
