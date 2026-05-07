@@ -9,15 +9,11 @@
     --texto:#f8fafc;
 }
 
-/* 🔥 RESET */
-
 *{
     margin:0;
     padding:0;
     box-sizing:border-box;
 }
-
-/* 🔥 BODY */
 
 body{
     background:linear-gradient(135deg,#0f172a,#1e293b);
@@ -30,8 +26,6 @@ body{
     color:var(--texto);
 }
 
-/* 🔥 CONTENEDOR */
-
 .contenedor-app{
     width:100%;
     max-width:430px;
@@ -42,8 +36,6 @@ body{
     animation:fade 0.5s ease;
     backdrop-filter:blur(10px);
 }
-
-/* 🔥 ANIMACIÓN */
 
 @keyframes fade{
     from{
@@ -56,29 +48,20 @@ body{
     }
 }
 
-/* 🔥 LOGO */
-
 .logo{
-    width:120px;
+    width:220px;
     display:block;
     margin:auto;
     margin-bottom:20px;
     animation:float 3s ease-in-out infinite;
+    filter:drop-shadow(0 0 25px rgba(255,255,255,0.3));
 }
 
 @keyframes float{
-    0%{
-        transform:translateY(0px);
-    }
-    50%{
-        transform:translateY(-8px);
-    }
-    100%{
-        transform:translateY(0px);
-    }
+    0%{transform:translateY(0px);}
+    50%{transform:translateY(-8px);}
+    100%{transform:translateY(0px);}
 }
-
-/* 🔥 TITULOS */
 
 h1,h2,h3{
     text-align:center;
@@ -86,13 +69,9 @@ h1,h2,h3{
     color:white;
 }
 
-/* 🔥 CONTENIDO */
-
 .contenido{
     margin-top:20px;
 }
-
-/* 🔥 INPUTS */
 
 input,
 select,
@@ -105,25 +84,12 @@ textarea{
     background:#334155;
     color:white;
     font-size:15px;
-    transition:0.3s;
 }
-
-input:focus,
-select:focus,
-textarea:focus{
-    outline:none;
-    transform:scale(1.02);
-    box-shadow:0 0 10px rgba(56,189,248,0.5);
-}
-
-/* 🔥 TEXTAREA */
 
 textarea{
     resize:none;
     min-height:100px;
 }
-
-/* 🔥 BOTONES */
 
 button{
     width:100%;
@@ -140,35 +106,17 @@ button{
 
 button:hover{
     transform:scale(1.03);
-    opacity:0.95;
 }
-
-button:active{
-    transform:scale(0.98);
-}
-
-/* 🔥 TARJETAS */
 
 .tarjeta-solicitud{
     background:#334155;
     padding:15px;
     border-radius:20px;
     margin-bottom:15px;
-    animation:fade 0.4s ease;
-    transition:0.3s;
 }
-
-.tarjeta-solicitud:hover{
-    transform:translateY(-3px);
-    box-shadow:0 5px 20px rgba(0,0,0,0.3);
-}
-
-/* 🔥 ESTADOS */
 
 .estado{
     font-weight:bold;
-    margin-top:10px;
-    text-transform:capitalize;
 }
 
 .aprobado{
@@ -187,19 +135,9 @@ button:active{
     color:var(--azul);
 }
 
-/* 🔥 TABLAS */
-
 table{
     width:100%;
     border-collapse:collapse;
-    font-size:13px;
-    overflow:hidden;
-    border-radius:15px;
-}
-
-th{
-    background:#334155;
-    color:white;
 }
 
 th,td{
@@ -208,32 +146,16 @@ th,td{
     text-align:left;
 }
 
-tr{
-    background:#1e293b;
-    transition:0.3s;
-}
-
-tr:hover{
-    background:#334155;
-}
-
-/* 🔥 NOTIFICACIONES */
-
 .notificacion-pro{
     position:fixed;
     top:20px;
     right:20px;
     background:linear-gradient(135deg,var(--azul),var(--morado));
     color:white;
-    padding:15px 20px;
+    padding:15px;
     border-radius:15px;
     z-index:999;
-    font-weight:bold;
-    animation:fade 0.3s ease;
-    box-shadow:0 5px 20px rgba(0,0,0,0.4);
 }
-
-/* 🔥 ESCALA DOLOR */
 
 .titulo-dolor{
     display:block;
@@ -267,17 +189,10 @@ tr:hover{
     font-size:18px;
 }
 
-.dolor span:hover{
-    transform:scale(1.08);
-}
-
 .dolor input:checked + span{
     border:3px solid white;
     transform:scale(1.12);
-    box-shadow:0 0 15px rgba(255,255,255,0.5);
 }
-
-/* 🔥 COLORES ESCALA */
 
 .d1 span{background:#22c55e;}
 .d2 span{background:#4ade80;}
@@ -290,22 +205,9 @@ tr:hover{
 .d9 span{background:#dc2626;}
 .d10 span{background:#7f1d1d;}
 
-/* 🔥 LOADER */
-
-.loader{
-    text-align:center;
-    padding:20px;
-    color:var(--azul);
-    font-weight:bold;
-}
-
-/* 🔥 LINKS */
-
 a{
     text-decoration:none;
 }
-
-/* 🔥 RESPONSIVE */
 
 @media(max-width:500px){
 
@@ -317,18 +219,6 @@ a{
         max-width:100%;
         border-radius:0;
         min-height:100vh;
-    }
-
-    .logo{
-        width:100px;
-    }
-
-    table{
-        font-size:12px;
-    }
-
-    button{
-        font-size:14px;
     }
 
 }
