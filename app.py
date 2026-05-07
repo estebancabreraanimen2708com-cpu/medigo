@@ -12,9 +12,10 @@ app = Flask(__name__)
 def conectar_bd():
     return mysql.connector.connect(
         host="TU_HOST",
-        user="TU_USUARIO",
+        user="TU_USER",
         password="TU_PASSWORD",
-        database="TU_DATABASE"
+        database="TU_DATABASE",
+        port=TU_PORT
     )
 
 # 🔥 HORA ECUADOR
@@ -105,7 +106,7 @@ def solicitudes():
         estudiantes=estudiantes
     )
 
-# 🔥 API SOLICITUDES
+# 🔥 API
 
 @app.route('/api/solicitudes')
 def api_solicitudes():
@@ -198,7 +199,7 @@ def atendido(id):
 
     return redirect('/medico')
 
-# 🔥 HISTORIAL CLINICO
+# 🔥 HISTORIAL
 
 @app.route('/historial/<int:id_estudiante>')
 def historial(id_estudiante):
@@ -262,26 +263,13 @@ def descargar_pdf():
 
     pdf.ln(50)
 
-    # 🔥 TITULO
     pdf.set_font("Arial","B",20)
 
-    pdf.cell(
-        200,
-        10,
-        "REPORTE MEDIGO",
-        ln=True,
-        align="C"
-    )
+    pdf.cell(200,10,"REPORTE MEDIGO",ln=True,align="C")
 
     pdf.set_font("Arial","",12)
 
-    pdf.cell(
-        200,
-        10,
-        "Quito - Ecuador",
-        ln=True,
-        align="C"
-    )
+    pdf.cell(200,10,"Quito - Ecuador",ln=True,align="C")
 
     pdf.ln(10)
 
