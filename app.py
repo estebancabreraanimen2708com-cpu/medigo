@@ -6,7 +6,7 @@ import pytz
 
 app = Flask(__name__)
 
-# 🔥 CONEXIÓN MYSQL
+# 🔥 CONEXION MYSQL
 
 def conectar_bd():
     return mysql.connector.connect(
@@ -46,7 +46,6 @@ def login_inspector():
         clave = request.form['clave']
 
         if usuario == "inspector" and clave == "123":
-
             return redirect('/inspector')
 
     return render_template('login_inspector.html')
@@ -62,7 +61,6 @@ def login_medico():
         clave = request.form['clave']
 
         if usuario == "medico" and clave == "123":
-
             return redirect('/medico')
 
     return render_template('login_medico.html')
@@ -106,7 +104,7 @@ def solicitudes():
         estudiantes=estudiantes
     )
 
-# 🔥 API SOLICITUDES
+# 🔥 API
 
 @app.route('/api/solicitudes')
 def api_solicitudes():
@@ -139,7 +137,7 @@ def api_solicitudes():
 def inspector():
     return render_template('inspector.html')
 
-# 🔥 MÉDICO
+# 🔥 MEDICO
 
 @app.route('/medico')
 def medico():
@@ -199,7 +197,7 @@ def atendido(id):
 
     return redirect('/medico')
 
-# 🔥 HISTORIAL CLINICO
+# 🔥 HISTORIAL
 
 @app.route('/historial/<int:id_estudiante>')
 def historial(id_estudiante):
@@ -228,7 +226,7 @@ def historial(id_estudiante):
         historial=historial
     )
 
-# 🔥 PDF PROFESIONAL
+# 🔥 PDF PREMIUM
 
 @app.route('/descargar_pdf')
 def descargar_pdf():
@@ -260,7 +258,6 @@ def descargar_pdf():
 
     pdf.ln(50)
 
-    # 🔥 TITULO
     pdf.set_font("Arial","B",20)
 
     pdf.cell(
