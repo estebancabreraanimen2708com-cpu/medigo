@@ -7,7 +7,7 @@ import pytz
 app = Flask(__name__)
 
 # =========================================
-# 🔥 CONEXION MYSQL
+# 🔥 MYSQL
 # =========================================
 
 def conectar_bd():
@@ -45,7 +45,7 @@ def roles():
     return render_template('roles.html')
 
 # =========================================
-# 🔥 SOLICITUDES (PROFESOR)
+# 🔥 SOLICITUDES
 # =========================================
 
 @app.route('/solicitudes', methods=['GET', 'POST'])
@@ -90,7 +90,7 @@ def solicitudes():
     )
 
 # =========================================
-# 🔥 API SOLICITUDES
+# 🔥 API
 # =========================================
 
 @app.route('/api/solicitudes')
@@ -195,7 +195,7 @@ def atendido(id):
     return redirect('/medico')
 
 # =========================================
-# 🔥 HISTORIAL CLINICO
+# 🔥 HISTORIAL
 # =========================================
 
 @app.route('/historial/<int:id_estudiante>')
@@ -214,7 +214,7 @@ def historial(id_estudiante):
     FROM solicitudes s
     JOIN estudiantes e
     ON s.id_estudiante = e.id_estudiante
-    WHERE e.id_estudiante = %s
+    WHERE e.id_estudiante=%s
     ORDER BY s.fecha DESC
     """, (id_estudiante,))
 
