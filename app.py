@@ -7,9 +7,7 @@ import os
 
 app = Flask(__name__)
 
-# 🔥 CONEXION MYSQL
-# ⚠ AQUI PON TUS DATOS REALES DE RAILWAY
-# NO CAMBIES NADA MAS
+# 🔥 MYSQL
 
 def conectar_bd():
     return mysql.connector.connect(
@@ -52,7 +50,7 @@ def login_inspector():
         if usuario == "inspector" and clave == "123":
             return redirect('/inspector')
 
-    return render_template('login_inspector.html')
+    return render_template('inspector.html')
 
 # 🔥 LOGIN MEDICO
 
@@ -67,7 +65,7 @@ def login_medico():
         if usuario == "medico" and clave == "123":
             return redirect('/medico')
 
-    return render_template('login_medico.html')
+    return render_template('medico.html')
 
 # 🔥 SOLICITUDES
 
