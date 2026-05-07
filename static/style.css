@@ -1,265 +1,167 @@
-/* ========================= */
-/* 🎨 VARIABLES */
-/* ========================= */
-:root {
-    --azul: #0056b3;
-    --azul-oscuro: #003d80;
-    --amarillo: #ffcc00;
-    --blanco: #ffffff;
-    --gris-fondo: #f0f2f5;
-    --texto: #333;
+:root{
+    --fondo:#0f172a;
+    --card:#1e293b;
+    --azul:#38bdf8;
+    --morado:#8b5cf6;
+    --verde:#22c55e;
+    --rojo:#ef4444;
+    --texto:#f8fafc;
 }
 
-/* ========================= */
-/* RESET */
-/* ========================= */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
 }
 
-/* ========================= */
-/* BODY */
-/* ========================= */
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #e9ecef, #f8f9fa);
-    display: flex;
-    justify-content: center;
-    padding: 20px;
+body{
+    background:linear-gradient(135deg,#0f172a,#1e293b);
+    font-family:'Segoe UI',sans-serif;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+    color:var(--texto);
 }
 
-/* ========================= */
-/* CONTENEDOR */
-/* ========================= */
-.contenedor-app {
-    width: 100%;
-    max-width: 420px;
-    background: var(--blanco);
-    border-radius: 35px;
-    overflow: hidden;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-    animation: fadeIn 0.5s ease;
+.contenedor-app{
+    width:100%;
+    max-width:430px;
+    background:rgba(30,41,59,0.95);
+    border-radius:30px;
+    padding:25px;
+    box-shadow:0 10px 40px rgba(0,0,0,0.5);
+    animation:fade 0.5s ease;
 }
 
-/* ========================= */
-/* CABECERA */
-/* ========================= */
-.cabecera-azul {
-    background: linear-gradient(135deg, var(--azul), var(--azul-oscuro));
-    padding: 30px 20px;
-    color: white;
-    text-align: center;
-    border-radius: 0 0 40px 40px;
-}
-
-/* ========================= */
-/* CONTENIDO */
-/* ========================= */
-.contenido {
-    padding: 25px;
-}
-
-/* ========================= */
-/* FORM */
-/* ========================= */
-label {
-    font-weight: bold;
-    margin-bottom: 8px;
-    display: block;
-}
-
-select, textarea, input {
-    width: 100%;
-    padding: 12px;
-    border-radius: 15px;
-    border: 2px solid #eee;
-    background: #f8f9fa;
-    margin-bottom: 15px;
-    transition: 0.2s;
-}
-
-select:focus, textarea:focus, input:focus {
-    border-color: var(--azul);
-    outline: none;
-}
-
-/* ========================= */
-/* ESCALA DOLOR */
-/* ========================= */
-.escala-dolor {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 8px;
-    margin-bottom: 20px;
-}
-
-.nivel-btn {
-    padding: 10px;
-    text-align: center;
-    border-radius: 12px;
-    font-size: 13px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.nivel-btn:hover {
-    transform: scale(1.08);
-}
-
-/* COLORES */
-.n-1, .n-2 { background: #d4edda; color: #155724; }
-.n-3, .n-4, .n-5 { background: #fff3cd; color: #856404; }
-.n-6, .n-7, .n-8 { background: #ffe5d0; color: #854800; }
-.n-9, .n-10 { background: #f8d7da; color: #721c24; }
-
-.nivel-btn input { display: none; }
-
-.nivel-btn input:checked + span {
-    border-bottom: 3px solid var(--azul);
-}
-
-/* ========================= */
-/* TARJETAS */
-/* ========================= */
-.tarjeta-solicitud {
-    background: white;
-    border-radius: 20px;
-    padding: 15px;
-    margin-bottom: 15px;
-    border-left: 6px solid var(--amarillo);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-    transition: 0.2s;
-}
-
-.tarjeta-solicitud:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-}
-
-/* INFO */
-.fila-info {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 8px;
-}
-
-.nombre-est {
-    font-weight: 800;
-    color: var(--azul);
-}
-
-.cuadro-motivo {
-    background: #f8f9fa;
-    padding: 10px;
-    border-radius: 12px;
-    font-size: 0.9em;
-    margin: 8px 0;
-}
-
-/* ========================= */
-/* ESTADOS */
-/* ========================= */
-.estado {
-    padding: 4px 10px;
-    border-radius: 10px;
-    font-size: 0.75rem;
-    font-weight: bold;
-}
-
-.estado-pendiente { background: #fff3cd; color: #856404; }
-.estado-aprobado { background: #d4edda; color: #155724; }
-.estado-rechazado { background: #f8d7da; color: #721c24; }
-
-/* ========================= */
-/* BOTONES */
-/* ========================= */
-.btn-principal {
-    width: 100%;
-    padding: 16px;
-    background: var(--amarillo);
-    color: var(--azul);
-    border: none;
-    border-radius: 50px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.btn-principal:hover {
-    background: #ffd633;
-    transform: scale(1.03);
-}
-
-.btn-secundario {
-    display: block;
-    text-align: center;
-    background: var(--azul);
-    color: white;
-    padding: 14px;
-    border-radius: 50px;
-    font-weight: bold;
-    margin-top: 10px;
-    text-decoration: none;
-}
-
-.btn-secundario:hover {
-    background: var(--azul-oscuro);
-}
-
-/* ========================= */
-/* ANIMACIÓN */
-/* ========================= */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px);}
-    to { opacity: 1; transform: translateY(0);}
-}
-
-/* ========================= */
-/* 📱 RESPONSIVE */
-/* ========================= */
-@media (max-width: 768px) {
-
-    body {
-        padding: 10px;
+@keyframes fade{
+    from{
+        opacity:0;
+        transform:translateY(20px);
     }
-
-    .contenedor-app {
-        max-width: 100%;
-        border-radius: 25px;
-    }
-
-    .contenido {
-        padding: 18px;
-    }
-
-    .escala-dolor {
-        grid-template-columns: repeat(5, 1fr);
-    }
-
-    .btn-principal {
-        font-size: 14px;
-    }
-
-    .tarjeta-solicitud {
-        font-size: 14px;
+    to{
+        opacity:1;
+        transform:translateY(0);
     }
 }
 
-@media (max-width: 480px) {
+.logo{
+    width:120px;
+    display:block;
+    margin:auto;
+    margin-bottom:20px;
+}
 
-    .escala-dolor {
-        grid-template-columns: repeat(3, 1fr);
+h1,h2{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+.contenido{
+    margin-top:20px;
+}
+
+input,
+select,
+textarea{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:15px;
+    margin-bottom:15px;
+    background:#334155;
+    color:white;
+    font-size:15px;
+}
+
+textarea{
+    resize:none;
+    min-height:100px;
+}
+
+button{
+    width:100%;
+    padding:15px;
+    border:none;
+    border-radius:15px;
+    background:linear-gradient(135deg,var(--azul),var(--morado));
+    color:white;
+    font-weight:bold;
+    font-size:15px;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+button:hover{
+    transform:scale(1.03);
+    opacity:0.9;
+}
+
+.botones{
+    display:flex;
+    gap:10px;
+    margin-bottom:20px;
+}
+
+.botones a{
+    flex:1;
+}
+
+.tarjeta-solicitud{
+    background:#334155;
+    padding:15px;
+    border-radius:20px;
+    margin-bottom:15px;
+    animation:fade 0.4s ease;
+}
+
+.estado{
+    font-weight:bold;
+    margin-top:10px;
+}
+
+.aprobado{
+    color:var(--verde);
+}
+
+.rechazado{
+    color:var(--rojo);
+}
+
+.pendiente{
+    color:#facc15;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+}
+
+th,td{
+    padding:10px;
+    border-bottom:1px solid #475569;
+    text-align:left;
+}
+
+.notificacion-pro{
+    position:fixed;
+    top:20px;
+    right:20px;
+    background:var(--morado);
+    padding:15px;
+    border-radius:15px;
+    z-index:999;
+    animation:fade 0.3s ease;
+}
+
+@media(max-width:500px){
+
+    .contenedor-app{
+        max-width:100%;
+        border-radius:0;
+        min-height:100vh;
     }
 
-    .cabecera-azul {
-        font-size: 16px;
-    }
-
-    .btn-principal {
-        font-size: 13px;
-        padding: 12px;
-    }
 }
