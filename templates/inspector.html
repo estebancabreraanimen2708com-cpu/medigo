@@ -1,57 +1,99 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body>
+
 <div class="contenedor-app">
 
-<div class="cabecera-azul">
 <h2>Inspector</h2>
+
+<div class="botones">
+
+<a href="/solicitudes">
+<button>Solicitudes</button>
+</a>
+
+<a href="/logout">
+<button>Salir</button>
+</a>
+
 </div>
 
-<div class="contenido">
-<a href="/logout" class="btn-secundario">Cerrar sesión</a>
-</div>
+<a href="/descargar_pdf">
+<button>📄 Descargar PDF</button>
+</a>
 
-<div id="tablaHoy" class="contenido"></div>
+<br>
+
+<div id="tablaHoy"></div>
 
 </div>
 
 <script>
-let cargando=false;
+
+function sonido(){
+    new Audio("/static/mixkit-correct-answer-tone-2870.wav").play();
+}
 
 function cargar(){
-if(cargando) return;
-cargando=true;
 
 fetch('/api/solicitudes')
 .then(r=>r.json())
 .then(data=>{
+
 let cont=document.getElementById("tablaHoy");
 cont.innerHTML="";
 
 data.forEach(s=>{
+
 cont.innerHTML+=`
+
 <div class="tarjeta-solicitud">
-<b>${s.nombre}</b> - ${s.estado}<br>
-${s.motivo}<br>
+
+<h3>${s.nombre}</h3>
+
+<p>${s.motivo}</p>
+
+<div class="estado ${s.estado}">
+${s.estado}
+</div>
+
+<br>
 
 ${s.estado==="pendiente"?`
-<a href="/aprobar/${s.id_solicitud}"><button>Aprobar</button></a>
-<a href="/rechazar/${s.id_solicitud}"><button>Rechazar</button></a>
-`:``}
 
-</div>`;
+<a href="/aprobar/${s.id_solicitud}">
+<button>✔ Aprobar</button>
+</a>
+
+<br><br>
+
+<a href="/rechazar/${s.id_solicitud}">
+<button>✖ Rechazar</button>
+</a>
+
+`:`
+<b>Solicitud procesada</b>
+`}
+
+</div>
+
+`;
+
 });
 
-cargando=false;
 });
+
 }
 
 setInterval(cargar,3000);
+
 cargar();
+
 </script>
 
 </body>
