@@ -7,15 +7,17 @@ import os
 
 app = Flask(__name__)
 
-# 🔥 MYSQL
+# 🔥 CONEXION MYSQL
+# ⚠ AQUI PON TUS DATOS REALES DE RAILWAY
+# NO CAMBIES NADA MAS
 
 def conectar_bd():
     return mysql.connector.connect(
-        host="TU_HOST",
-        user="TU_USER",
-        password="TU_PASSWORD",
-        database="TU_DATABASE",
-        port=TU_PORT
+        host="TU_HOST_REAL",
+        user="TU_USER_REAL",
+        password="TU_PASSWORD_REAL",
+        database="TU_DATABASE_REAL",
+        port=12345
     )
 
 # 🔥 HORA ECUADOR
@@ -39,7 +41,7 @@ def roles():
 
 # 🔥 LOGIN INSPECTOR
 
-@app.route('/login/inspector', methods=['GET','POST'])
+@app.route('/login/inspector', methods=['GET', 'POST'])
 def login_inspector():
 
     if request.method == 'POST':
@@ -54,7 +56,7 @@ def login_inspector():
 
 # 🔥 LOGIN MEDICO
 
-@app.route('/login/medico', methods=['GET','POST'])
+@app.route('/login/medico', methods=['GET', 'POST'])
 def login_medico():
 
     if request.method == 'POST':
@@ -69,7 +71,7 @@ def login_medico():
 
 # 🔥 SOLICITUDES
 
-@app.route('/solicitudes', methods=['GET','POST'])
+@app.route('/solicitudes', methods=['GET', 'POST'])
 def solicitudes():
 
     conn = conectar_bd()
@@ -87,7 +89,7 @@ def solicitudes():
         INSERT INTO solicitudes
         (id_estudiante,motivo,dolor,estado,fecha)
         VALUES(%s,%s,%s,%s,%s)
-        """,(estudiante,motivo,dolor,"pendiente",fecha))
+        """, (estudiante, motivo, dolor, "pendiente", fecha))
 
         conn.commit()
 
@@ -125,7 +127,7 @@ def api_solicitudes():
     s.fecha
     FROM solicitudes s
     JOIN estudiantes e
-    ON s.id_estudiante=e.id_estudiante
+    ON s.id_estudiante = e.id_estudiante
     ORDER BY s.id_solicitud DESC
     """)
 
@@ -157,7 +159,7 @@ def aprobar(id):
     UPDATE solicitudes
     SET estado='aprobado'
     WHERE id_solicitud=%s
-    """,(id,))
+    """, (id,))
 
     conn.commit()
 
@@ -175,7 +177,7 @@ def rechazar(id):
     UPDATE solicitudes
     SET estado='rechazado'
     WHERE id_solicitud=%s
-    """,(id,))
+    """, (id,))
 
     conn.commit()
 
@@ -193,7 +195,7 @@ def atendido(id):
     UPDATE solicitudes
     SET estado='atendido'
     WHERE id_solicitud=%s
-    """,(id,))
+    """, (id,))
 
     conn.commit()
 
@@ -216,10 +218,10 @@ def historial(id_estudiante):
     s.fecha
     FROM solicitudes s
     JOIN estudiantes e
-    ON s.id_estudiante=e.id_estudiante
+    ON s.id_estudiante = e.id_estudiante
     WHERE e.id_estudiante=%s
     ORDER BY s.fecha DESC
-    """,(id_estudiante,))
+    """, (id_estudiante,))
 
     historial = cursor.fetchall()
 
@@ -228,7 +230,7 @@ def historial(id_estudiante):
         historial=historial
     )
 
-# 🔥 PDF PREMIUM
+# 🔥 PDF
 
 @app.route('/descargar_pdf')
 def descargar_pdf():
@@ -245,7 +247,7 @@ def descargar_pdf():
     s.fecha
     FROM solicitudes s
     JOIN estudiantes e
-    ON s.id_estudiante=e.id_estudiante
+    ON s.id_estudiante = e.id_estudiante
     ORDER BY s.fecha DESC
     """)
 
@@ -255,28 +257,28 @@ def descargar_pdf():
 
     pdf.add_page()
 
-    # 🔥 LOGO
     logo_path = "static/logo.jpg"
 
-    if os.path.exists(logo_path):
-        pdf.image(logo_path,70,8,70)
+    try:
+        pdf.image(logo_path, 70, 8, 70)
+    except:
+        pass
 
     pdf.ln(50)
 
-    pdf.set_font("Arial","B",20)
+    pdf.set_font("Arial", "B", 20)
 
-    pdf.cell(200,10,"REPORTE MEDIGO",ln=True,align="C")
+    pdf.cell(200, 10, "REPORTE MEDIGO", ln=True, align="C")
 
-    pdf.set_font("Arial","",12)
+    pdf.set_font("Arial", "", 12)
 
-    pdf.cell(200,10,"Quito - Ecuador",ln=True,align="C")
+    pdf.cell(200, 10, "Quito - Ecuador", ln=True, align="C")
 
     pdf.ln(10)
 
-    # 🔥 TABLA
-    pdf.set_fill_color(56,189,248)
+    pdf.set_fill_color(56, 189, 248)
 
-    pdf.set_font("Arial","B",11)
+    pdf.set_font("Arial", "B", 11)
 
     pdf.cell(40,10,"Nombre",1,0,"C",True)
     pdf.cell(55,10,"Motivo",1,0,"C",True)
@@ -293,18 +295,6 @@ def descargar_pdf():
         pdf.cell(20,10,str(d["dolor"]),1)
         pdf.cell(30,10,str(d["estado"]),1)
         pdf.cell(45,10,str(d["fecha"]),1,1)
-
-    pdf.ln(20)
-
-    pdf.set_font("Arial","B",12)
-
-    pdf.cell(
-        200,
-        10,
-        "Firma automatica - MediGo",
-        ln=True,
-        align="R"
-    )
 
     archivo = "reporte_medigo.pdf"
 
