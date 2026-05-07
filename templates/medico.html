@@ -10,7 +10,7 @@
 
 <div class="contenedor-app">
 
-<img src="{{ url_for('static', filename='logo.png') }}" class="logo">
+<img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
 
 <h2>Médico</h2>
 
@@ -26,13 +26,13 @@ fetch('/api/solicitudes')
 .then(r=>r.json())
 .then(data=>{
 
-let cont = document.getElementById("tablaMedico");
+let cont=document.getElementById("tablaMedico");
 
-cont.innerHTML = "";
+cont.innerHTML="";
 
 data.forEach(s=>{
 
-cont.innerHTML += `
+cont.innerHTML+=`
 
 <div class="tarjeta-solicitud">
 
@@ -46,13 +46,13 @@ ${s.estado}
 
 <br>
 
-${s.estado === "aprobado" ? `
+${s.estado==="aprobado"?`
 
 <a href="/atendido/${s.id_solicitud}">
 <button>🏥 Atender</button>
 </a>
 
-` : ``}
+`:``}
 
 </div>
 
@@ -64,7 +64,6 @@ ${s.estado === "aprobado" ? `
 
 }
 
-// ⚡ MÁS RÁPIDO
 setInterval(cargar,1000);
 
 cargar();
