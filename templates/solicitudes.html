@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+
     <meta charset="UTF-8">
-    <title>Solicitudes</title>
+
+    <title>Solicitudes Médicas</title>
 
     <link rel="stylesheet"
     href="{{ url_for('static', filename='style.css') }}">
 
 </head>
+
 <body>
 
 <div class="contenedor-app">
@@ -19,6 +22,8 @@
     <h1>Solicitudes Médicas</h1>
 
     <form method="POST">
+
+        <label>Estudiante</label>
 
         <select name="estudiante" required>
 
@@ -36,17 +41,20 @@
 
         </select>
 
+        <label>Motivo</label>
+
         <textarea
         name="motivo"
-        placeholder="Motivo"
+        placeholder="Escriba el motivo"
         required></textarea>
+
+        <label>Escala del dolor</label>
 
         <input
         type="number"
         name="dolor"
         min="1"
         max="10"
-        placeholder="Escala del dolor"
         required>
 
         <button type="submit">
