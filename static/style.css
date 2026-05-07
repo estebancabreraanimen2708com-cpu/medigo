@@ -53,7 +53,7 @@ body{
     margin-bottom:20px;
 }
 
-h1,h2{
+h1,h2,h3{
     text-align:center;
     margin-bottom:20px;
 }
@@ -96,16 +96,6 @@ button{
 button:hover{
     transform:scale(1.03);
     opacity:0.9;
-}
-
-.botones{
-    display:flex;
-    gap:10px;
-    margin-bottom:20px;
-}
-
-.botones a{
-    flex:1;
 }
 
 .tarjeta-solicitud{
