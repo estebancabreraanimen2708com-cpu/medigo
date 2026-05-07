@@ -8,6 +8,21 @@
 
 <body>
 
+<!-- 🔥 PARTICULAS -->
+<div class="particulas">
+
+<span style="left:10%; animation-duration:12s;"></span>
+<span style="left:20%; animation-duration:18s;"></span>
+<span style="left:30%; animation-duration:10s;"></span>
+<span style="left:40%; animation-duration:15s;"></span>
+<span style="left:50%; animation-duration:20s;"></span>
+<span style="left:60%; animation-duration:13s;"></span>
+<span style="left:70%; animation-duration:17s;"></span>
+<span style="left:80%; animation-duration:11s;"></span>
+<span style="left:90%; animation-duration:16s;"></span>
+
+</div>
+
 <div class="contenedor-app">
 
 <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
@@ -26,25 +41,25 @@
 
 <script>
 
-let ultimaCantidad=0;
+let ultimaCantidad = 0;
 
 function sonido(){
-new Audio("/static/mixkit-correct-answer-tone-2870.wav").play();
+    new Audio("/static/mixkit-correct-answer-tone-2870.wav").play();
 }
 
 function alerta(msg){
 
-let div=document.createElement("div");
+    let div=document.createElement("div");
 
-div.className="notificacion-pro";
+    div.className="notificacion-pro";
 
-div.innerText=msg;
+    div.innerText=msg;
 
-document.body.appendChild(div);
+    document.body.appendChild(div);
 
-setTimeout(()=>{
-div.remove();
-},3000);
+    setTimeout(()=>{
+        div.remove();
+    },3000);
 
 }
 
@@ -54,17 +69,17 @@ fetch('/api/solicitudes')
 .then(r=>r.json())
 .then(data=>{
 
-if(data.length>ultimaCantidad){
+if(data.length > ultimaCantidad){
 
-let nueva=data[0];
+    let nueva=data[0];
 
-if(nueva.estado==="pendiente"){
+    if(nueva.estado==="pendiente"){
 
-sonido();
+        sonido();
 
-alerta("Nueva solicitud");
+        alerta("🚨 Nueva solicitud médica");
 
-}
+    }
 
 }
 
@@ -83,6 +98,14 @@ cont.innerHTML+=`
 <h3>${s.nombre}</h3>
 
 <p>${s.motivo}</p>
+
+<p><b>Dolor:</b> ${s.dolor}</p>
+
+${s.dolor >= 8 ? `
+<div class="urgente">
+🚨 URGENTE
+</div>
+` : ``}
 
 <div class="estado ${s.estado}">
 ${s.estado}
