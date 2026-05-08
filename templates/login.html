@@ -1,32 +1,44 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <meta charset="UTF-8">
+
+    <title>Login</title>
+
+    <link rel="stylesheet"
+    href="{{ url_for('static', filename='style.css') }}">
+
 </head>
 
 <body>
 
-<div class="contenedor-app">
+<div class="contenedor">
 
-<div class="cabecera-azul">
-<h2>Login {{ rol }}</h2>
-</div>
+    <h1>
+        LOGIN {{ rol.upper() }}
+    </h1>
 
-<div class="contenido">
+    <form method="POST">
 
-<form method="POST">
-<input type="text" name="user" placeholder="Usuario" required>
-<input type="password" name="pass" placeholder="Contraseña" required>
+        <input
+        type="text"
+        name="usuario"
+        placeholder="Usuario"
+        required>
 
-<button class="btn-principal">Entrar</button>
-</form>
+        <input
+        type="password"
+        name="password"
+        placeholder="Contraseña"
+        required>
 
-{% if error %}
-<p style="color:red;">{{ error }}</p>
-{% endif %}
+        <button type="submit" class="btn">
+            INGRESAR
+        </button>
 
-</div>
+    </form>
+
 </div>
 
 </body>
