@@ -1,97 +1,33 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-<title>Médico</title>
+    <meta charset="UTF-8">
+    <title>Médico</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
 <body>
 
-<!-- 🔥 PARTICULAS -->
-<div class="particulas">
+<div class="contenedor">
 
-<span style="left:10%; animation-duration:12s;"></span>
-<span style="left:20%; animation-duration:18s;"></span>
-<span style="left:30%; animation-duration:10s;"></span>
-<span style="left:40%; animation-duration:15s;"></span>
-<span style="left:50%; animation-duration:20s;"></span>
-<span style="left:60%; animation-duration:13s;"></span>
-<span style="left:70%; animation-duration:17s;"></span>
-<span style="left:80%; animation-duration:11s;"></span>
-<span style="left:90%; animation-duration:16s;"></span>
+    <h1>Médico</h1>
 
-</div>
+    <table>
 
-<div class="contenedor-app">
+        <tr>
+            <th>Nombre</th>
+            <th>Motivo</th>
+            <th>Estado</th>
+        </tr>
 
-<img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
+        <tr>
+            <td>Ejemplo</td>
+            <td>Dolor</td>
+            <td>Pendiente</td>
+        </tr>
 
-<h2>Médico</h2>
-
-<div id="tablaMedico"></div>
+    </table>
 
 </div>
-
-<script>
-
-function cargar(){
-
-fetch('/api/solicitudes')
-.then(r=>r.json())
-.then(data=>{
-
-let cont=document.getElementById("tablaMedico");
-
-cont.innerHTML="";
-
-data.forEach(s=>{
-
-cont.innerHTML+=`
-
-<div class="tarjeta-solicitud">
-
-<h3>${s.nombre}</h3>
-
-<p>${s.motivo}</p>
-
-<p><b>Dolor:</b> ${s.dolor}</p>
-
-${s.dolor >= 8 ? `
-<div class="urgente">
-🚨 URGENTE
-</div>
-` : ``}
-
-<div class="estado ${s.estado}">
-${s.estado}
-</div>
-
-<br>
-
-${s.estado==="aprobado"?`
-
-<a href="/atendido/${s.id_solicitud}">
-<button>🏥 Atender</button>
-</a>
-
-`:``}
-
-</div>
-
-`;
-
-});
-
-});
-
-}
-
-setInterval(cargar,1000);
-
-cargar();
-
-</script>
 
 </body>
 </html>
