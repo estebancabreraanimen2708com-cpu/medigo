@@ -2,12 +2,12 @@
 <html lang="es">
 <head>
 
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
 
-    <title>Inspector</title>
+<title>Inspector</title>
 
-    <link rel="stylesheet"
-    href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet"
+href="{{ url_for('static', filename='style.css') }}">
 
 </head>
 
@@ -15,23 +15,71 @@
 
 <div class="contenedor">
 
-    <h1>Panel Inspector</h1>
+<h1>Panel Inspector</h1>
 
-    <table>
+<a href="/pdf">
 
-        <tr>
-            <th>Nombre</th>
-            <th>Motivo</th>
-            <th>Estado</th>
-        </tr>
+<button class="btn pdf">
+DESCARGAR PDF
+</button>
 
-        <tr>
-            <td>Ejemplo</td>
-            <td>Dolor de cabeza</td>
-            <td>Pendiente</td>
-        </tr>
+</a>
 
-    </table>
+<table>
+
+<tr>
+<th>Nombre</th>
+<th>Motivo</th>
+<th>Dolor</th>
+<th>Estado</th>
+<th>Acciones</th>
+</tr>
+
+{% for s in solicitudes %}
+
+<tr>
+
+<td>{{ s.nombre }}</td>
+
+<td>{{ s.motivo }}</td>
+
+<td>{{ s.dolor }}</td>
+
+<td>{{ s.estado }}</td>
+
+<td>
+
+{% if s.estado == "Pendiente" %}
+
+<a href="/aprobar/{{ s.id_solicitud }}">
+
+<button class="aprobar">
+✔
+</button>
+
+</a>
+
+<a href="/rechazar/{{ s.id_solicitud }}">
+
+<button class="rechazar">
+✖
+</button>
+
+</a>
+
+{% else %}
+
+{{ s.estado }}
+
+{% endif %}
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
 
 </div>
 
