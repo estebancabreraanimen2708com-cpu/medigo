@@ -1,25 +1,42 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+
     <meta charset="UTF-8">
+
     <title>Solicitudes</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <link rel="stylesheet"
+    href="{{ url_for('static', filename='style.css') }}">
+
 </head>
+
 <body>
 
 <div class="contenedor">
 
-    <h1>Solicitudes</h1>
+    <h1>Solicitudes Médicas</h1>
 
     <form>
 
-        <select>
-            <option>Seleccionar estudiante</option>
+        <select required>
+
+            <option>
+                Seleccionar estudiante
+            </option>
+
         </select>
 
-        <textarea placeholder="Motivo"></textarea>
+        <textarea
+        placeholder="Motivo"></textarea>
 
-        <button class="btn">Enviar</button>
+        <input
+        type="number"
+        placeholder="Dolor 1-10">
+
+        <button class="btn">
+            ENVIAR
+        </button>
 
     </form>
 
