@@ -34,7 +34,8 @@
 </div>
 
 <script>
-let ultimaCantidad = 0;
+let idsVistos = new Set();
+let primeraCarga = true;
 
 function sonido(){
     new Audio("/static/mixkit-correct-answer-tone-2870.wav").play();
@@ -46,7 +47,6 @@ function notificar(mensaje){
             body: mensaje
         });
     }
-
     sonido();
 }
 
@@ -60,16 +60,16 @@ fetch('/api/solicitudes')
 .then(r => r.json())
 .then(data => {
 
-    if(ultimaCantidad !== 0 && data.length > ultimaCantidad){
-        notificar("🔔 Nueva solicitud médica");
-    }
-
-    ultimaCantidad = data.length;
-
     let tabla = document.getElementById("tablaInspector");
     tabla.innerHTML = "";
 
     data.forEach(s => {
+
+        if(!primeraCarga && !idsVistos.has(s.id_solicitud) && s.estado === "Pendiente"){
+            notificar("🔔 Nueva solicitud médica de " + s.nombre);
+        }
+
+        idsVistos.add(s.id_solicitud);
 
         let acciones = "";
 
@@ -97,6 +97,8 @@ fetch('/api/solicitudes')
         </tr>
         `;
     });
+
+    primeraCarga = false;
 });
 }
 
