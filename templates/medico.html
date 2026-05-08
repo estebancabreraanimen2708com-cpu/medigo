@@ -64,26 +64,25 @@ fetch('/api/solicitudes')
 
     data.forEach(s => {
 
-        let accion = "";
+        let accion = "-";
 
-        if(s.estado === "Aprobado"){
+        if(
+            s.estado.includes(
+                "Estudiante yendo al medico"
+            )
+        ){
 
             accion = `
 
-            <a href="/atendido/${s.id_solicitud}">
+            <a href="/llego/${s.id_solicitud}">
 
                 <button class="aprobar">
-                Atendido
+                Estudiante llegó al médico
                 </button>
 
             </a>
 
             `;
-        }
-
-        else{
-
-            accion = "-";
         }
 
         tabla.innerHTML += `
