@@ -5,24 +5,159 @@
 }
 
 body{
-
     font-family:Arial, Helvetica, sans-serif;
 
-    background:linear-gradient(
-        135deg,
-        #0f172a,
-        #1e293b,
-        #334155
-    );
+    background:
+        radial-gradient(circle at 20% 20%, rgba(56,189,248,.20), transparent 25%),
+        radial-gradient(circle at 80% 80%, rgba(139,92,246,.20), transparent 25%),
+        linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px),
+        linear-gradient(135deg,#0f172a,#1e293b,#334155);
+
+    background-size:
+        cover,
+        cover,
+        42px 42px,
+        42px 42px,
+        cover;
 
     min-height:100vh;
-
     display:flex;
     justify-content:center;
     align-items:center;
-
     padding:30px;
+    overflow-x:hidden;
+    position:relative;
+}
 
+/* ==============================
+   LINEAS MÉDICAS NEON
+============================== */
+
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:-2;
+
+    background:
+        linear-gradient(90deg, transparent 0 48%, rgba(56,189,248,.14) 50%, transparent 52%),
+        linear-gradient(0deg, transparent 0 48%, rgba(139,92,246,.12) 50%, transparent 52%);
+
+    background-size:140px 140px;
+    animation:moverGrid 14s linear infinite;
+}
+
+body::after{
+    content:"✚      ⚕      ✚      ⚕      ✚      ⚕";
+    position:fixed;
+    bottom:10%;
+    left:-20%;
+    width:140%;
+    color:rgba(56,189,248,.12);
+    font-size:70px;
+    letter-spacing:35px;
+    pointer-events:none;
+    z-index:-1;
+    animation:medLine 18s linear infinite;
+    text-shadow:0 0 20px rgba(56,189,248,.45);
+}
+
+@keyframes moverGrid{
+    from{
+        background-position:0 0;
+    }
+    to{
+        background-position:140px 140px;
+    }
+}
+
+@keyframes medLine{
+    from{
+        transform:translateX(-10%);
+    }
+    to{
+        transform:translateX(10%);
+    }
+}
+
+/* ==============================
+   PARTÍCULAS SIN HTML EXTRA
+============================== */
+
+.contenedor::before,
+.contenedor::after{
+    content:"";
+    position:fixed;
+    border-radius:50%;
+    pointer-events:none;
+    z-index:-1;
+    opacity:.55;
+    filter:blur(1px);
+}
+
+.contenedor::before{
+    width:9px;
+    height:9px;
+    left:12%;
+    bottom:-20px;
+    background:#38bdf8;
+    box-shadow:
+        90px -40px #8b5cf6,
+        180px 20px #22c55e,
+        280px -80px #38bdf8,
+        390px 10px #8b5cf6,
+        520px -60px #38bdf8,
+        650px 15px #22c55e,
+        790px -70px #8b5cf6,
+        920px -20px #38bdf8;
+    animation:particulas1 10s linear infinite;
+}
+
+.contenedor::after{
+    width:7px;
+    height:7px;
+    right:10%;
+    bottom:-20px;
+    background:#8b5cf6;
+    box-shadow:
+        -80px -20px #38bdf8,
+        -160px 30px #8b5cf6,
+        -260px -60px #22c55e,
+        -370px 5px #38bdf8,
+        -490px -90px #8b5cf6,
+        -610px -10px #22c55e,
+        -760px -80px #38bdf8;
+    animation:particulas2 13s linear infinite;
+}
+
+@keyframes particulas1{
+    from{
+        transform:translateY(0) scale(.8);
+        opacity:.15;
+    }
+    30%{
+        opacity:.65;
+    }
+    to{
+        transform:translateY(-110vh) scale(1.2);
+        opacity:0;
+    }
+}
+
+@keyframes particulas2{
+    from{
+        transform:translateY(0) scale(.7);
+        opacity:.12;
+    }
+    30%{
+        opacity:.6;
+    }
+    to{
+        transform:translateY(-110vh) scale(1.1);
+        opacity:0;
+    }
 }
 
 /* =========================================
@@ -30,27 +165,26 @@ body{
 ========================================= */
 
 .contenedor{
-
     width:100%;
     max-width:1000px;
-
-    background:rgba(255,255,255,.08);
-
-    backdrop-filter:blur(10px);
-
-    border:1px solid rgba(255,255,255,.2);
-
+    background:rgba(15,23,42,.82);
+    backdrop-filter:blur(14px);
+    border:1px solid rgba(56,189,248,.28);
     border-radius:25px;
-
     padding:40px;
-
     box-shadow:
-    0 0 25px rgba(0,0,0,.3);
-
+        0 0 25px rgba(0,0,0,.35),
+        0 0 35px rgba(56,189,248,.10);
     color:white;
-
     animation:entrada 1s ease;
+    position:relative;
+    overflow:hidden;
+}
 
+.contenedor:hover{
+    box-shadow:
+        0 0 25px rgba(0,0,0,.35),
+        0 0 45px rgba(56,189,248,.20);
 }
 
 /* =========================================
@@ -58,17 +192,14 @@ body{
 ========================================= */
 
 @keyframes entrada{
-
     from{
         opacity:0;
         transform:translateY(20px);
     }
-
     to{
         opacity:1;
         transform:translateY(0);
     }
-
 }
 
 /* =========================================
@@ -76,15 +207,24 @@ body{
 ========================================= */
 
 .logo{
-
     width:180px;
-
     display:block;
-
     margin:auto;
-
     margin-bottom:20px;
+    filter:drop-shadow(0 0 18px rgba(56,189,248,.35));
+    animation:flotarLogo 3s ease-in-out infinite;
+}
 
+@keyframes flotarLogo{
+    0%{
+        transform:translateY(0);
+    }
+    50%{
+        transform:translateY(-7px);
+    }
+    100%{
+        transform:translateY(0);
+    }
 }
 
 /* =========================================
@@ -92,20 +232,21 @@ body{
 ========================================= */
 
 h1{
-
     text-align:center;
-
     margin-bottom:20px;
-
     font-size:40px;
+    text-shadow:0 0 18px rgba(56,189,248,.28);
+}
 
+h2{
+    text-align:center;
+    margin-top:30px;
+    margin-bottom:15px;
 }
 
 h3{
-
     margin-top:25px;
     margin-bottom:15px;
-
 }
 
 /* =========================================
@@ -115,51 +256,43 @@ h3{
 input,
 select,
 textarea{
-
     width:100%;
-
     padding:15px;
-
     border:none;
-
     border-radius:15px;
-
     margin-top:15px;
-
     outline:none;
-
-    background:rgba(255,255,255,.15);
-
+    background:rgba(255,255,255,.14);
     color:white;
-
     font-size:16px;
+    border:1px solid rgba(255,255,255,.15);
+    transition:.3s;
+}
 
+input:focus,
+select:focus,
+textarea:focus{
+    border-color:#38bdf8;
+    box-shadow:0 0 15px rgba(56,189,248,.35);
+    transform:scale(1.01);
 }
 
 textarea{
-
     resize:none;
     height:120px;
-
 }
 
 input::placeholder,
 textarea::placeholder{
-
     color:#ddd;
-
 }
 
 select{
-
     color:white;
-
 }
 
 option{
-
     color:black;
-
 }
 
 /* =========================================
@@ -167,33 +300,37 @@ option{
 ========================================= */
 
 .btn{
-
     width:100%;
-
     padding:15px;
-
     border:none;
-
     border-radius:15px;
-
     margin-top:20px;
-
     font-size:18px;
-
     font-weight:bold;
-
     cursor:pointer;
-
     transition:.3s;
-
     color:white;
+    position:relative;
+    overflow:hidden;
+}
 
+.btn::before{
+    content:"";
+    position:absolute;
+    top:0;
+    left:-100%;
+    width:100%;
+    height:100%;
+    background:linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent);
+    transition:.5s;
+}
+
+.btn:hover::before{
+    left:100%;
 }
 
 .btn:hover{
-
     transform:scale(1.03);
-
 }
 
 /* =========================================
@@ -201,27 +338,19 @@ option{
 ========================================= */
 
 .profesor{
-
-    background:#3498db;
-
+    background:linear-gradient(135deg,#2563eb,#38bdf8);
 }
 
 .inspector{
-
-    background:#f39c12;
-
+    background:linear-gradient(135deg,#f59e0b,#f97316);
 }
 
 .medico{
-
-    background:#2ecc71;
-
+    background:linear-gradient(135deg,#16a34a,#22c55e);
 }
 
 .pdf{
-
-    background:#9b59b6;
-
+    background:linear-gradient(135deg,#7c3aed,#a855f7);
 }
 
 /* =========================================
@@ -229,39 +358,29 @@ option{
 ========================================= */
 
 table{
-
     width:100%;
-
     border-collapse:collapse;
-
     margin-top:25px;
-
     overflow:hidden;
-
     border-radius:15px;
-
 }
 
 th{
-
-    background:#2563eb;
-
+    background:linear-gradient(135deg,#2563eb,#38bdf8);
     color:white;
-
     padding:15px;
-
+    font-size:14px;
 }
 
 td{
-
     background:rgba(255,255,255,.08);
-
     padding:15px;
-
     text-align:center;
-
     border-bottom:1px solid rgba(255,255,255,.1);
+}
 
+tr:hover td{
+    background:rgba(56,189,248,.12);
 }
 
 /* =========================================
@@ -269,53 +388,34 @@ td{
 ========================================= */
 
 .aprobar{
-
     background:#2ecc71;
-
     border:none;
-
     padding:10px 14px;
-
     border-radius:10px;
-
     color:white;
-
     cursor:pointer;
-
     margin-right:5px;
-
     transition:.3s;
-
 }
 
 .aprobar:hover{
-
     transform:scale(1.1);
-
+    box-shadow:0 0 12px rgba(46,204,113,.6);
 }
 
 .rechazar{
-
     background:#e74c3c;
-
     border:none;
-
     padding:10px 14px;
-
     border-radius:10px;
-
     color:white;
-
     cursor:pointer;
-
     transition:.3s;
-
 }
 
 .rechazar:hover{
-
     transform:scale(1.1);
-
+    box-shadow:0 0 12px rgba(231,76,60,.6);
 }
 
 /* =========================================
@@ -323,54 +423,33 @@ td{
 ========================================= */
 
 .dolor-container{
-
     display:flex;
-
     flex-wrap:wrap;
-
     justify-content:center;
-
     gap:12px;
-
     margin-top:20px;
-
 }
 
 .dolor-container input{
-
     display:none;
-
 }
 
 .dolor{
-
     width:50px;
     height:50px;
-
     border-radius:50%;
-
     display:flex;
-
     align-items:center;
-
     justify-content:center;
-
     font-weight:bold;
-
     color:white;
-
     cursor:pointer;
-
     transition:.3s;
-
     font-size:18px;
-
 }
 
 .dolor:hover{
-
     transform:scale(1.12);
-
 }
 
 /* =========================================
@@ -380,31 +459,23 @@ td{
 .dolor1,
 .dolor2,
 .dolor3{
-
     background:#22c55e;
-
 }
 
 .dolor4,
 .dolor5,
 .dolor6{
-
     background:#eab308;
-
 }
 
 .dolor7,
 .dolor8{
-
     background:#f97316;
-
 }
 
 .dolor9,
 .dolor10{
-
     background:#ef4444;
-
 }
 
 /* =========================================
@@ -412,14 +483,10 @@ td{
 ========================================= */
 
 input[type="radio"]:checked + .dolor{
-
     border:4px solid white;
-
     transform:scale(1.15);
-
     box-shadow:
-    0 0 20px rgba(255,255,255,.6);
-
+        0 0 20px rgba(255,255,255,.6);
 }
 
 /* =========================================
@@ -427,30 +494,41 @@ input[type="radio"]:checked + .dolor{
 ========================================= */
 
 @media(max-width:700px){
+    body{
+        padding:12px;
+        align-items:flex-start;
+    }
 
     .contenedor{
-
         padding:20px;
-
+        border-radius:18px;
+        overflow-x:auto;
     }
 
     h1{
-
         font-size:30px;
+    }
 
+    .logo{
+        width:140px;
     }
 
     table{
-
         font-size:12px;
-
+        min-width:650px;
     }
 
     td,
     th{
-
         padding:10px;
-
     }
 
+    .btn{
+        font-size:15px;
+    }
+
+    .dolor{
+        width:44px;
+        height:44px;
+    }
 }
