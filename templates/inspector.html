@@ -13,10 +13,15 @@
 
 <h1>Panel Inspector</h1>
 
+<button type="button" class="btn medico" onclick="activarAlertas()">
+🔔 Activar notificaciones
+</button>
+
 <a href="/pdf">
 <button class="btn pdf">📄 DESCARGAR PDF</button>
 </a>
 
+<div class="tabla-scroll">
 <table>
 <thead>
 <tr>
@@ -31,26 +36,43 @@
 
 <tbody id="tablaInspector"></tbody>
 </table>
+</div>
 
 </div>
 
 <script>
 let idsVistos = new Set();
 let primeraCarga = true;
+let audioActivado = false;
+let audio = new Audio("/static/mixkit-correct-answer-tone-2870.wav");
+
+function activarAlertas(){
+    audio.play().then(() => {
+        audio.pause();
+        audio.currentTime = 0;
+        audioActivado = true;
+        alert("Notificaciones y sonido activados");
+    }).catch(() => {
+        alert("Toca otra vez para activar el sonido");
+    });
+
+    if("Notification" in window && Notification.permission !== "granted"){
+        Notification.requestPermission();
+    }
+}
 
 function sonido(){
-    new Audio("/static/mixkit-correct-answer-tone-2870.wav").play();
+    if(audioActivado){
+        audio.currentTime = 0;
+        audio.play().catch(() => {});
+    }
 }
 
 function notificar(mensaje){
-    if(Notification.permission === "granted"){
+    if("Notification" in window && Notification.permission === "granted"){
         new Notification("MediGo", { body: mensaje });
     }
     sonido();
-}
-
-if(Notification.permission !== "granted"){
-    Notification.requestPermission();
 }
 
 function cargarInspector(){
