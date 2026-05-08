@@ -1,28 +1,21 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-<title>MediGo</title>
+    <meta charset="UTF-8">
+    <title>MEDIGO</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
 <body>
 
-<div class="contenedor-app">
+<div class="contenedor">
 
-<img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
+    <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
 
-<h1>MediGo</h1>
+    <h1>MEDIGO</h1>
 
-<p style="text-align:center;">
-Sistema médico estudiantil
-</p>
-
-<br>
-
-<a href="/roles">
-<button>Iniciar</button>
-</a>
+    <a href="/roles">
+        <button class="btn">INICIAR</button>
+    </a>
 
 </div>
 
