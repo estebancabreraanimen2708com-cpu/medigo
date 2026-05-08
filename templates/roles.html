@@ -1,10 +1,16 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+
     <meta charset="UTF-8">
+
     <title>Roles</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <link rel="stylesheet"
+    href="{{ url_for('static', filename='style.css') }}">
+
 </head>
+
 <body>
 
 <div class="contenedor">
@@ -12,15 +18,27 @@
     <h1>Selecciona un Rol</h1>
 
     <a href="/solicitudes">
-        <button class="btn">PROFESOR</button>
+
+        <button class="btn profesor">
+            👨‍🏫 PROFESOR
+        </button>
+
     </a>
 
-    <a href="/inspector">
-        <button class="btn">INSPECTOR</button>
+    <a href="/login/inspector">
+
+        <button class="btn inspector">
+            🕵️ INSPECTOR
+        </button>
+
     </a>
 
-    <a href="/medico">
-        <button class="btn">MÉDICO</button>
+    <a href="/login/medico">
+
+        <button class="btn medico">
+            🩺 MÉDICO
+        </button>
+
     </a>
 
 </div>
