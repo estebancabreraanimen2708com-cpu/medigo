@@ -1,42 +1,17 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-<title>Historial</title>
+    <meta charset="UTF-8">
+    <title>Historial</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
 <body>
 
-<div class="contenedor-app">
+<div class="contenedor">
 
-<img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
+    <h1>Historial</h1>
 
-<h2>Historial Clínico</h2>
-
-<a href="/inspector">
-<button>⬅ Volver</button>
-</a>
-
-<br><br>
-
-{% for h in historial %}
-
-<div class="tarjeta-solicitud">
-
-<h3>{{ h.nombre }}</h3>
-
-<p>{{ h.motivo }}</p>
-
-<p><b>Dolor:</b> {{ h.dolor }}</p>
-
-<p><b>Estado:</b> {{ h.estado }}</p>
-
-<p><b>Fecha:</b> {{ h.fecha }}</p>
-
-</div>
-
-{% endfor %}
+    <p>Historial clínico del estudiante</p>
 
 </div>
 
