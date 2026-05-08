@@ -7,10 +7,6 @@ import os
 
 app = Flask(__name__)
 
-# =========================================
-# MYSQL
-# =========================================
-
 def conectar_bd():
     return mysql.connector.connect(
         host="roundhouse.proxy.rlwy.net",
@@ -25,10 +21,6 @@ ecuador = pytz.timezone("America/Guayaquil")
 def fecha_ecuador():
     return datetime.now(ecuador).strftime("%Y-%m-%d %H:%M:%S")
 
-# =========================================
-# INICIO
-# =========================================
-
 @app.route('/')
 def inicio():
     return render_template('inicio.html')
@@ -36,10 +28,6 @@ def inicio():
 @app.route('/roles')
 def roles():
     return render_template('roles.html')
-
-# =========================================
-# LOGIN
-# =========================================
 
 @app.route('/login/<rol>', methods=['GET', 'POST'])
 def login(rol):
@@ -51,15 +39,11 @@ def login(rol):
         usuario = request.form['usuario']
         password = request.form['password']
 
-        if rol == "inspector":
+        if rol == "inspector" and usuario == "inspector" and password == "123":
+            return redirect('/inspector')
 
-            if usuario == "inspector" and password == "123":
-                return redirect('/inspector')
-
-        if rol == "medico":
-
-            if usuario == "medico" and password == "123":
-                return redirect('/medico')
+        if rol == "medico" and usuario == "medico" and password == "123":
+            return redirect('/medico')
 
         error = "Usuario o contraseña incorrectos"
 
@@ -68,10 +52,6 @@ def login(rol):
         rol=rol,
         error=error
     )
-
-# =========================================
-# SOLICITUDES
-# =========================================
 
 @app.route('/solicitudes', methods=['GET', 'POST'])
 def solicitudes():
@@ -135,10 +115,6 @@ def solicitudes():
         estudiantes=estudiantes
     )
 
-# =========================================
-# API
-# =========================================
-
 @app.route('/api/solicitudes')
 def api_solicitudes():
 
@@ -175,25 +151,13 @@ def api_solicitudes():
 
     return jsonify(solicitudes)
 
-# =========================================
-# INSPECTOR
-# =========================================
-
 @app.route('/inspector')
 def inspector():
     return render_template('inspector.html')
 
-# =========================================
-# MEDICO
-# =========================================
-
 @app.route('/medico')
 def medico():
     return render_template('medico.html')
-
-# =========================================
-# APROBAR
-# =========================================
 
 @app.route('/aprobar/<int:id>')
 def aprobar(id):
@@ -201,33 +165,21 @@ def aprobar(id):
     conn = conectar_bd()
     cursor = conn.cursor()
 
-    texto = (
-        "Estudiante yendo al medico | "
-        + fecha_ecuador()
-    )
-
     cursor.execute("""
 
     UPDATE solicitudes
 
-    SET estado=%s
+    SET estado='Aprobado'
 
     WHERE id_solicitud=%s
 
-    """, (
-        texto,
-        id
-    ))
+    """, (id,))
 
     conn.commit()
 
     conn.close()
 
     return redirect('/inspector')
-
-# =========================================
-# RECHAZAR
-# =========================================
 
 @app.route('/rechazar/<int:id>')
 def rechazar(id):
@@ -235,23 +187,15 @@ def rechazar(id):
     conn = conectar_bd()
     cursor = conn.cursor()
 
-    texto = (
-        "Estudiante se queda en clases | "
-        + fecha_ecuador()
-    )
-
     cursor.execute("""
 
     UPDATE solicitudes
 
-    SET estado=%s
+    SET estado='Rechazado'
 
     WHERE id_solicitud=%s
 
-    """, (
-        texto,
-        id
-    ))
+    """, (id,))
 
     conn.commit()
 
@@ -259,43 +203,27 @@ def rechazar(id):
 
     return redirect('/inspector')
 
-# =========================================
-# LLEGO AL MEDICO
-# =========================================
-
-@app.route('/llego/<int:id>')
-def llego(id):
+@app.route('/atendido/<int:id>')
+def atendido(id):
 
     conn = conectar_bd()
     cursor = conn.cursor()
-
-    texto = (
-        "Estudiante llego al medico | "
-        + fecha_ecuador()
-    )
 
     cursor.execute("""
 
     UPDATE solicitudes
 
-    SET estado=%s
+    SET estado='Atendido'
 
     WHERE id_solicitud=%s
 
-    """, (
-        texto,
-        id
-    ))
+    """, (id,))
 
     conn.commit()
 
     conn.close()
 
     return redirect('/medico')
-
-# =========================================
-# PDF
-# =========================================
 
 @app.route('/pdf')
 def pdf():
@@ -336,10 +264,21 @@ def pdf():
 
     pdf.add_page()
 
-    if os.path.exists("static/logo.jpg"):
-        pdf.image("static/logo.jpg", 75, 8, 60)
+    try:
 
-    pdf.ln(45)
+        if os.path.exists("static/logo.jpg"):
+
+            pdf.image(
+                "static/logo.jpg",
+                75,
+                8,
+                60
+            )
+
+            pdf.ln(45)
+
+    except:
+        pdf.ln(10)
 
     pdf.set_font("Arial", "B", 18)
 
@@ -351,7 +290,17 @@ def pdf():
         align="C"
     )
 
-    pdf.ln(10)
+    pdf.set_font("Arial", "", 11)
+
+    pdf.cell(
+        0,
+        8,
+        "Fecha de descarga: " + fecha_ecuador(),
+        ln=True,
+        align="C"
+    )
+
+    pdf.ln(8)
 
     pdf.set_font("Arial", "", 10)
 
@@ -373,10 +322,6 @@ def pdf():
         archivo,
         as_attachment=True
     )
-
-# =========================================
-# RUN
-# =========================================
 
 if __name__ == '__main__':
     app.run(debug=True)
