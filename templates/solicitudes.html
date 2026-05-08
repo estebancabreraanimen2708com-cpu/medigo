@@ -19,9 +19,7 @@
 <option value="">Seleccionar estudiante</option>
 
 {% for e in estudiantes %}
-<option value="{{ e.id_estudiante }}">
-{{ e.nombre }}
-</option>
+<option value="{{ e.id_estudiante }}">{{ e.nombre }}</option>
 {% endfor %}
 
 </select>
@@ -59,6 +57,7 @@ ENVIAR SOLICITUD
 <th>Motivo</th>
 <th>Dolor</th>
 <th>Estado</th>
+<th>Fecha</th>
 </tr>
 </thead>
 
@@ -77,9 +76,7 @@ function sonido(){
 
 function notificar(mensaje){
     if(Notification.permission === "granted"){
-        new Notification("MediGo", {
-            body: mensaje
-        });
+        new Notification("MediGo", { body: mensaje });
     }
     sonido();
 }
@@ -89,16 +86,13 @@ if(Notification.permission !== "granted"){
 }
 
 function cargarSolicitudes(){
-
 fetch('/api/solicitudes')
 .then(r => r.json())
 .then(data => {
-
     let tabla = document.getElementById("tablaSolicitudes");
     tabla.innerHTML = "";
 
     data.forEach(s => {
-
         if(!primeraCarga && estadosAnteriores[s.id_solicitud] && estadosAnteriores[s.id_solicitud] !== s.estado){
 
             if(s.estado === "Aprobado"){
@@ -122,8 +116,8 @@ fetch('/api/solicitudes')
             <td>${s.motivo}</td>
             <td>${s.dolor}</td>
             <td>${s.estado}</td>
-        </tr>
-        `;
+            <td>${s.fecha}</td>
+        </tr>`;
     });
 
     primeraCarga = false;
