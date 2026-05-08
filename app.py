@@ -1,11 +1,7 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, jsonify
 import mysql.connector
 
 app = Flask(__name__)
-
-# =========================================
-# 🔥 MYSQL RAILWAY PUBLIC NETWORK
-# =========================================
 
 def conectar_bd():
     return mysql.connector.connect(
@@ -16,29 +12,16 @@ def conectar_bd():
         port=21196
     )
 
-# =========================================
-# 🔥 INICIO
-# =========================================
-
 @app.route('/')
 def inicio():
     return render_template('inicio.html')
-
-# =========================================
-# 🔥 ROLES
-# =========================================
 
 @app.route('/roles')
 def roles():
     return render_template('roles.html')
 
-# =========================================
-# 🔥 LOGIN ÚNICO
-# =========================================
-
 @app.route('/login/<rol>', methods=['GET', 'POST'])
 def login(rol):
-
     if request.method == 'POST':
         usuario = request.form['usuario']
         password = request.form['password']
@@ -51,13 +34,8 @@ def login(rol):
 
     return render_template('login.html', rol=rol)
 
-# =========================================
-# 🔥 PROFESOR / SOLICITUDES
-# =========================================
-
 @app.route('/solicitudes', methods=['GET', 'POST'])
 def solicitudes():
-
     conn = conectar_bd()
     cursor = conn.cursor(dictionary=True)
 
@@ -77,8 +55,9 @@ def solicitudes():
         return redirect('/solicitudes')
 
     cursor.execute("""
-        SELECT DISTINCT id_estudiante, nombre
+        SELECT MIN(id_estudiante) AS id_estudiante, nombre
         FROM estudiantes
+        GROUP BY nombre
         ORDER BY nombre
     """)
 
@@ -87,69 +66,38 @@ def solicitudes():
 
     return render_template('solicitudes.html', estudiantes=estudiantes)
 
-# =========================================
-# 🔥 INSPECTOR
-# =========================================
+@app.route('/api/solicitudes')
+def api_solicitudes():
+    conn = conectar_bd()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT
+            s.id_solicitud,
+            e.nombre,
+            s.motivo,
+            s.dolor,
+            s.estado
+        FROM solicitudes s
+        JOIN estudiantes e ON s.id_estudiante = e.id_estudiante
+        ORDER BY s.id_solicitud DESC
+    """)
+
+    solicitudes = cursor.fetchall()
+    conn.close()
+
+    return jsonify(solicitudes)
 
 @app.route('/inspector')
 def inspector():
-
-    conn = conectar_bd()
-    cursor = conn.cursor(dictionary=True)
-
-    cursor.execute("""
-        SELECT
-            s.id_solicitud,
-            e.nombre,
-            s.motivo,
-            s.dolor,
-            s.estado
-        FROM solicitudes s
-        JOIN estudiantes e
-        ON s.id_estudiante = e.id_estudiante
-        ORDER BY s.id_solicitud DESC
-    """)
-
-    solicitudes = cursor.fetchall()
-    conn.close()
-
-    return render_template('inspector.html', solicitudes=solicitudes)
-
-# =========================================
-# 🔥 MÉDICO
-# =========================================
+    return render_template('inspector.html')
 
 @app.route('/medico')
 def medico():
-
-    conn = conectar_bd()
-    cursor = conn.cursor(dictionary=True)
-
-    cursor.execute("""
-        SELECT
-            s.id_solicitud,
-            e.nombre,
-            s.motivo,
-            s.dolor,
-            s.estado
-        FROM solicitudes s
-        JOIN estudiantes e
-        ON s.id_estudiante = e.id_estudiante
-        ORDER BY s.id_solicitud DESC
-    """)
-
-    solicitudes = cursor.fetchall()
-    conn.close()
-
-    return render_template('medico.html', solicitudes=solicitudes)
-
-# =========================================
-# 🔥 APROBAR / RECHAZAR
-# =========================================
+    return render_template('medico.html')
 
 @app.route('/aprobar/<int:id>')
 def aprobar(id):
-
     conn = conectar_bd()
     cursor = conn.cursor()
 
@@ -164,10 +112,8 @@ def aprobar(id):
 
     return redirect('/inspector')
 
-
 @app.route('/rechazar/<int:id>')
 def rechazar(id):
-
     conn = conectar_bd()
     cursor = conn.cursor()
 
@@ -182,17 +128,25 @@ def rechazar(id):
 
     return redirect('/inspector')
 
-# =========================================
-# 🔥 PDF
-# =========================================
+@app.route('/atendido/<int:id>')
+def atendido(id):
+    conn = conectar_bd()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        UPDATE solicitudes
+        SET estado = 'Atendido'
+        WHERE id_solicitud = %s
+    """, (id,))
+
+    conn.commit()
+    conn.close()
+
+    return redirect('/medico')
 
 @app.route('/pdf')
 def pdf():
     return "PDF próximamente"
-
-# =========================================
-# 🔥 RUN
-# =========================================
 
 if __name__ == '__main__':
     app.run(debug=True)
