@@ -1,65 +1,25 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-
     <meta charset="UTF-8">
-
-    <title>Solicitudes Médicas</title>
-
-    <link rel="stylesheet"
-    href="{{ url_for('static', filename='style.css') }}">
-
+    <title>Solicitudes</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
 <body>
 
-<div class="contenedor-app">
+<div class="contenedor">
 
-    <img
-    src="{{ url_for('static', filename='logo.jpg') }}"
-    class="logo">
+    <h1>Solicitudes</h1>
 
-    <h1>Solicitudes Médicas</h1>
+    <form>
 
-    <form method="POST">
-
-        <label>Estudiante</label>
-
-        <select name="estudiante" required>
-
-            <option value="">
-                Seleccione estudiante
-            </option>
-
-            {% for e in estudiantes %}
-
-            <option value="{{ e.id_estudiante }}">
-                {{ e.nombre }}
-            </option>
-
-            {% endfor %}
-
+        <select>
+            <option>Seleccionar estudiante</option>
         </select>
 
-        <label>Motivo</label>
+        <textarea placeholder="Motivo"></textarea>
 
-        <textarea
-        name="motivo"
-        placeholder="Escriba el motivo"
-        required></textarea>
-
-        <label>Escala del dolor</label>
-
-        <input
-        type="number"
-        name="dolor"
-        min="1"
-        max="10"
-        required>
-
-        <button type="submit">
-            Enviar Solicitud
-        </button>
+        <button class="btn">Enviar</button>
 
     </form>
 
