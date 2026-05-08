@@ -1,5 +1,9 @@
-from flask import Flask, render_template, request, redirect, jsonify
+from flask import Flask, render_template, request, redirect, jsonify, send_file
 import mysql.connector
+from fpdf import FPDF
+from datetime import datetime
+import pytz
+import os
 
 app = Flask(__name__)
 
@@ -12,6 +16,11 @@ def conectar_bd():
         port=21196
     )
 
+ecuador = pytz.timezone("America/Guayaquil")
+
+def fecha_ecuador():
+    return datetime.now(ecuador).strftime("%Y-%m-%d %H:%M:%S")
+
 @app.route('/')
 def inicio():
     return render_template('inicio.html')
@@ -22,6 +31,8 @@ def roles():
 
 @app.route('/login/<rol>', methods=['GET', 'POST'])
 def login(rol):
+    error = None
+
     if request.method == 'POST':
         usuario = request.form['usuario']
         password = request.form['password']
@@ -32,7 +43,9 @@ def login(rol):
         if rol == "medico" and usuario == "medico" and password == "123":
             return redirect('/medico')
 
-    return render_template('login.html', rol=rol)
+        error = "Usuario o contraseña incorrectos"
+
+    return render_template('login.html', rol=rol, error=error)
 
 @app.route('/solicitudes', methods=['GET', 'POST'])
 def solicitudes():
@@ -45,13 +58,12 @@ def solicitudes():
         dolor = request.form['dolor']
 
         cursor.execute("""
-            INSERT INTO solicitudes (id_estudiante, motivo, dolor, estado)
-            VALUES (%s, %s, %s, %s)
-        """, (estudiante, motivo, dolor, "Pendiente"))
+            INSERT INTO solicitudes (id_estudiante, motivo, dolor, estado, fecha)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (estudiante, motivo, dolor, "Pendiente", fecha_ecuador()))
 
         conn.commit()
         conn.close()
-
         return redirect('/solicitudes')
 
     cursor.execute("""
@@ -77,7 +89,8 @@ def api_solicitudes():
             e.nombre,
             s.motivo,
             s.dolor,
-            s.estado
+            s.estado,
+            DATE_FORMAT(s.fecha, '%Y-%m-%d %H:%i:%s') AS fecha
         FROM solicitudes s
         JOIN estudiantes e ON s.id_estudiante = e.id_estudiante
         ORDER BY s.id_solicitud DESC
@@ -146,7 +159,69 @@ def atendido(id):
 
 @app.route('/pdf')
 def pdf():
-    return "PDF próximamente"
+    conn = conectar_bd()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT
+            e.nombre,
+            s.motivo,
+            s.dolor,
+            s.estado,
+            DATE_FORMAT(s.fecha, '%Y-%m-%d %H:%i:%s') AS fecha
+        FROM solicitudes s
+        JOIN estudiantes e ON s.id_estudiante = e.id_estudiante
+        ORDER BY s.id_solicitud DESC
+    """)
+
+    datos = cursor.fetchall()
+    conn.close()
+
+    archivo = "reporte_medigo.pdf"
+
+    pdf = FPDF()
+    pdf.add_page()
+
+    try:
+        if os.path.exists("static/logo.jpg"):
+            pdf.image("static/logo.jpg", 75, 8, 60)
+            pdf.ln(45)
+    except:
+        pdf.ln(10)
+
+    pdf.set_font("Arial", "B", 18)
+    pdf.cell(0, 10, "Reporte MediGo", ln=True, align="C")
+
+    pdf.set_font("Arial", "", 11)
+    pdf.cell(0, 8, "Fecha de descarga: " + fecha_ecuador(), ln=True, align="C")
+    pdf.cell(0, 8, "Quito - Ecuador", ln=True, align="C")
+    pdf.ln(8)
+
+    pdf.set_font("Arial", "B", 9)
+    pdf.set_fill_color(56, 189, 248)
+
+    pdf.cell(38, 10, "Nombre", 1, 0, "C", True)
+    pdf.cell(50, 10, "Motivo", 1, 0, "C", True)
+    pdf.cell(18, 10, "Dolor", 1, 0, "C", True)
+    pdf.cell(28, 10, "Estado", 1, 0, "C", True)
+    pdf.cell(50, 10, "Fecha", 1, 1, "C", True)
+
+    pdf.set_font("Arial", "", 8)
+
+    for d in datos:
+        pdf.cell(38, 10, str(d["nombre"])[:18], 1)
+        pdf.cell(50, 10, str(d["motivo"])[:24], 1)
+        pdf.cell(18, 10, str(d["dolor"]), 1, 0, "C")
+        pdf.cell(28, 10, str(d["estado"]), 1)
+        pdf.cell(50, 10, str(d["fecha"]), 1, 1)
+
+    pdf.ln(15)
+    pdf.set_font("Arial", "B", 11)
+    pdf.cell(0, 10, "Firma automatica - MediGo", ln=True, align="R")
+
+    pdf.output(archivo)
+
+    return send_file(archivo, as_attachment=True)
 
 if __name__ == '__main__':
     app.run(debug=True)
