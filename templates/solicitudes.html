@@ -2,12 +2,12 @@
 <html lang="es">
 <head>
 
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
 
-    <title>Solicitudes</title>
+<title>Solicitudes</title>
 
-    <link rel="stylesheet"
-    href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet"
+href="{{ url_for('static', filename='style.css') }}">
 
 </head>
 
@@ -15,30 +15,61 @@
 
 <div class="contenedor">
 
-    <h1>Solicitudes Médicas</h1>
+<h1>Solicitudes Médicas</h1>
 
-    <form>
+<form method="POST">
 
-        <select required>
+<select name="estudiante" required>
 
-            <option>
-                Seleccionar estudiante
-            </option>
+<option value="">
+Seleccionar estudiante
+</option>
 
-        </select>
+{% for e in estudiantes %}
 
-        <textarea
-        placeholder="Motivo"></textarea>
+<option value="{{ e.id_estudiante }}">
+{{ e.nombre }}
+</option>
 
-        <input
-        type="number"
-        placeholder="Dolor 1-10">
+{% endfor %}
 
-        <button class="btn">
-            ENVIAR
-        </button>
+</select>
 
-    </form>
+<textarea
+name="motivo"
+placeholder="Motivo"
+required></textarea>
+
+<h3>Escala del Dolor</h3>
+
+<div class="dolor-container">
+
+{% for i in range(1,11) %}
+
+<input
+type="radio"
+name="dolor"
+value="{{ i }}"
+id="dolor{{ i }}"
+required>
+
+<label
+for="dolor{{ i }}"
+class="dolor dolor{{ i }}">
+
+{{ i }}
+
+</label>
+
+{% endfor %}
+
+</div>
+
+<button class="btn">
+ENVIAR SOLICITUD
+</button>
+
+</form>
 
 </div>
 
