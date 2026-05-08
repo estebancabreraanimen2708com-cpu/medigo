@@ -159,27 +159,43 @@ def inspector():
 def medico():
     return render_template('medico.html')
 
+# =========================================
+# APROBAR
+# =========================================
+
 @app.route('/aprobar/<int:id>')
 def aprobar(id):
 
     conn = conectar_bd()
     cursor = conn.cursor()
 
+    texto = (
+        "Estudiante yendo al medico | "
+        + fecha_ecuador()
+    )
+
     cursor.execute("""
 
     UPDATE solicitudes
 
-    SET estado='Aprobado'
+    SET estado=%s
 
     WHERE id_solicitud=%s
 
-    """, (id,))
+    """, (
+        texto,
+        id
+    ))
 
     conn.commit()
 
     conn.close()
 
     return redirect('/inspector')
+
+# =========================================
+# RECHAZAR
+# =========================================
 
 @app.route('/rechazar/<int:id>')
 def rechazar(id):
@@ -187,15 +203,23 @@ def rechazar(id):
     conn = conectar_bd()
     cursor = conn.cursor()
 
+    texto = (
+        "Estudiante se queda en clases | "
+        + fecha_ecuador()
+    )
+
     cursor.execute("""
 
     UPDATE solicitudes
 
-    SET estado='Rechazado'
+    SET estado=%s
 
     WHERE id_solicitud=%s
 
-    """, (id,))
+    """, (
+        texto,
+        id
+    ))
 
     conn.commit()
 
@@ -203,21 +227,33 @@ def rechazar(id):
 
     return redirect('/inspector')
 
-@app.route('/atendido/<int:id>')
-def atendido(id):
+# =========================================
+# LLEGÓ AL MÉDICO
+# =========================================
+
+@app.route('/llego/<int:id>')
+def llego(id):
 
     conn = conectar_bd()
     cursor = conn.cursor()
+
+    texto = (
+        "Estudiante llego al medico | "
+        + fecha_ecuador()
+    )
 
     cursor.execute("""
 
     UPDATE solicitudes
 
-    SET estado='Atendido'
+    SET estado=%s
 
     WHERE id_solicitud=%s
 
-    """, (id,))
+    """, (
+        texto,
+        id
+    ))
 
     conn.commit()
 
