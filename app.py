@@ -36,34 +36,45 @@ def roles():
     return render_template('roles.html')
 
 # =========================================
-# 🔥 LOGIN
+# 🔥 LOGIN INSPECTOR
 # =========================================
 
-@app.route('/login/<rol>', methods=['GET', 'POST'])
-def login(rol):
+@app.route('/login/inspector', methods=['GET', 'POST'])
+def login_inspector():
 
     if request.method == 'POST':
 
         usuario = request.form['usuario']
         password = request.form['password']
 
-        # INSPECTOR
-        if rol == "inspector":
+        if usuario == "inspector" and password == "123":
 
-            if usuario == "inspector" and password == "123":
-
-                return redirect('/inspector')
-
-        # MEDICO
-        elif rol == "medico":
-
-            if usuario == "medico" and password == "123":
-
-                return redirect('/medico')
+            return redirect('/inspector')
 
     return render_template(
         'login.html',
-        rol=rol
+        rol="inspector"
+    )
+
+# =========================================
+# 🔥 LOGIN MEDICO
+# =========================================
+
+@app.route('/login/medico', methods=['GET', 'POST'])
+def login_medico():
+
+    if request.method == 'POST':
+
+        usuario = request.form['usuario']
+        password = request.form['password']
+
+        if usuario == "medico" and password == "123":
+
+            return redirect('/medico')
+
+    return render_template(
+        'login.html',
+        rol="medico"
     )
 
 # =========================================
@@ -73,56 +84,62 @@ def login(rol):
 @app.route('/solicitudes', methods=['GET', 'POST'])
 def solicitudes():
 
-    conn = conectar_bd()
+    try:
 
-    cursor = conn.cursor(dictionary=True)
+        conn = conectar_bd()
 
-    # GUARDAR
-    if request.method == 'POST':
+        cursor = conn.cursor(dictionary=True)
 
-        estudiante = request.form['estudiante']
+        # GUARDAR SOLICITUD
+        if request.method == 'POST':
 
-        motivo = request.form['motivo']
+            estudiante = request.form['estudiante']
 
-        dolor = request.form['dolor']
+            motivo = request.form['motivo']
 
+            dolor = request.form['dolor']
+
+            cursor.execute("""
+
+            INSERT INTO solicitudes
+            (id_estudiante,motivo,dolor,estado)
+
+            VALUES(%s,%s,%s,%s)
+
+            """, (
+                estudiante,
+                motivo,
+                dolor,
+                "Pendiente"
+            ))
+
+            conn.commit()
+
+            return redirect('/solicitudes')
+
+        # ESTUDIANTES
         cursor.execute("""
 
-        INSERT INTO solicitudes
-        (id_estudiante,motivo,dolor,estado)
+        SELECT
+        id_estudiante,
+        nombre
 
-        VALUES(%s,%s,%s,%s)
+        FROM estudiantes
 
-        """, (
-            estudiante,
-            motivo,
-            dolor,
-            "Pendiente"
-        ))
+        ORDER BY nombre
 
-        conn.commit()
+        """)
 
-        return redirect('/solicitudes')
+        estudiantes = cursor.fetchall()
 
-    # ESTUDIANTES
-    cursor.execute("""
+        return render_template(
+            'solicitudes.html',
+            estudiantes=estudiantes
+        )
 
-    SELECT DISTINCT
-    id_estudiante,
-    nombre
+    except Exception as e:
 
-    FROM estudiantes
-
-    ORDER BY nombre
-
-    """)
-
-    estudiantes = cursor.fetchall()
-
-    return render_template(
-        'solicitudes.html',
-        estudiantes=estudiantes
-    )
+        return f"ERROR PROFESOR: {e}"
 
 # =========================================
 # 🔥 INSPECTOR
@@ -131,34 +148,40 @@ def solicitudes():
 @app.route('/inspector')
 def inspector():
 
-    conn = conectar_bd()
+    try:
 
-    cursor = conn.cursor(dictionary=True)
+        conn = conectar_bd()
 
-    cursor.execute("""
+        cursor = conn.cursor(dictionary=True)
 
-    SELECT
-    s.id_solicitud,
-    e.nombre,
-    s.motivo,
-    s.dolor,
-    s.estado
+        cursor.execute("""
 
-    FROM solicitudes s
+        SELECT
+        s.id_solicitud,
+        e.nombre,
+        s.motivo,
+        s.dolor,
+        s.estado
 
-    JOIN estudiantes e
-    ON s.id_estudiante = e.id_estudiante
+        FROM solicitudes s
 
-    ORDER BY s.id_solicitud DESC
+        JOIN estudiantes e
+        ON s.id_estudiante = e.id_estudiante
 
-    """)
+        ORDER BY s.id_solicitud DESC
 
-    solicitudes = cursor.fetchall()
+        """)
 
-    return render_template(
-        'inspector.html',
-        solicitudes=solicitudes
-    )
+        solicitudes = cursor.fetchall()
+
+        return render_template(
+            'inspector.html',
+            solicitudes=solicitudes
+        )
+
+    except Exception as e:
+
+        return f"ERROR INSPECTOR: {e}"
 
 # =========================================
 # 🔥 APROBAR
@@ -215,34 +238,40 @@ def rechazar(id):
 @app.route('/medico')
 def medico():
 
-    conn = conectar_bd()
+    try:
 
-    cursor = conn.cursor(dictionary=True)
+        conn = conectar_bd()
 
-    cursor.execute("""
+        cursor = conn.cursor(dictionary=True)
 
-    SELECT
-    s.id_solicitud,
-    e.nombre,
-    s.motivo,
-    s.dolor,
-    s.estado
+        cursor.execute("""
 
-    FROM solicitudes s
+        SELECT
+        s.id_solicitud,
+        e.nombre,
+        s.motivo,
+        s.dolor,
+        s.estado
 
-    JOIN estudiantes e
-    ON s.id_estudiante = e.id_estudiante
+        FROM solicitudes s
 
-    ORDER BY s.id_solicitud DESC
+        JOIN estudiantes e
+        ON s.id_estudiante = e.id_estudiante
 
-    """)
+        ORDER BY s.id_solicitud DESC
 
-    solicitudes = cursor.fetchall()
+        """)
 
-    return render_template(
-        'medico.html',
-        solicitudes=solicitudes
-    )
+        solicitudes = cursor.fetchall()
+
+        return render_template(
+            'medico.html',
+            solicitudes=solicitudes
+        )
+
+    except Exception as e:
+
+        return f"ERROR MEDICO: {e}"
 
 # =========================================
 # 🔥 RUN
