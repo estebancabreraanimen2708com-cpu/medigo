@@ -20,6 +20,7 @@
 <th>Motivo</th>
 <th>Dolor</th>
 <th>Estado</th>
+<th>Fecha</th>
 <th>Acción</th>
 </tr>
 </thead>
@@ -31,24 +32,20 @@
 
 <script>
 function cargarMedico(){
-
 fetch('/api/solicitudes')
 .then(r => r.json())
 .then(data => {
-
     let tabla = document.getElementById("tablaMedico");
     tabla.innerHTML = "";
 
     data.forEach(s => {
-
         let accion = "";
 
         if(s.estado === "Aprobado"){
             accion = `
             <a href="/atendido/${s.id_solicitud}">
                 <button class="aprobar">Atendido</button>
-            </a>
-            `;
+            </a>`;
         } else {
             accion = "-";
         }
@@ -59,9 +56,9 @@ fetch('/api/solicitudes')
             <td>${s.motivo}</td>
             <td>${s.dolor}</td>
             <td>${s.estado}</td>
+            <td>${s.fecha}</td>
             <td>${accion}</td>
-        </tr>
-        `;
+        </tr>`;
     });
 });
 }
