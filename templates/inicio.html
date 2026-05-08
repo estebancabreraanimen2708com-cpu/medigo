@@ -1,20 +1,34 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+
     <meta charset="UTF-8">
+
     <title>MEDIGO</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <link rel="stylesheet"
+    href="{{ url_for('static', filename='style.css') }}">
+
 </head>
+
 <body>
 
 <div class="contenedor">
 
-    <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
+    <img
+    src="{{ url_for('static', filename='logo.jpg') }}"
+    class="logo">
 
     <h1>MEDIGO</h1>
 
+    <p>Sistema Médico Escolar</p>
+
     <a href="/roles">
-        <button class="btn">INICIAR</button>
+
+        <button class="btn">
+            EMPEZAR
+        </button>
+
     </a>
 
 </div>
