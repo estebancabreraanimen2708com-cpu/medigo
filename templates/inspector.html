@@ -24,6 +24,7 @@
 <th>Motivo</th>
 <th>Dolor</th>
 <th>Estado</th>
+<th>Fecha</th>
 <th>Acciones</th>
 </tr>
 </thead>
@@ -43,9 +44,7 @@ function sonido(){
 
 function notificar(mensaje){
     if(Notification.permission === "granted"){
-        new Notification("MediGo", {
-            body: mensaje
-        });
+        new Notification("MediGo", { body: mensaje });
     }
     sonido();
 }
@@ -55,16 +54,13 @@ if(Notification.permission !== "granted"){
 }
 
 function cargarInspector(){
-
 fetch('/api/solicitudes')
 .then(r => r.json())
 .then(data => {
-
     let tabla = document.getElementById("tablaInspector");
     tabla.innerHTML = "";
 
     data.forEach(s => {
-
         if(!primeraCarga && !idsVistos.has(s.id_solicitud) && s.estado === "Pendiente"){
             notificar("🔔 Nueva solicitud médica de " + s.nombre);
         }
@@ -81,8 +77,7 @@ fetch('/api/solicitudes')
 
             <a href="/rechazar/${s.id_solicitud}">
                 <button class="rechazar">✖</button>
-            </a>
-            `;
+            </a>`;
         } else {
             acciones = s.estado;
         }
@@ -93,9 +88,9 @@ fetch('/api/solicitudes')
             <td>${s.motivo}</td>
             <td>${s.dolor}</td>
             <td>${s.estado}</td>
+            <td>${s.fecha}</td>
             <td>${acciones}</td>
-        </tr>
-        `;
+        </tr>`;
     });
 
     primeraCarga = false;
