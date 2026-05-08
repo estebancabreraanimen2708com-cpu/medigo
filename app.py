@@ -4,17 +4,16 @@ import mysql.connector
 app = Flask(__name__)
 
 # =========================================
-# 🔥 MYSQL
+# 🔥 MYSQL RAILWAY PUBLIC NETWORK
 # =========================================
 
 def conectar_bd():
-
     return mysql.connector.connect(
-        host="mysql.railway.internal",
+        host="roundhouse.proxy.rlwy.net",
         user="root",
         password="wYbBPSlKSxHuYpUKYiYSfWzMnnqUyAVJ",
         database="railway",
-        port=3306
+        port=21196
     )
 
 # =========================================
@@ -23,7 +22,6 @@ def conectar_bd():
 
 @app.route('/')
 def inicio():
-
     return render_template('inicio.html')
 
 # =========================================
@@ -32,114 +30,62 @@ def inicio():
 
 @app.route('/roles')
 def roles():
-
     return render_template('roles.html')
 
 # =========================================
-# 🔥 LOGIN INSPECTOR
+# 🔥 LOGIN ÚNICO
 # =========================================
 
-@app.route('/login/inspector', methods=['GET', 'POST'])
-def login_inspector():
+@app.route('/login/<rol>', methods=['GET', 'POST'])
+def login(rol):
 
     if request.method == 'POST':
-
         usuario = request.form['usuario']
         password = request.form['password']
 
-        if usuario == "inspector" and password == "123":
-
+        if rol == "inspector" and usuario == "inspector" and password == "123":
             return redirect('/inspector')
 
-    return render_template(
-        'login.html',
-        rol="inspector"
-    )
-
-# =========================================
-# 🔥 LOGIN MEDICO
-# =========================================
-
-@app.route('/login/medico', methods=['GET', 'POST'])
-def login_medico():
-
-    if request.method == 'POST':
-
-        usuario = request.form['usuario']
-        password = request.form['password']
-
-        if usuario == "medico" and password == "123":
-
+        if rol == "medico" and usuario == "medico" and password == "123":
             return redirect('/medico')
 
-    return render_template(
-        'login.html',
-        rol="medico"
-    )
+    return render_template('login.html', rol=rol)
 
 # =========================================
-# 🔥 SOLICITUDES
+# 🔥 PROFESOR / SOLICITUDES
 # =========================================
 
 @app.route('/solicitudes', methods=['GET', 'POST'])
 def solicitudes():
 
-    try:
+    conn = conectar_bd()
+    cursor = conn.cursor(dictionary=True)
 
-        conn = conectar_bd()
+    if request.method == 'POST':
+        estudiante = request.form['estudiante']
+        motivo = request.form['motivo']
+        dolor = request.form['dolor']
 
-        cursor = conn.cursor(dictionary=True)
-
-        # GUARDAR SOLICITUD
-        if request.method == 'POST':
-
-            estudiante = request.form['estudiante']
-
-            motivo = request.form['motivo']
-
-            dolor = request.form['dolor']
-
-            cursor.execute("""
-
-            INSERT INTO solicitudes
-            (id_estudiante,motivo,dolor,estado)
-
-            VALUES(%s,%s,%s,%s)
-
-            """, (
-                estudiante,
-                motivo,
-                dolor,
-                "Pendiente"
-            ))
-
-            conn.commit()
-
-            return redirect('/solicitudes')
-
-        # ESTUDIANTES
         cursor.execute("""
+            INSERT INTO solicitudes (id_estudiante, motivo, dolor, estado)
+            VALUES (%s, %s, %s, %s)
+        """, (estudiante, motivo, dolor, "Pendiente"))
 
-        SELECT
-        id_estudiante,
-        nombre
+        conn.commit()
+        conn.close()
 
+        return redirect('/solicitudes')
+
+    cursor.execute("""
+        SELECT DISTINCT id_estudiante, nombre
         FROM estudiantes
-
         ORDER BY nombre
+    """)
 
-        """)
+    estudiantes = cursor.fetchall()
+    conn.close()
 
-        estudiantes = cursor.fetchall()
-
-        return render_template(
-            'solicitudes.html',
-            estudiantes=estudiantes
-        )
-
-    except Exception as e:
-
-        return f"ERROR PROFESOR: {e}"
+    return render_template('solicitudes.html', estudiantes=estudiantes)
 
 # =========================================
 # 🔥 INSPECTOR
@@ -148,135 +94,105 @@ def solicitudes():
 @app.route('/inspector')
 def inspector():
 
-    try:
+    conn = conectar_bd()
+    cursor = conn.cursor(dictionary=True)
 
-        conn = conectar_bd()
-
-        cursor = conn.cursor(dictionary=True)
-
-        cursor.execute("""
-
+    cursor.execute("""
         SELECT
-        s.id_solicitud,
-        e.nombre,
-        s.motivo,
-        s.dolor,
-        s.estado
-
+            s.id_solicitud,
+            e.nombre,
+            s.motivo,
+            s.dolor,
+            s.estado
         FROM solicitudes s
-
         JOIN estudiantes e
         ON s.id_estudiante = e.id_estudiante
-
         ORDER BY s.id_solicitud DESC
+    """)
 
-        """)
+    solicitudes = cursor.fetchall()
+    conn.close()
 
-        solicitudes = cursor.fetchall()
-
-        return render_template(
-            'inspector.html',
-            solicitudes=solicitudes
-        )
-
-    except Exception as e:
-
-        return f"ERROR INSPECTOR: {e}"
+    return render_template('inspector.html', solicitudes=solicitudes)
 
 # =========================================
-# 🔥 APROBAR
+# 🔥 MÉDICO
+# =========================================
+
+@app.route('/medico')
+def medico():
+
+    conn = conectar_bd()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT
+            s.id_solicitud,
+            e.nombre,
+            s.motivo,
+            s.dolor,
+            s.estado
+        FROM solicitudes s
+        JOIN estudiantes e
+        ON s.id_estudiante = e.id_estudiante
+        ORDER BY s.id_solicitud DESC
+    """)
+
+    solicitudes = cursor.fetchall()
+    conn.close()
+
+    return render_template('medico.html', solicitudes=solicitudes)
+
+# =========================================
+# 🔥 APROBAR / RECHAZAR
 # =========================================
 
 @app.route('/aprobar/<int:id>')
 def aprobar(id):
 
     conn = conectar_bd()
-
     cursor = conn.cursor()
 
     cursor.execute("""
-
-    UPDATE solicitudes
-    SET estado='Aprobado'
-
-    WHERE id_solicitud=%s
-
+        UPDATE solicitudes
+        SET estado = 'Aprobado'
+        WHERE id_solicitud = %s
     """, (id,))
 
     conn.commit()
+    conn.close()
 
     return redirect('/inspector')
 
-# =========================================
-# 🔥 RECHAZAR
-# =========================================
 
 @app.route('/rechazar/<int:id>')
 def rechazar(id):
 
     conn = conectar_bd()
-
     cursor = conn.cursor()
 
     cursor.execute("""
-
-    UPDATE solicitudes
-    SET estado='Rechazado'
-
-    WHERE id_solicitud=%s
-
+        UPDATE solicitudes
+        SET estado = 'Rechazado'
+        WHERE id_solicitud = %s
     """, (id,))
 
     conn.commit()
+    conn.close()
 
     return redirect('/inspector')
 
 # =========================================
-# 🔥 MEDICO
+# 🔥 PDF
 # =========================================
 
-@app.route('/medico')
-def medico():
-
-    try:
-
-        conn = conectar_bd()
-
-        cursor = conn.cursor(dictionary=True)
-
-        cursor.execute("""
-
-        SELECT
-        s.id_solicitud,
-        e.nombre,
-        s.motivo,
-        s.dolor,
-        s.estado
-
-        FROM solicitudes s
-
-        JOIN estudiantes e
-        ON s.id_estudiante = e.id_estudiante
-
-        ORDER BY s.id_solicitud DESC
-
-        """)
-
-        solicitudes = cursor.fetchall()
-
-        return render_template(
-            'medico.html',
-            solicitudes=solicitudes
-        )
-
-    except Exception as e:
-
-        return f"ERROR MEDICO: {e}"
+@app.route('/pdf')
+def pdf():
+    return "PDF próximamente"
 
 # =========================================
 # 🔥 RUN
 # =========================================
 
 if __name__ == '__main__':
-
     app.run(debug=True)
