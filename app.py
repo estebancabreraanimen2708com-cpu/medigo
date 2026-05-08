@@ -8,6 +8,7 @@ app = Flask(__name__)
 # =========================================
 
 def conectar_bd():
+
     return mysql.connector.connect(
         host="mysql.railway.internal",
         user="root",
@@ -22,6 +23,7 @@ def conectar_bd():
 
 @app.route('/')
 def inicio():
+
     return render_template('inicio.html')
 
 # =========================================
@@ -30,6 +32,7 @@ def inicio():
 
 @app.route('/roles')
 def roles():
+
     return render_template('roles.html')
 
 # =========================================
@@ -44,15 +47,15 @@ def login(rol):
         usuario = request.form['usuario']
         password = request.form['password']
 
-        # LOGIN INSPECTOR
+        # INSPECTOR
         if rol == "inspector":
 
             if usuario == "inspector" and password == "123":
 
                 return redirect('/inspector')
 
-        # LOGIN MEDICO
-        if rol == "medico":
+        # MEDICO
+        elif rol == "medico":
 
             if usuario == "medico" and password == "123":
 
@@ -71,19 +74,25 @@ def login(rol):
 def solicitudes():
 
     conn = conectar_bd()
+
     cursor = conn.cursor(dictionary=True)
 
-    # GUARDAR SOLICITUD
+    # GUARDAR
     if request.method == 'POST':
 
         estudiante = request.form['estudiante']
+
         motivo = request.form['motivo']
+
         dolor = request.form['dolor']
 
         cursor.execute("""
+
         INSERT INTO solicitudes
         (id_estudiante,motivo,dolor,estado)
+
         VALUES(%s,%s,%s,%s)
+
         """, (
             estudiante,
             motivo,
@@ -95,11 +104,17 @@ def solicitudes():
 
         return redirect('/solicitudes')
 
-    # OBTENER ESTUDIANTES
+    # ESTUDIANTES
     cursor.execute("""
-    SELECT DISTINCT id_estudiante,nombre
+
+    SELECT DISTINCT
+    id_estudiante,
+    nombre
+
     FROM estudiantes
+
     ORDER BY nombre
+
     """)
 
     estudiantes = cursor.fetchall()
@@ -117,19 +132,25 @@ def solicitudes():
 def inspector():
 
     conn = conectar_bd()
+
     cursor = conn.cursor(dictionary=True)
 
     cursor.execute("""
+
     SELECT
-        s.id_solicitud,
-        e.nombre,
-        s.motivo,
-        s.dolor,
-        s.estado
+    s.id_solicitud,
+    e.nombre,
+    s.motivo,
+    s.dolor,
+    s.estado
+
     FROM solicitudes s
+
     JOIN estudiantes e
     ON s.id_estudiante = e.id_estudiante
+
     ORDER BY s.id_solicitud DESC
+
     """)
 
     solicitudes = cursor.fetchall()
@@ -147,12 +168,16 @@ def inspector():
 def aprobar(id):
 
     conn = conectar_bd()
+
     cursor = conn.cursor()
 
     cursor.execute("""
+
     UPDATE solicitudes
     SET estado='Aprobado'
+
     WHERE id_solicitud=%s
+
     """, (id,))
 
     conn.commit()
@@ -167,12 +192,16 @@ def aprobar(id):
 def rechazar(id):
 
     conn = conectar_bd()
+
     cursor = conn.cursor()
 
     cursor.execute("""
+
     UPDATE solicitudes
     SET estado='Rechazado'
+
     WHERE id_solicitud=%s
+
     """, (id,))
 
     conn.commit()
@@ -187,19 +216,25 @@ def rechazar(id):
 def medico():
 
     conn = conectar_bd()
+
     cursor = conn.cursor(dictionary=True)
 
     cursor.execute("""
+
     SELECT
-        s.id_solicitud,
-        e.nombre,
-        s.motivo,
-        s.dolor,
-        s.estado
+    s.id_solicitud,
+    e.nombre,
+    s.motivo,
+    s.dolor,
+    s.estado
+
     FROM solicitudes s
+
     JOIN estudiantes e
     ON s.id_estudiante = e.id_estudiante
+
     ORDER BY s.id_solicitud DESC
+
     """)
 
     solicitudes = cursor.fetchall()
@@ -210,16 +245,9 @@ def medico():
     )
 
 # =========================================
-# 🔥 PDF
-# =========================================
-
-@app.route('/pdf')
-def pdf():
-    return "PDF próximamente"
-
-# =========================================
 # 🔥 RUN
 # =========================================
 
 if __name__ == '__main__':
+
     app.run(debug=True)
