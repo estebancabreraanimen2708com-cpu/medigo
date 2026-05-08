@@ -236,8 +236,17 @@ option{
     background:linear-gradient(135deg,#7c3aed,#a855f7);
 }
 
+.tabla-scroll{
+    width:100%;
+    overflow-x:auto;
+    margin-top:20px;
+    border-radius:18px;
+    -webkit-overflow-scrolling:touch;
+}
+
 table{
     width:100%;
+    min-width:720px;
     border-collapse:collapse;
     margin-top:25px;
     overflow:hidden;
@@ -252,6 +261,7 @@ th{
     font-size:14px;
     text-transform:uppercase;
     letter-spacing:.5px;
+    white-space:nowrap;
 }
 
 td{
@@ -260,11 +270,11 @@ td{
     text-align:center;
     border-bottom:1px solid rgba(255,255,255,.10);
     transition:.2s;
+    white-space:nowrap;
 }
 
 tr:hover td{
     background:rgba(56,189,248,.16);
-    transform:scale(1.005);
 }
 
 .aprobar,
@@ -367,7 +377,7 @@ input[type="radio"]:checked + .dolor{
     .contenedor{
         padding:20px;
         border-radius:20px;
-        overflow-x:auto;
+        overflow:hidden;
     }
 
     h1{
@@ -376,6 +386,11 @@ input[type="radio"]:checked + .dolor{
 
     .logo{
         width:145px;
+    }
+
+    .tabla-scroll{
+        overflow-x:auto;
+        -webkit-overflow-scrolling:touch;
     }
 
     table{
