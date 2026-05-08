@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
 
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
 
-    <title>Login</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="stylesheet"
-    href="{{ url_for('static', filename='style.css') }}">
+<title>Login</title>
+
+<link rel="stylesheet"
+href="{{ url_for('static', filename='style.css') }}">
 
 </head>
 
@@ -15,29 +18,29 @@
 
 <div class="contenedor">
 
-    <h1>
-        LOGIN {{ rol.upper() }}
-    </h1>
+<h1>
+LOGIN {{ rol.upper() }}
+</h1>
 
-    <form method="POST">
+<form method="POST">
 
-        <input
-        type="text"
-        name="usuario"
-        placeholder="Usuario"
-        required>
+<input
+type="text"
+name="usuario"
+placeholder="Usuario"
+required>
 
-        <input
-        type="password"
-        name="password"
-        placeholder="Contraseña"
-        required>
+<input
+type="password"
+name="password"
+placeholder="Contraseña"
+required>
 
-        <button type="submit" class="btn">
-            INGRESAR
-        </button>
+<button type="submit" class="btn medico">
+INGRESAR
+</button>
 
-    </form>
+</form>
 
 </div>
 
