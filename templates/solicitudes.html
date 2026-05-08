@@ -13,6 +13,10 @@
 
 <h1>Solicitudes Médicas</h1>
 
+<button type="button" class="btn medico" onclick="activarAlertas()">
+🔔 Activar notificaciones
+</button>
+
 <form method="POST">
 
 <select name="estudiante" required>
@@ -29,17 +33,10 @@
 <h3>Escala del Dolor</h3>
 
 <div class="dolor-container">
-
 {% for i in range(1,11) %}
-
 <input type="radio" name="dolor" value="{{ i }}" id="dolor{{ i }}" required>
-
-<label for="dolor{{ i }}" class="dolor dolor{{ i }}">
-{{ i }}
-</label>
-
+<label for="dolor{{ i }}" class="dolor dolor{{ i }}">{{ i }}</label>
 {% endfor %}
-
 </div>
 
 <button type="submit" class="btn profesor">
@@ -48,8 +45,9 @@ ENVIAR SOLICITUD
 
 </form>
 
-<h2 style="margin-top:30px;">Estado de solicitudes</h2>
+<h2>Estado de solicitudes</h2>
 
+<div class="tabla-scroll">
 <table>
 <thead>
 <tr>
@@ -63,26 +61,43 @@ ENVIAR SOLICITUD
 
 <tbody id="tablaSolicitudes"></tbody>
 </table>
+</div>
 
 </div>
 
 <script>
 let estadosAnteriores = {};
 let primeraCarga = true;
+let audioActivado = false;
+let audio = new Audio("/static/mixkit-correct-answer-tone-2870.wav");
+
+function activarAlertas(){
+    audio.play().then(() => {
+        audio.pause();
+        audio.currentTime = 0;
+        audioActivado = true;
+        alert("Notificaciones y sonido activados");
+    }).catch(() => {
+        alert("Toca otra vez para activar el sonido");
+    });
+
+    if("Notification" in window && Notification.permission !== "granted"){
+        Notification.requestPermission();
+    }
+}
 
 function sonido(){
-    new Audio("/static/mixkit-correct-answer-tone-2870.wav").play();
+    if(audioActivado){
+        audio.currentTime = 0;
+        audio.play().catch(() => {});
+    }
 }
 
 function notificar(mensaje){
-    if(Notification.permission === "granted"){
+    if("Notification" in window && Notification.permission === "granted"){
         new Notification("MediGo", { body: mensaje });
     }
     sonido();
-}
-
-if(Notification.permission !== "granted"){
-    Notification.requestPermission();
 }
 
 function cargarSolicitudes(){
@@ -94,7 +109,6 @@ fetch('/api/solicitudes')
 
     data.forEach(s => {
         if(!primeraCarga && estadosAnteriores[s.id_solicitud] && estadosAnteriores[s.id_solicitud] !== s.estado){
-
             if(s.estado === "Aprobado"){
                 notificar("✅ Tu solicitud fue aprobada: " + s.nombre);
             }
