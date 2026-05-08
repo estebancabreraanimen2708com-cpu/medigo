@@ -1,17 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Solicitudes</title>
-
-<link rel="stylesheet"
-href="{{ url_for('static', filename='style.css') }}">
-
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body>
@@ -23,25 +16,17 @@ href="{{ url_for('static', filename='style.css') }}">
 <form method="POST">
 
 <select name="estudiante" required>
-
-<option value="">
-Seleccionar estudiante
-</option>
+<option value="">Seleccionar estudiante</option>
 
 {% for e in estudiantes %}
-
 <option value="{{ e.id_estudiante }}">
 {{ e.nombre }}
 </option>
-
 {% endfor %}
 
 </select>
 
-<textarea
-name="motivo"
-placeholder="Motivo"
-required></textarea>
+<textarea name="motivo" placeholder="Motivo" required></textarea>
 
 <h3>Escala del Dolor</h3>
 
@@ -49,19 +34,10 @@ required></textarea>
 
 {% for i in range(1,11) %}
 
-<input
-type="radio"
-name="dolor"
-value="{{ i }}"
-id="dolor{{ i }}"
-required>
+<input type="radio" name="dolor" value="{{ i }}" id="dolor{{ i }}" required>
 
-<label
-for="dolor{{ i }}"
-class="dolor dolor{{ i }}">
-
+<label for="dolor{{ i }}" class="dolor dolor{{ i }}">
 {{ i }}
-
 </label>
 
 {% endfor %}
@@ -74,7 +50,89 @@ ENVIAR SOLICITUD
 
 </form>
 
+<h2 style="margin-top:30px;">Estado de solicitudes</h2>
+
+<table>
+<thead>
+<tr>
+<th>Nombre</th>
+<th>Motivo</th>
+<th>Dolor</th>
+<th>Estado</th>
+</tr>
+</thead>
+
+<tbody id="tablaSolicitudes"></tbody>
+</table>
+
 </div>
+
+<script>
+let estadosAnteriores = {};
+let primeraCarga = true;
+
+function sonido(){
+    new Audio("/static/mixkit-correct-answer-tone-2870.wav").play();
+}
+
+function notificar(mensaje){
+    if(Notification.permission === "granted"){
+        new Notification("MediGo", {
+            body: mensaje
+        });
+    }
+    sonido();
+}
+
+if(Notification.permission !== "granted"){
+    Notification.requestPermission();
+}
+
+function cargarSolicitudes(){
+
+fetch('/api/solicitudes')
+.then(r => r.json())
+.then(data => {
+
+    let tabla = document.getElementById("tablaSolicitudes");
+    tabla.innerHTML = "";
+
+    data.forEach(s => {
+
+        if(!primeraCarga && estadosAnteriores[s.id_solicitud] && estadosAnteriores[s.id_solicitud] !== s.estado){
+
+            if(s.estado === "Aprobado"){
+                notificar("✅ Tu solicitud fue aprobada: " + s.nombre);
+            }
+
+            if(s.estado === "Rechazado"){
+                notificar("❌ Tu solicitud fue rechazada: " + s.nombre);
+            }
+
+            if(s.estado === "Atendido"){
+                notificar("🏥 Consulta finalizada: " + s.nombre);
+            }
+        }
+
+        estadosAnteriores[s.id_solicitud] = s.estado;
+
+        tabla.innerHTML += `
+        <tr>
+            <td>${s.nombre}</td>
+            <td>${s.motivo}</td>
+            <td>${s.dolor}</td>
+            <td>${s.estado}</td>
+        </tr>
+        `;
+    });
+
+    primeraCarga = false;
+});
+}
+
+setInterval(cargarSolicitudes, 1000);
+cargarSolicitudes();
+</script>
 
 </body>
 </html>
