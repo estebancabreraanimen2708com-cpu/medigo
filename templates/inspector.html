@@ -1,10 +1,131 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
 <title>Inspector</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<link rel="stylesheet"
+href="{{ url_for('static', filename='style.css') }}">
+
+<style>
+
+.btn-mas{
+
+    position:fixed;
+
+    bottom:25px;
+
+    right:25px;
+
+    width:75px;
+
+    height:75px;
+
+    border-radius:50%;
+
+    border:none;
+
+    background:linear-gradient(
+        135deg,
+        #ffcc00,
+        #ffb703
+    );
+
+    color:#002b5c;
+
+    font-size:42px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    z-index:999;
+
+    box-shadow:
+    0 10px 30px rgba(0,0,0,.35);
+
+    transition:.25s;
+}
+
+.btn-mas:hover{
+
+    transform:scale(1.1)
+    rotate(90deg);
+}
+
+.modal{
+
+    position:fixed;
+
+    inset:0;
+
+    background:rgba(0,0,0,.65);
+
+    display:none;
+
+    justify-content:center;
+
+    align-items:center;
+
+    z-index:1000;
+}
+
+.modal-content{
+
+    width:95%;
+
+    max-width:520px;
+
+    background:#0f172a;
+
+    border-radius:25px;
+
+    padding:30px;
+
+    border:2px solid #ffcc00;
+
+    box-shadow:
+    0 15px 40px rgba(0,0,0,.45);
+
+    animation:modal .3s ease;
+}
+
+@keyframes modal{
+
+    from{
+        opacity:0;
+        transform:scale(.85);
+    }
+
+    to{
+        opacity:1;
+        transform:scale(1);
+    }
+}
+
+.cerrar{
+
+    float:right;
+
+    font-size:30px;
+
+    cursor:pointer;
+
+    color:white;
+}
+
+.modal-content h2{
+
+    margin-bottom:20px;
+}
+
+</style>
+
 </head>
 
 <body>
@@ -14,14 +135,23 @@
 <h1>Panel Inspector</h1>
 
 <a href="/pdf">
-<button class="btn pdf">📄 DESCARGAR PDF</button>
+
+<button class="btn pdf">
+
+📄 DESCARGAR PDF
+
+</button>
+
 </a>
 
 <div class="tabla-scroll">
 
 <table>
+
 <thead>
+
 <tr>
+
 <th>Curso</th>
 <th>Nombre</th>
 <th>Motivo</th>
@@ -29,52 +159,233 @@
 <th>Estado</th>
 <th>Fecha</th>
 <th>Acciones</th>
+
 </tr>
+
 </thead>
 
 <tbody id="tablaInspector"></tbody>
+
 </table>
 
 </div>
 
 </div>
 
+<!-- BOTÓN MÁS -->
+
+<button
+class="btn-mas"
+onclick="abrirModal()">
+
++
+
+</button>
+
+<!-- MODAL -->
+
+<div id="modal" class="modal">
+
+<div class="modal-content">
+
+<span
+class="cerrar"
+onclick="cerrarModal()">
+
+×
+
+</span>
+
+<h2>Nueva Solicitud</h2>
+
+<form
+method="POST"
+action="/solicitudes">
+
+<input
+type="hidden"
+name="curso"
+value="Inspector">
+
+<select
+name="estudiante"
+required>
+
+<option value="">
+Seleccionar estudiante
+</option>
+
+<option value="1">
+Estudiante 1
+</option>
+
+<option value="2">
+Estudiante 2
+</option>
+
+<option value="3">
+Estudiante 3
+</option>
+
+</select>
+
+<textarea
+name="motivo"
+placeholder="Motivo"
+required></textarea>
+
+<div class="emociones">
+
+<input
+type="radio"
+name="dolor"
+value="1"
+id="i1"
+required>
+
+<label
+for="i1"
+class="cara verde">
+
+<div class="emoji">😊</div>
+
+<span>Leve</span>
+
+</label>
+
+<input
+type="radio"
+name="dolor"
+value="2"
+id="i2">
+
+<label
+for="i2"
+class="cara amarillo">
+
+<div class="emoji">😐</div>
+
+<span>Moderado</span>
+
+</label>
+
+<input
+type="radio"
+name="dolor"
+value="3"
+id="i3">
+
+<label
+for="i3"
+class="cara rojo">
+
+<div class="emoji">😖</div>
+
+<span>Urgente</span>
+
+</label>
+
+</div>
+
+<button
+type="submit"
+class="btn inspector">
+
+ENVIAR
+
+</button>
+
+</form>
+
+</div>
+
+</div>
+
 <script>
+
+function abrirModal(){
+
+    document.getElementById(
+        "modal"
+    ).style.display = "flex";
+}
+
+function cerrarModal(){
+
+    document.getElementById(
+        "modal"
+    ).style.display = "none";
+}
+
 let idsVistos = new Set();
+
 let primeraCarga = true;
-let audio = new Audio("/static/mixkit-correct-answer-tone-2870.wav");
+
+let audio =
+new Audio(
+"/static/mixkit-correct-answer-tone-2870.wav"
+);
+
 let audioListo = false;
 
 function desbloquearAudio(){
+
     if(audioListo) return;
 
     audio.play()
+
     .then(() => {
+
         audio.pause();
+
         audio.currentTime = 0;
+
         audioListo = true;
+
     })
+
     .catch(() => {});
 }
 
-document.addEventListener("click", desbloquearAudio, { once:true });
-document.addEventListener("touchstart", desbloquearAudio, { once:true });
+document.addEventListener(
+    "click",
+    desbloquearAudio,
+    { once:true }
+);
+
+document.addEventListener(
+    "touchstart",
+    desbloquearAudio,
+    { once:true }
+);
 
 function sonido(){
+
     if(audioListo){
+
         audio.currentTime = 0;
+
         audio.play().catch(() => {});
     }
 }
 
 function notificar(mensaje){
+
     if("Notification" in window){
+
         if(Notification.permission === "default"){
+
             Notification.requestPermission();
         }
 
         if(Notification.permission === "granted"){
-            new Notification("MediGo", { body: mensaje });
+
+            new Notification(
+                "MediGo",
+                {
+                    body:mensaje
+                }
+            );
         }
     }
 
@@ -84,32 +395,66 @@ function notificar(mensaje){
 function cargarInspector(){
 
 fetch('/api/solicitudes')
+
 .then(r => r.json())
+
 .then(data => {
 
-    let tabla = document.getElementById("tablaInspector");
+    let tabla =
+    document.getElementById(
+        "tablaInspector"
+    );
+
     tabla.innerHTML = "";
 
     data.forEach(s => {
 
-        if(!primeraCarga && !idsVistos.has(s.id_solicitud) && s.estado === "Pendiente"){
-            notificar("🔔 Nueva solicitud médica");
+        if(
+            !primeraCarga &&
+            !idsVistos.has(
+                s.id_solicitud
+            ) &&
+            s.estado === "Pendiente"
+        ){
+
+            notificar(
+                "🔔 Nueva solicitud médica"
+            );
         }
 
-        idsVistos.add(s.id_solicitud);
+        idsVistos.add(
+            s.id_solicitud
+        );
 
         let acciones = "";
 
-        if(s.estado === "Pendiente"){
+        if(
+            s.estado === "Pendiente"
+        ){
+
             acciones = `
+
             <a href="/aprobar/${s.id_solicitud}">
-                <button class="aprobar">✔</button>
+
+                <button class="aprobar">
+                ✔
+                </button>
+
             </a>
 
             <a href="/rechazar/${s.id_solicitud}">
-                <button class="rechazar">✖</button>
-            </a>`;
-        } else {
+
+                <button class="rechazar">
+                ✖
+                </button>
+
+            </a>
+
+            `;
+        }
+
+        else{
+
             acciones = s.estado;
         }
 
@@ -117,32 +462,54 @@ fetch('/api/solicitudes')
 
         if(s.dolor == 1){
             dolorTexto = "😊 Leve";
-        } else if(s.dolor == 2){
+        }
+
+        else if(s.dolor == 2){
             dolorTexto = "😐 Moderado";
-        } else if(s.dolor == 3){
+        }
+
+        else if(s.dolor == 3){
             dolorTexto = "😖 Urgente";
-        } else {
+        }
+
+        else{
             dolorTexto = s.dolor;
         }
 
         tabla.innerHTML += `
+
         <tr>
+
             <td>${s.curso || ""}</td>
+
             <td>${s.nombre}</td>
+
             <td>${s.motivo}</td>
+
             <td>${dolorTexto}</td>
+
             <td>${s.estado}</td>
+
             <td>${s.fecha}</td>
+
             <td>${acciones}</td>
-        </tr>`;
+
+        </tr>
+
+        `;
     });
 
     primeraCarga = false;
 });
 }
 
-setInterval(cargarInspector, 1000);
+setInterval(
+    cargarInspector,
+    1000
+);
+
 cargarInspector();
+
 </script>
 
 </body>
