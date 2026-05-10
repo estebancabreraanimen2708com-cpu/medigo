@@ -1,9 +1,41 @@
+/* AGREGA ESTO AL FINAL DE style.css */
+
+.subtitulo{
+    text-align:center;
+    margin-top:-10px;
+    margin-bottom:25px;
+    opacity:.85;
+    font-size:18px;
+    letter-spacing:.5px;
+}
+
+.card-seccion{
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:22px;
+    padding:22px;
+    margin-bottom:22px;
+    backdrop-filter:blur(10px);
+    box-shadow:
+    0 8px 25px rgba(0,0,0,.18);
+}
+
+.card-seccion h3{
+    margin-bottom:15px;
+    font-size:20px;
+    color:#e2e8f0;
+}
+
+.select-bosco{
+    background:rgba(255,255,255,.10);
+    border:1px solid rgba(255,255,255,.12);
+}
+
 .emociones{
     display:flex;
     justify-content:center;
-    gap:25px;
-    margin-top:25px;
-    margin-bottom:15px;
+    gap:22px;
+    flex-wrap:wrap;
 }
 
 .emociones input{
@@ -11,48 +43,68 @@
 }
 
 .cara{
-    width:85px;
-    height:85px;
-    border-radius:50%;
+    width:140px;
+    min-height:145px;
+    border-radius:28px;
     display:flex;
+    flex-direction:column;
     align-items:center;
     justify-content:center;
-    font-size:42px;
     cursor:pointer;
     transition:.25s;
-    box-shadow:0 10px 25px rgba(0,0,0,.35);
+    color:white;
+    font-weight:bold;
+    box-shadow:
+    0 10px 30px rgba(0,0,0,.25);
 }
 
 .cara:hover{
-    transform:scale(1.1);
+    transform:translateY(-8px) scale(1.03);
+}
+
+.emoji{
+    font-size:55px;
+    margin-bottom:12px;
+}
+
+.cara span{
+    font-size:18px;
 }
 
 .verde{
-    background:#22c55e;
+    background:linear-gradient(135deg,#22c55e,#16a34a);
 }
 
 .amarillo{
-    background:#facc15;
+    background:linear-gradient(135deg,#facc15,#eab308);
 }
 
 .rojo{
-    background:#ef4444;
+    background:linear-gradient(135deg,#ef4444,#dc2626);
 }
 
 .emociones input:checked + .cara{
-    transform:scale(1.15);
+
+    transform:scale(1.06);
+
     border:5px solid white;
-    box-shadow:0 0 25px rgba(255,255,255,.8);
+
+    box-shadow:
+    0 0 30px rgba(255,255,255,.6);
 }
 
 @media(max-width:700px){
+
     .cara{
-        width:65px;
-        height:65px;
-        font-size:32px;
+        width:100%;
+        min-height:120px;
     }
 
-    .emociones{
-        gap:15px;
+    .emoji{
+        font-size:42px;
+    }
+
+    .cara span{
+        font-size:16px;
     }
 }
