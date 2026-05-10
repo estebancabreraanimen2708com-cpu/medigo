@@ -1,55 +1,312 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
 <title>Cursos</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<link rel="stylesheet"
+href="{{ url_for('static', filename='style.css') }}">
+
+<style>
+
+.paralelos{
+    display:none;
+    margin-top:18px;
+    animation:aparecer .3s ease;
+}
+
+@keyframes aparecer{
+    from{
+        opacity:0;
+        transform:translateY(-10px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+.grid-paralelos{
+    display:grid;
+    grid-template-columns:
+    repeat(auto-fit,minmax(120px,1fr));
+    gap:15px;
+    margin-top:15px;
+}
+
+.btn-paralelo{
+    height:65px;
+    font-size:22px;
+    border-radius:18px;
+}
+
+.curso-card{
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:24px;
+    padding:22px;
+    margin-bottom:22px;
+    transition:.25s;
+}
+
+.curso-card:hover{
+    transform:translateY(-4px);
+}
+
+.btn-curso{
+    height:85px;
+    font-size:28px;
+    border-radius:22px;
+}
+
+</style>
+
 </head>
 
 <body>
 
 <div class="contenedor">
 
-<img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
+<img
+src="{{ url_for('static', filename='logo.jpg') }}"
+class="logo">
 
 <h1>MediGo</h1>
 
-<p class="subtitulo">Sistema Médico Escolar Salesiano</p>
+<p class="subtitulo">
+Sistema Médico Escolar Salesiano
+</p>
 
 <div class="imagenes-donbosco">
 
-<img src="{{ url_for('static', filename='donbosco1.jpg') }}" onerror="this.src='{{ url_for('static', filename='logo.jpg') }}'">
+<img src="{{ url_for('static', filename='donbosco1.jpg') }}">
 
-<img src="{{ url_for('static', filename='donbosco2.jpg') }}" onerror="this.src='{{ url_for('static', filename='logo.jpg') }}'">
+<img src="{{ url_for('static', filename='donbosco2.jpg') }}">
 
-<img src="{{ url_for('static', filename='donbosco3.jpg') }}" onerror="this.src='{{ url_for('static', filename='logo.jpg') }}'">
-
-</div>
-
-<h2>Selecciona el curso</h2>
-
-<div class="grid-cursos">
-
-<a href="/solicitudes?curso=1BGU A">
-<button class="btn profesor curso-btn">1BGU A</button>
-</a>
-
-<a href="/solicitudes?curso=1BGU B">
-<button class="btn profesor curso-btn">1BGU B</button>
-</a>
-
-<a href="/solicitudes?curso=2BGU A">
-<button class="btn profesor curso-btn">2BGU A</button>
-</a>
-
-<a href="/solicitudes?curso=2BGU B">
-<button class="btn profesor curso-btn">2BGU B</button>
-</a>
+<img src="{{ url_for('static', filename='donbosco3.jpg') }}">
 
 </div>
 
+<!-- 7MO -->
+
+<div class="curso-card">
+
+<button
+class="btn profesor btn-curso"
+onclick="toggleParalelos('p7')">
+
+7mo
+
+</button>
+
+<div id="p7" class="paralelos">
+
+<div class="grid-paralelos">
+
+<a href="/solicitudes?curso=7mo A">
+<button class="btn inspector btn-paralelo">
+A
+</button>
+</a>
+
+<a href="/solicitudes?curso=7mo B">
+<button class="btn inspector btn-paralelo">
+B
+</button>
+</a>
+
+<a href="/solicitudes?curso=7mo C">
+<button class="btn inspector btn-paralelo">
+C
+</button>
+</a>
+
+<a href="/solicitudes?curso=7mo D">
+<button class="btn inspector btn-paralelo">
+D
+</button>
+</a>
+
 </div>
+
+</div>
+
+</div>
+
+<!-- 8VO -->
+
+<div class="curso-card">
+
+<button
+class="btn profesor btn-curso"
+onclick="toggleParalelos('p8')">
+
+8vo
+
+</button>
+
+<div id="p8" class="paralelos">
+
+<div class="grid-paralelos">
+
+<a href="/solicitudes?curso=8vo A">
+<button class="btn inspector btn-paralelo">
+A
+</button>
+</a>
+
+<a href="/solicitudes?curso=8vo B">
+<button class="btn inspector btn-paralelo">
+B
+</button>
+</a>
+
+<a href="/solicitudes?curso=8vo C">
+<button class="btn inspector btn-paralelo">
+C
+</button>
+</a>
+
+<a href="/solicitudes?curso=8vo D">
+<button class="btn inspector btn-paralelo">
+D
+</button>
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- 9NO -->
+
+<div class="curso-card">
+
+<button
+class="btn profesor btn-curso"
+onclick="toggleParalelos('p9')">
+
+9no
+
+</button>
+
+<div id="p9" class="paralelos">
+
+<div class="grid-paralelos">
+
+<a href="/solicitudes?curso=9no A">
+<button class="btn inspector btn-paralelo">
+A
+</button>
+</a>
+
+<a href="/solicitudes?curso=9no B">
+<button class="btn inspector btn-paralelo">
+B
+</button>
+</a>
+
+<a href="/solicitudes?curso=9no C">
+<button class="btn inspector btn-paralelo">
+C
+</button>
+</a>
+
+<a href="/solicitudes?curso=9no D">
+<button class="btn inspector btn-paralelo">
+D
+</button>
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- 10MO -->
+
+<div class="curso-card">
+
+<button
+class="btn profesor btn-curso"
+onclick="toggleParalelos('p10')">
+
+10mo
+
+</button>
+
+<div id="p10" class="paralelos">
+
+<div class="grid-paralelos">
+
+<a href="/solicitudes?curso=10mo A">
+<button class="btn inspector btn-paralelo">
+A
+</button>
+</a>
+
+<a href="/solicitudes?curso=10mo B">
+<button class="btn inspector btn-paralelo">
+B
+</button>
+</a>
+
+<a href="/solicitudes?curso=10mo C">
+<button class="btn inspector btn-paralelo">
+C
+</button>
+</a>
+
+<a href="/solicitudes?curso=10mo D">
+<button class="btn inspector btn-paralelo">
+D
+</button>
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+function toggleParalelos(id){
+
+    let todos =
+    document.querySelectorAll(".paralelos");
+
+    todos.forEach(p => {
+
+        if(p.id !== id){
+            p.style.display = "none";
+        }
+    });
+
+    let actual =
+    document.getElementById(id);
+
+    if(
+        actual.style.display === "block"
+    ){
+        actual.style.display = "none";
+    }
+
+    else{
+        actual.style.display = "block";
+    }
+}
+
+</script>
 
 </body>
 </html>
