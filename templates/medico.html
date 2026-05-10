@@ -1,17 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-
 <meta charset="UTF-8">
-
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Médico</title>
-
-<link rel="stylesheet"
-href="{{ url_for('static', filename='style.css') }}">
-
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body>
@@ -23,24 +16,19 @@ href="{{ url_for('static', filename='style.css') }}">
 <div class="tabla-scroll">
 
 <table>
-
 <thead>
-
 <tr>
-
+<th>Curso</th>
 <th>Nombre</th>
 <th>Motivo</th>
 <th>Dolor</th>
 <th>Estado</th>
 <th>Fecha</th>
 <th>Acción</th>
-
 </tr>
-
 </thead>
 
 <tbody id="tablaMedico"></tbody>
-
 </table>
 
 </div>
@@ -48,18 +36,13 @@ href="{{ url_for('static', filename='style.css') }}">
 </div>
 
 <script>
-
 function cargarMedico(){
 
 fetch('/api/solicitudes')
-
 .then(r => r.json())
-
 .then(data => {
 
-    let tabla =
-    document.getElementById("tablaMedico");
-
+    let tabla = document.getElementById("tablaMedico");
     tabla.innerHTML = "";
 
     data.forEach(s => {
@@ -67,52 +50,42 @@ fetch('/api/solicitudes')
         let accion = "";
 
         if(s.estado === "Aprobado"){
-
             accion = `
-
             <a href="/atendido/${s.id_solicitud}">
-
-                <button class="aprobar">
-                Atendido
-                </button>
-
-            </a>
-
-            `;
-        }
-
-        else{
-
+                <button class="aprobar">Atendido</button>
+            </a>`;
+        } else {
             accion = "-";
         }
 
+        let dolorTexto = "";
+
+        if(s.dolor == 1){
+            dolorTexto = "😊 Leve";
+        } else if(s.dolor == 2){
+            dolorTexto = "😐 Moderado";
+        } else if(s.dolor == 3){
+            dolorTexto = "😖 Urgente";
+        } else {
+            dolorTexto = s.dolor;
+        }
+
         tabla.innerHTML += `
-
         <tr>
-
+            <td>${s.curso || ""}</td>
             <td>${s.nombre}</td>
-
             <td>${s.motivo}</td>
-
-            <td>${s.dolor}</td>
-
+            <td>${dolorTexto}</td>
             <td>${s.estado}</td>
-
             <td>${s.fecha}</td>
-
             <td>${accion}</td>
-
-        </tr>
-
-        `;
+        </tr>`;
     });
 });
 }
 
 setInterval(cargarMedico, 1000);
-
 cargarMedico();
-
 </script>
 
 </body>
