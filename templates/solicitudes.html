@@ -1,110 +1,52 @@
-<!-- solicitudes.html COMPLETO -->
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
-
 <meta charset="UTF-8">
-
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Solicitudes</title>
-
-<link rel="stylesheet"
-href="{{ url_for('static', filename='style.css') }}">
-
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body>
 
 <div class="contenedor">
 
-<img
-src="{{ url_for('static', filename='logo.jpg') }}"
-class="logo">
+<img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
 
 <h1>MediGo</h1>
 
 <p class="subtitulo">
-Sistema Médico Escolar
+Curso seleccionado: {{ curso }}
 </p>
 
 <form method="POST">
 
-<!-- CURSO -->
-
-<div class="card-seccion">
-
-<h3>Curso</h3>
-
-<select id="curso" class="select-bosco" required>
-
-<option value="">
-Seleccionar curso
-</option>
-
-<option>
-1BGU A
-</option>
-
-<option>
-1BGU B
-</option>
-
-<option>
-2BGU A
-</option>
-
-<option>
-2BGU B
-</option>
-
-</select>
-
-</div>
-
-<!-- ESTUDIANTE -->
+<input type="hidden" name="curso" value="{{ curso }}">
 
 <div class="card-seccion">
 
 <h3>Estudiante</h3>
 
-<select
-name="estudiante"
-required
-class="select-bosco">
-
-<option value="">
-Seleccionar estudiante
-</option>
+<select name="estudiante" required>
+<option value="">Seleccionar estudiante</option>
 
 {% for e in estudiantes %}
-
 <option value="{{ e.id_estudiante }}">
 {{ e.nombre }}
 </option>
-
 {% endfor %}
 
 </select>
 
 </div>
 
-<!-- MOTIVO -->
-
 <div class="card-seccion">
 
 <h3>Motivo</h3>
 
-<textarea
-name="motivo"
-placeholder="Escribe el motivo..."
-required></textarea>
+<textarea name="motivo" placeholder="Escribe el motivo..." required></textarea>
 
 </div>
-
-<!-- DOLOR -->
 
 <div class="card-seccion">
 
@@ -112,53 +54,22 @@ required></textarea>
 
 <div class="emociones">
 
-<input
-type="radio"
-name="dolor"
-value="1"
-id="dolor1"
-required>
-
-<label
-for="dolor1"
-class="cara verde">
-
+<input type="radio" name="dolor" value="1" id="dolor1" required>
+<label for="dolor1" class="cara verde">
 <div class="emoji">😊</div>
-
 <span>Leve</span>
-
 </label>
 
-<input
-type="radio"
-name="dolor"
-value="2"
-id="dolor2">
-
-<label
-for="dolor2"
-class="cara amarillo">
-
+<input type="radio" name="dolor" value="2" id="dolor2">
+<label for="dolor2" class="cara amarillo">
 <div class="emoji">😐</div>
-
 <span>Moderado</span>
-
 </label>
 
-<input
-type="radio"
-name="dolor"
-value="3"
-id="dolor3">
-
-<label
-for="dolor3"
-class="cara rojo">
-
+<input type="radio" name="dolor" value="3" id="dolor3">
+<label for="dolor3" class="cara rojo">
 <div class="emoji">😖</div>
-
 <span>Urgente</span>
-
 </label>
 
 </div>
@@ -176,23 +87,17 @@ ENVIAR SOLICITUD
 <div class="tabla-scroll">
 
 <table>
-
 <thead>
-
 <tr>
-
 <th>Nombre</th>
 <th>Motivo</th>
 <th>Dolor</th>
 <th>Estado</th>
 <th>Fecha</th>
-
 </tr>
-
 </thead>
 
 <tbody id="tablaSolicitudes"></tbody>
-
 </table>
 
 </div>
@@ -200,73 +105,41 @@ ENVIAR SOLICITUD
 </div>
 
 <script>
-
 let estadosAnteriores = {};
 let primeraCarga = true;
-
-let audio =
-new Audio(
-"/static/mixkit-correct-answer-tone-2870.wav"
-);
-
+let audio = new Audio("/static/mixkit-correct-answer-tone-2870.wav");
 let audioListo = false;
 
 function desbloquearAudio(){
-
     if(audioListo) return;
 
     audio.play()
-
     .then(() => {
-
         audio.pause();
-
         audio.currentTime = 0;
-
         audioListo = true;
-
     })
-
     .catch(() => {});
 }
 
-document.addEventListener(
-    "click",
-    desbloquearAudio,
-    { once:true }
-);
-
-document.addEventListener(
-    "touchstart",
-    desbloquearAudio,
-    { once:true }
-);
+document.addEventListener("click", desbloquearAudio, { once:true });
+document.addEventListener("touchstart", desbloquearAudio, { once:true });
 
 function sonido(){
-
     if(audioListo){
-
         audio.currentTime = 0;
-
         audio.play().catch(() => {});
     }
 }
 
 function notificar(mensaje){
-
     if("Notification" in window){
-
         if(Notification.permission === "default"){
-
             Notification.requestPermission();
         }
 
         if(Notification.permission === "granted"){
-
-            new Notification("MediGo", {
-
-                body: mensaje
-            });
+            new Notification("MediGo", { body: mensaje });
         }
     }
 
@@ -276,102 +149,51 @@ function notificar(mensaje){
 function cargarSolicitudes(){
 
 fetch('/api/solicitudes')
-
 .then(r => r.json())
-
 .then(data => {
 
-    let tabla =
-    document.getElementById(
-        "tablaSolicitudes"
-    );
-
+    let tabla = document.getElementById("tablaSolicitudes");
     tabla.innerHTML = "";
 
     data.forEach(s => {
 
-        if(
-            !primeraCarga &&
-            estadosAnteriores[s.id_solicitud] &&
-            estadosAnteriores[s.id_solicitud]
-            !== s.estado
-        ){
+        if(!primeraCarga && estadosAnteriores[s.id_solicitud] && estadosAnteriores[s.id_solicitud] !== s.estado){
 
-            if(
-                s.estado.includes(
-                    "yendo al medico"
-                ) ||
-                s.estado === "Aprobado"
-            ){
-
-                notificar(
-                    "✅ Solicitud aprobada"
-                );
+            if(s.estado === "Aprobado"){
+                notificar("✅ Solicitud aprobada");
             }
 
-            if(
-                s.estado.includes(
-                    "queda en clases"
-                ) ||
-                s.estado === "Rechazado"
-            ){
-
-                notificar(
-                    "❌ Solicitud rechazada"
-                );
+            if(s.estado === "Rechazado"){
+                notificar("❌ Solicitud rechazada");
             }
 
-            if(
-                s.estado.includes(
-                    "llego al medico"
-                ) ||
-                s.estado === "Atendido"
-            ){
-
-                notificar(
-                    "🏥 Consulta finalizada"
-                );
+            if(s.estado === "Atendido"){
+                notificar("🏥 Consulta finalizada");
             }
         }
 
-        estadosAnteriores[s.id_solicitud]
-        = s.estado;
+        estadosAnteriores[s.id_solicitud] = s.estado;
 
         let dolorTexto = "";
 
         if(s.dolor == 1){
             dolorTexto = "😊 Leve";
-        }
-
-        else if(s.dolor == 2){
+        } else if(s.dolor == 2){
             dolorTexto = "😐 Moderado";
-        }
-
-        else if(s.dolor == 3){
+        } else if(s.dolor == 3){
             dolorTexto = "😖 Urgente";
-        }
-
-        else{
+        } else {
             dolorTexto = s.dolor;
         }
 
         tabla.innerHTML += `
-
         <tr>
-
             <td>${s.nombre}</td>
-
             <td>${s.motivo}</td>
-
             <td>${dolorTexto}</td>
-
             <td>${s.estado}</td>
-
             <td>${s.fecha}</td>
-
-        </tr>
-
-        `;
+        </tr>`;
     });
 
     primeraCarga = false;
@@ -379,9 +201,7 @@ fetch('/api/solicitudes')
 }
 
 setInterval(cargarSolicitudes, 1000);
-
 cargarSolicitudes();
-
 </script>
 
 </body>
