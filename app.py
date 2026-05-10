@@ -65,9 +65,17 @@ def solicitudes():
         curso = request.form.get('curso', '')
 
         cursor.execute("""
-            INSERT INTO solicitudes (id_estudiante, motivo, dolor, estado, fecha)
-            VALUES (%s, %s, %s, %s, %s)
-        """, (estudiante, motivo, dolor, "Pendiente", fecha_ecuador()))
+            INSERT INTO solicitudes
+            (id_estudiante, motivo, dolor, estado, fecha, curso)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (
+            estudiante,
+            motivo,
+            dolor,
+            "Pendiente",
+            fecha_ecuador(),
+            curso
+        ))
 
         conn.commit()
         conn.close()
@@ -102,6 +110,7 @@ def api_solicitudes():
             s.motivo,
             s.dolor,
             s.estado,
+            s.curso,
             DATE_FORMAT(s.fecha, '%Y-%m-%d %H:%i:%s') AS fecha
         FROM solicitudes s
         JOIN estudiantes e ON s.id_estudiante = e.id_estudiante
@@ -177,6 +186,7 @@ def pdf():
     cursor.execute("""
         SELECT
             e.nombre,
+            s.curso,
             s.motivo,
             s.dolor,
             s.estado,
@@ -212,11 +222,12 @@ def pdf():
 
     for d in datos:
         texto = (
-            f"{d['nombre']} | "
-            f"{d['motivo']} | "
+            f"Curso: {d['curso']} | "
+            f"Estudiante: {d['nombre']} | "
+            f"Motivo: {d['motivo']} | "
             f"Dolor: {d['dolor']} | "
-            f"{d['estado']} | "
-            f"{d['fecha']}"
+            f"Estado: {d['estado']} | "
+            f"Fecha: {d['fecha']}"
         )
         pdf.multi_cell(0, 8, texto)
 
