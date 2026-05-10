@@ -1,17 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-
 <meta charset="UTF-8">
-
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Inspector</title>
-
-<link rel="stylesheet"
-href="{{ url_for('static', filename='style.css') }}">
-
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body>
@@ -21,34 +14,25 @@ href="{{ url_for('static', filename='style.css') }}">
 <h1>Panel Inspector</h1>
 
 <a href="/pdf">
-
-<button class="btn pdf">
-📄 DESCARGAR PDF
-</button>
-
+<button class="btn pdf">📄 DESCARGAR PDF</button>
 </a>
 
 <div class="tabla-scroll">
 
 <table>
-
 <thead>
-
 <tr>
-
+<th>Curso</th>
 <th>Nombre</th>
 <th>Motivo</th>
 <th>Dolor</th>
 <th>Estado</th>
 <th>Fecha</th>
 <th>Acciones</th>
-
 </tr>
-
 </thead>
 
 <tbody id="tablaInspector"></tbody>
-
 </table>
 
 </div>
@@ -56,120 +40,60 @@ href="{{ url_for('static', filename='style.css') }}">
 </div>
 
 <script>
-
 let idsVistos = new Set();
-
 let primeraCarga = true;
-
-let audio =
-new Audio("/static/mixkit-correct-answer-tone-2870.wav");
-
+let audio = new Audio("/static/mixkit-correct-answer-tone-2870.wav");
 let audioListo = false;
 
-/* =========================================
-🔥 DESBLOQUEAR AUDIO IOS/ANDROID
-========================================= */
-
 function desbloquearAudio(){
-
     if(audioListo) return;
 
     audio.play()
-
     .then(() => {
-
         audio.pause();
-
         audio.currentTime = 0;
-
         audioListo = true;
-
-        console.log("Audio desbloqueado");
-
     })
-
     .catch(() => {});
 }
 
-document.addEventListener(
-    "click",
-    desbloquearAudio,
-    { once:true }
-);
-
-document.addEventListener(
-    "touchstart",
-    desbloquearAudio,
-    { once:true }
-);
-
-/* =========================================
-🔥 SONIDO
-========================================= */
+document.addEventListener("click", desbloquearAudio, { once:true });
+document.addEventListener("touchstart", desbloquearAudio, { once:true });
 
 function sonido(){
-
     if(audioListo){
-
         audio.currentTime = 0;
-
         audio.play().catch(() => {});
     }
 }
 
-/* =========================================
-🔥 NOTIFICACION
-========================================= */
-
 function notificar(mensaje){
-
     if("Notification" in window){
-
         if(Notification.permission === "default"){
-
             Notification.requestPermission();
         }
 
         if(Notification.permission === "granted"){
-
-            new Notification("MediGo", {
-
-                body: mensaje
-            });
+            new Notification("MediGo", { body: mensaje });
         }
     }
 
     sonido();
 }
 
-/* =========================================
-🔥 TABLA
-========================================= */
-
 function cargarInspector(){
 
 fetch('/api/solicitudes')
-
 .then(r => r.json())
-
 .then(data => {
 
-    let tabla =
-    document.getElementById("tablaInspector");
-
+    let tabla = document.getElementById("tablaInspector");
     tabla.innerHTML = "";
 
     data.forEach(s => {
 
-        if(
-            !primeraCarga &&
-            !idsVistos.has(s.id_solicitud) &&
-            s.estado === "Pendiente"
-        ){
-
-            notificar(
-                "🔔 Nueva solicitud médica"
-            );
+        if(!primeraCarga && !idsVistos.has(s.id_solicitud) && s.estado === "Pendiente"){
+            notificar("🔔 Nueva solicitud médica");
         }
 
         idsVistos.add(s.id_solicitud);
@@ -177,52 +101,40 @@ fetch('/api/solicitudes')
         let acciones = "";
 
         if(s.estado === "Pendiente"){
-
             acciones = `
-
             <a href="/aprobar/${s.id_solicitud}">
-
-                <button class="aprobar">
-                ✔
-                </button>
-
+                <button class="aprobar">✔</button>
             </a>
 
             <a href="/rechazar/${s.id_solicitud}">
-
-                <button class="rechazar">
-                ✖
-                </button>
-
-            </a>
-
-            `;
-        }
-
-        else{
-
+                <button class="rechazar">✖</button>
+            </a>`;
+        } else {
             acciones = s.estado;
         }
 
+        let dolorTexto = "";
+
+        if(s.dolor == 1){
+            dolorTexto = "😊 Leve";
+        } else if(s.dolor == 2){
+            dolorTexto = "😐 Moderado";
+        } else if(s.dolor == 3){
+            dolorTexto = "😖 Urgente";
+        } else {
+            dolorTexto = s.dolor;
+        }
+
         tabla.innerHTML += `
-
         <tr>
-
+            <td>${s.curso || ""}</td>
             <td>${s.nombre}</td>
-
             <td>${s.motivo}</td>
-
-            <td>${s.dolor}</td>
-
+            <td>${dolorTexto}</td>
             <td>${s.estado}</td>
-
             <td>${s.fecha}</td>
-
             <td>${acciones}</td>
-
-        </tr>
-
-        `;
+        </tr>`;
     });
 
     primeraCarga = false;
@@ -230,9 +142,7 @@ fetch('/api/solicitudes')
 }
 
 setInterval(cargarInspector, 1000);
-
 cargarInspector();
-
 </script>
 
 </body>
