@@ -119,11 +119,6 @@ href="{{ url_for('static', filename='style.css') }}">
     color:white;
 }
 
-.modal-content h2{
-
-    margin-bottom:20px;
-}
-
 </style>
 
 </head>
@@ -202,37 +197,40 @@ onclick="cerrarModal()">
 method="POST"
 action="/solicitudes">
 
-<input
-type="hidden"
-name="curso"
-value="Inspector">
+<div class="card-seccion">
 
-<select
-name="estudiante"
+<h3>Curso</h3>
+
+<input
+type="text"
+name="curso"
+placeholder="Ejemplo: 7mo A"
 required>
 
-<option value="">
-Seleccionar estudiante
-</option>
+</div>
 
-<option value="1">
-Estudiante 1
-</option>
+<div class="card-seccion">
 
-<option value="2">
-Estudiante 2
-</option>
+<h3>Nombre del estudiante</h3>
 
-<option value="3">
-Estudiante 3
-</option>
+<input
+type="text"
+name="nombre_manual"
+placeholder="Escribe el nombre..."
+required>
 
-</select>
+</div>
+
+<div class="card-seccion">
+
+<h3>Motivo</h3>
 
 <textarea
 name="motivo"
 placeholder="Motivo"
 required></textarea>
+
+</div>
 
 <div class="emociones">
 
@@ -321,77 +319,6 @@ let idsVistos = new Set();
 
 let primeraCarga = true;
 
-let audio =
-new Audio(
-"/static/mixkit-correct-answer-tone-2870.wav"
-);
-
-let audioListo = false;
-
-function desbloquearAudio(){
-
-    if(audioListo) return;
-
-    audio.play()
-
-    .then(() => {
-
-        audio.pause();
-
-        audio.currentTime = 0;
-
-        audioListo = true;
-
-    })
-
-    .catch(() => {});
-}
-
-document.addEventListener(
-    "click",
-    desbloquearAudio,
-    { once:true }
-);
-
-document.addEventListener(
-    "touchstart",
-    desbloquearAudio,
-    { once:true }
-);
-
-function sonido(){
-
-    if(audioListo){
-
-        audio.currentTime = 0;
-
-        audio.play().catch(() => {});
-    }
-}
-
-function notificar(mensaje){
-
-    if("Notification" in window){
-
-        if(Notification.permission === "default"){
-
-            Notification.requestPermission();
-        }
-
-        if(Notification.permission === "granted"){
-
-            new Notification(
-                "MediGo",
-                {
-                    body:mensaje
-                }
-            );
-        }
-    }
-
-    sonido();
-}
-
 function cargarInspector(){
 
 fetch('/api/solicitudes')
@@ -408,19 +335,6 @@ fetch('/api/solicitudes')
     tabla.innerHTML = "";
 
     data.forEach(s => {
-
-        if(
-            !primeraCarga &&
-            !idsVistos.has(
-                s.id_solicitud
-            ) &&
-            s.estado === "Pendiente"
-        ){
-
-            notificar(
-                "🔔 Nueva solicitud médica"
-            );
-        }
 
         idsVistos.add(
             s.id_solicitud
