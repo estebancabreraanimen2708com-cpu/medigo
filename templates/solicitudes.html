@@ -31,9 +31,7 @@ Curso seleccionado: {{ curso }}
 <option value="">Seleccionar estudiante</option>
 
 {% for e in estudiantes %}
-<option value="{{ e.id_estudiante }}">
-{{ e.nombre }}
-</option>
+<option value="{{ e.id_estudiante }}">{{ e.nombre }}</option>
 {% endfor %}
 
 </select>
@@ -89,6 +87,7 @@ ENVIAR SOLICITUD
 <table>
 <thead>
 <tr>
+<th>Curso</th>
 <th>Nombre</th>
 <th>Motivo</th>
 <th>Dolor</th>
@@ -188,6 +187,7 @@ fetch('/api/solicitudes')
 
         tabla.innerHTML += `
         <tr>
+            <td>${s.curso || ""}</td>
             <td>${s.nombre}</td>
             <td>${s.motivo}</td>
             <td>${dolorTexto}</td>
