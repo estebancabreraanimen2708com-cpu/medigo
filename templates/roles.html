@@ -1,47 +1,32 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Roles</title>
-
-<link rel="stylesheet"
-href="{{ url_for('static', filename='style.css') }}">
-
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body>
 
 <div class="contenedor">
 
-<h1>Selecciona un Rol</h1>
+<img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
 
-<a href="/solicitudes">
+<h1>MediGo</h1>
 
-<button class="btn profesor">
-👨‍🏫 PROFESOR
-</button>
+<p class="subtitulo">Selecciona tu rol</p>
 
+<a href="/cursos">
+<button class="btn profesor">👨‍🏫 Profesor</button>
 </a>
 
 <a href="/login/inspector">
-
-<button class="btn inspector">
-🕵️ INSPECTOR
-</button>
-
+<button class="btn inspector">🕵️ Inspector</button>
 </a>
 
 <a href="/login/medico">
-
-<button class="btn medico">
-🩺 MÉDICO
-</button>
-
+<button class="btn medico">🩺 Médico</button>
 </a>
 
 </div>
