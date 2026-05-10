@@ -1,41 +1,180 @@
-/* AGREGA ESTO AL FINAL DE style.css */
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:Arial, Helvetica, sans-serif;
+    min-height:100vh;
+    background:
+        radial-gradient(circle at top left, rgba(255,204,0,.20), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(0,86,179,.28), transparent 30%),
+        linear-gradient(135deg,#002b5c,#0056b3,#0f172a);
+    color:white;
+    padding:30px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow-x:hidden;
+}
+
+/* CONTENEDOR PRINCIPAL */
+
+.contenedor{
+    width:100%;
+    max-width:1050px;
+    background:rgba(255,255,255,.10);
+    border:2px solid rgba(255,204,0,.35);
+    border-radius:28px;
+    padding:40px;
+    backdrop-filter:blur(16px);
+    box-shadow:
+        0 15px 45px rgba(0,0,0,.35),
+        0 0 25px rgba(255,204,0,.15);
+    animation:entrada .6s ease;
+}
+
+@keyframes entrada{
+    from{
+        opacity:0;
+        transform:translateY(20px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+/* LOGO Y TÍTULOS */
+
+.logo{
+    width:170px;
+    display:block;
+    margin:0 auto 18px auto;
+    filter:drop-shadow(0 0 18px rgba(255,204,0,.35));
+}
+
+h1{
+    text-align:center;
+    font-size:42px;
+    margin-bottom:10px;
+    color:#ffcc00;
+    text-shadow:0 0 18px rgba(255,204,0,.25);
+}
+
+h2{
+    text-align:center;
+    margin-top:35px;
+    margin-bottom:18px;
+    color:#ffcc00;
+}
+
+h3{
+    margin-bottom:15px;
+    color:#ffcc00;
+}
 
 .subtitulo{
     text-align:center;
-    margin-top:-10px;
-    margin-bottom:25px;
-    opacity:.85;
+    margin-bottom:28px;
+    color:#eaf4ff;
     font-size:18px;
-    letter-spacing:.5px;
 }
 
+/* SECCIONES TIPO TARJETA */
+
 .card-seccion{
-    background:rgba(255,255,255,.06);
-    border:1px solid rgba(255,255,255,.08);
+    background:rgba(255,255,255,.09);
+    border:1px solid rgba(255,204,0,.25);
     border-radius:22px;
     padding:22px;
     margin-bottom:22px;
-    backdrop-filter:blur(10px);
-    box-shadow:
-    0 8px 25px rgba(0,0,0,.18);
+    box-shadow:0 8px 24px rgba(0,0,0,.20);
 }
 
-.card-seccion h3{
-    margin-bottom:15px;
-    font-size:20px;
-    color:#e2e8f0;
+/* FORMULARIOS */
+
+input,
+select,
+textarea{
+    width:100%;
+    padding:15px;
+    border:none;
+    border-radius:15px;
+    margin-top:12px;
+    outline:none;
+    background:rgba(255,255,255,.92);
+    color:#0f172a;
+    font-size:16px;
+    border:2px solid transparent;
+    transition:.25s;
 }
 
-.select-bosco{
-    background:rgba(255,255,255,.10);
-    border:1px solid rgba(255,255,255,.12);
+input:focus,
+select:focus,
+textarea:focus{
+    border-color:#ffcc00;
+    box-shadow:0 0 15px rgba(255,204,0,.45);
+    transform:translateY(-2px);
 }
+
+textarea{
+    resize:none;
+    height:120px;
+}
+
+input::placeholder,
+textarea::placeholder{
+    color:#475569;
+}
+
+/* BOTONES */
+
+.btn{
+    width:100%;
+    padding:16px;
+    border:none;
+    border-radius:16px;
+    margin-top:20px;
+    font-size:18px;
+    font-weight:bold;
+    cursor:pointer;
+    color:white;
+    transition:.25s;
+    box-shadow:0 8px 20px rgba(0,0,0,.25);
+}
+
+.btn:hover{
+    transform:translateY(-3px) scale(1.02);
+}
+
+.profesor{
+    background:linear-gradient(135deg,#0056b3,#007bff);
+}
+
+.inspector{
+    background:linear-gradient(135deg,#ffb703,#ffcc00);
+    color:#002b5c;
+}
+
+.medico{
+    background:linear-gradient(135deg,#008f5a,#22c55e);
+}
+
+.pdf{
+    background:linear-gradient(135deg,#002b5c,#0056b3);
+    border:2px solid #ffcc00;
+}
+
+/* ESCALA DE DOLOR CON CARITAS */
 
 .emociones{
     display:flex;
     justify-content:center;
     gap:22px;
     flex-wrap:wrap;
+    margin-top:18px;
 }
 
 .emociones input{
@@ -43,7 +182,7 @@
 }
 
 .cara{
-    width:140px;
+    width:145px;
     min-height:145px;
     border-radius:28px;
     display:flex;
@@ -54,17 +193,17 @@
     transition:.25s;
     color:white;
     font-weight:bold;
-    box-shadow:
-    0 10px 30px rgba(0,0,0,.25);
+    box-shadow:0 10px 28px rgba(0,0,0,.30);
+    border:3px solid rgba(255,255,255,.25);
 }
 
 .cara:hover{
-    transform:translateY(-8px) scale(1.03);
+    transform:translateY(-7px) scale(1.03);
 }
 
 .emoji{
     font-size:55px;
-    margin-bottom:12px;
+    margin-bottom:10px;
 }
 
 .cara span{
@@ -72,39 +211,150 @@
 }
 
 .verde{
-    background:linear-gradient(135deg,#22c55e,#16a34a);
+    background:linear-gradient(135deg,#16a34a,#22c55e);
 }
 
 .amarillo{
-    background:linear-gradient(135deg,#facc15,#eab308);
+    background:linear-gradient(135deg,#facc15,#ffb703);
+    color:#002b5c;
 }
 
 .rojo{
-    background:linear-gradient(135deg,#ef4444,#dc2626);
+    background:linear-gradient(135deg,#dc2626,#ef4444);
 }
 
 .emociones input:checked + .cara{
-
-    transform:scale(1.06);
-
-    border:5px solid white;
-
+    border:5px solid #ffcc00;
+    transform:scale(1.07);
     box-shadow:
-    0 0 30px rgba(255,255,255,.6);
+        0 0 25px rgba(255,204,0,.75),
+        0 10px 28px rgba(0,0,0,.35);
 }
 
+/* TABLAS RESPONSIVE */
+
+.tabla-scroll{
+    width:100%;
+    overflow-x:auto;
+    margin-top:20px;
+    border-radius:18px;
+    -webkit-overflow-scrolling:touch;
+}
+
+table{
+    width:100%;
+    min-width:720px;
+    border-collapse:collapse;
+    overflow:hidden;
+    border-radius:18px;
+    box-shadow:0 10px 30px rgba(0,0,0,.25);
+}
+
+th{
+    background:#ffcc00;
+    color:#002b5c;
+    padding:15px;
+    font-size:14px;
+    text-transform:uppercase;
+}
+
+td{
+    background:rgba(255,255,255,.12);
+    padding:14px;
+    text-align:center;
+    border-bottom:1px solid rgba(255,255,255,.15);
+    color:white;
+    white-space:nowrap;
+}
+
+tr:hover td{
+    background:rgba(255,204,0,.16);
+}
+
+/* BOTONES ACCIONES */
+
+.aprobar,
+.rechazar{
+    border:none;
+    padding:10px 14px;
+    border-radius:12px;
+    color:white;
+    cursor:pointer;
+    font-weight:bold;
+    transition:.2s;
+}
+
+.aprobar{
+    background:#22c55e;
+    margin-right:5px;
+}
+
+.rechazar{
+    background:#ef4444;
+}
+
+.aprobar:hover,
+.rechazar:hover{
+    transform:scale(1.1);
+}
+
+/* RESPONSIVE */
+
 @media(max-width:700px){
+    body{
+        padding:12px;
+        align-items:flex-start;
+    }
+
+    .contenedor{
+        padding:22px;
+        border-radius:20px;
+    }
+
+    .logo{
+        width:130px;
+    }
+
+    h1{
+        font-size:32px;
+    }
+
+    .subtitulo{
+        font-size:15px;
+    }
+
+    .card-seccion{
+        padding:18px;
+    }
+
+    .emociones{
+        gap:14px;
+    }
 
     .cara{
         width:100%;
-        min-height:120px;
+        min-height:115px;
     }
 
     .emoji{
-        font-size:42px;
+        font-size:40px;
     }
 
     .cara span{
         font-size:16px;
+    }
+
+    table{
+        min-width:720px;
+        font-size:12px;
+    }
+
+    th,
+    td{
+        padding:10px;
+    }
+
+    .btn{
+        font-size:15px;
     }
 }
