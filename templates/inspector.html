@@ -1,126 +1,81 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-
 <meta charset="UTF-8">
-
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Inspector</title>
-
-<link rel="stylesheet"
-href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
 <style>
-
 .btn-mas{
-
     position:fixed;
-
     bottom:25px;
-
     right:25px;
-
     width:75px;
-
     height:75px;
-
     border-radius:50%;
-
     border:none;
-
-    background:linear-gradient(
-        135deg,
-        #ffcc00,
-        #ffb703
-    );
-
+    background:linear-gradient(135deg,#ffcc00,#ffb703);
     color:#002b5c;
-
     font-size:42px;
-
     font-weight:bold;
-
     cursor:pointer;
-
     z-index:999;
-
-    box-shadow:
-    0 10px 30px rgba(0,0,0,.35);
-
-    transition:.25s;
-}
-
-.btn-mas:hover{
-
-    transform:scale(1.1)
-    rotate(90deg);
+    box-shadow:0 10px 30px rgba(0,0,0,.35);
 }
 
 .modal{
-
     position:fixed;
-
     inset:0;
-
     background:rgba(0,0,0,.65);
-
     display:none;
-
     justify-content:center;
-
     align-items:center;
-
     z-index:1000;
+    padding:15px;
 }
 
 .modal-content{
-
     width:95%;
-
-    max-width:520px;
-
+    max-width:600px;
+    max-height:90vh;
+    overflow-y:auto;
     background:#0f172a;
-
     border-radius:25px;
-
     padding:30px;
-
     border:2px solid #ffcc00;
-
-    box-shadow:
-    0 15px 40px rgba(0,0,0,.45);
-
-    animation:modal .3s ease;
-}
-
-@keyframes modal{
-
-    from{
-        opacity:0;
-        transform:scale(.85);
-    }
-
-    to{
-        opacity:1;
-        transform:scale(1);
-    }
+    box-shadow:0 15px 40px rgba(0,0,0,.45);
 }
 
 .cerrar{
-
     float:right;
-
-    font-size:30px;
-
+    font-size:32px;
     cursor:pointer;
-
     color:white;
 }
 
-</style>
+@media(max-width:700px){
+    .btn-mas{
+        width:65px;
+        height:65px;
+        font-size:36px;
+        bottom:18px;
+        right:18px;
+    }
 
+    .modal{
+        align-items:flex-start;
+        overflow-y:auto;
+    }
+
+    .modal-content{
+        margin-top:20px;
+        margin-bottom:30px;
+        padding:20px;
+        max-height:none;
+    }
+}
+</style>
 </head>
 
 <body>
@@ -130,23 +85,13 @@ href="{{ url_for('static', filename='style.css') }}">
 <h1>Panel Inspector</h1>
 
 <a href="/pdf">
-
-<button class="btn pdf">
-
-📄 DESCARGAR PDF
-
-</button>
-
+<button class="btn pdf">📄 DESCARGAR PDF</button>
 </a>
 
 <div class="tabla-scroll">
-
 <table>
-
 <thead>
-
 <tr>
-
 <th>Curso</th>
 <th>Nombre</th>
 <th>Motivo</th>
@@ -154,58 +99,103 @@ href="{{ url_for('static', filename='style.css') }}">
 <th>Estado</th>
 <th>Fecha</th>
 <th>Acciones</th>
-
 </tr>
-
 </thead>
 
 <tbody id="tablaInspector"></tbody>
-
 </table>
-
 </div>
 
 </div>
 
-<!-- BOTÓN MÁS -->
-
-<button
-class="btn-mas"
-onclick="abrirModal()">
-
-+
-
-</button>
-
-<!-- MODAL -->
+<button class="btn-mas" onclick="abrirModal()">+</button>
 
 <div id="modal" class="modal">
 
 <div class="modal-content">
 
-<span
-class="cerrar"
-onclick="cerrarModal()">
-
-×
-
-</span>
+<span class="cerrar" onclick="cerrarModal()">×</span>
 
 <h2>Nueva Solicitud</h2>
 
-<form
-method="POST"
-action="/solicitudes">
+<form method="POST" action="/solicitudes">
 
 <div class="card-seccion">
 
 <h3>Curso</h3>
 
-<input
-type="text"
-name="curso"
-placeholder="Ejemplo: 7mo A"
-required>
+<select name="curso" required>
+<option value="">Seleccionar curso</option>
+
+<option>Inicial 1</option>
+<option>Inicial 2</option>
+
+<option>1ro A</option>
+<option>1ro B</option>
+<option>1ro C</option>
+<option>1ro D</option>
+
+<option>2do A</option>
+<option>2do B</option>
+<option>2do C</option>
+<option>2do D</option>
+
+<option>3ro A</option>
+<option>3ro B</option>
+<option>3ro C</option>
+<option>3ro D</option>
+
+<option>4to A</option>
+<option>4to B</option>
+<option>4to C</option>
+<option>4to D</option>
+
+<option>5to A</option>
+<option>5to B</option>
+<option>5to C</option>
+<option>5to D</option>
+
+<option>6to A</option>
+<option>6to B</option>
+<option>6to C</option>
+<option>6to D</option>
+
+<option>7mo A</option>
+<option>7mo B</option>
+<option>7mo C</option>
+<option>7mo D</option>
+
+<option>8vo A</option>
+<option>8vo B</option>
+<option>8vo C</option>
+<option>8vo D</option>
+
+<option>9no A</option>
+<option>9no B</option>
+<option>9no C</option>
+<option>9no D</option>
+
+<option>10mo A</option>
+<option>10mo B</option>
+<option>10mo C</option>
+<option>10mo D</option>
+
+<option>1ro Bachillerato INF</option>
+<option>1ro Bachillerato ET</option>
+<option>1ro Bachillerato CCA</option>
+<option>1ro Bachillerato CCB</option>
+
+<option>2do Bachillerato INF</option>
+<option>2do Bachillerato ET</option>
+<option>2do Bachillerato CCA</option>
+<option>2do Bachillerato CCB</option>
+
+<option>3ro Bachillerato INF</option>
+<option>3ro Bachillerato ET</option>
+<option>3ro Bachillerato CCA</option>
+<option>3ro Bachillerato CCB</option>
+
+</select>
 
 </div>
 
@@ -216,7 +206,7 @@ required>
 <input
 type="text"
 name="nombre_manual"
-placeholder="Escribe el nombre..."
+placeholder="Escribe el nombre del estudiante"
 required>
 
 </div>
@@ -227,148 +217,83 @@ required>
 
 <textarea
 name="motivo"
-placeholder="Motivo"
+placeholder="Escribe el motivo..."
 required></textarea>
 
 </div>
 
+<div class="card-seccion">
+
+<h3>Nivel de Dolor</h3>
+
 <div class="emociones">
 
-<input
-type="radio"
-name="dolor"
-value="1"
-id="i1"
-required>
-
-<label
-for="i1"
-class="cara verde">
-
+<input type="radio" name="dolor" value="1" id="insDolor1" required>
+<label for="insDolor1" class="cara verde">
 <div class="emoji">😊</div>
-
 <span>Leve</span>
-
 </label>
 
-<input
-type="radio"
-name="dolor"
-value="2"
-id="i2">
-
-<label
-for="i2"
-class="cara amarillo">
-
+<input type="radio" name="dolor" value="2" id="insDolor2">
+<label for="insDolor2" class="cara amarillo">
 <div class="emoji">😐</div>
-
 <span>Moderado</span>
-
 </label>
 
-<input
-type="radio"
-name="dolor"
-value="3"
-id="i3">
-
-<label
-for="i3"
-class="cara rojo">
-
+<input type="radio" name="dolor" value="3" id="insDolor3">
+<label for="insDolor3" class="cara rojo">
 <div class="emoji">😖</div>
-
 <span>Urgente</span>
-
 </label>
 
 </div>
 
-<button
-type="submit"
-class="btn inspector">
+</div>
 
-ENVIAR
-
+<button type="submit" class="btn inspector">
+ENVIAR SOLICITUD
 </button>
 
 </form>
 
 </div>
-
 </div>
 
 <script>
-
 function abrirModal(){
-
-    document.getElementById(
-        "modal"
-    ).style.display = "flex";
+    document.getElementById("modal").style.display = "flex";
 }
 
 function cerrarModal(){
-
-    document.getElementById(
-        "modal"
-    ).style.display = "none";
+    document.getElementById("modal").style.display = "none";
 }
 
 let idsVistos = new Set();
-
 let primeraCarga = true;
 
 function cargarInspector(){
 
 fetch('/api/solicitudes')
-
 .then(r => r.json())
-
 .then(data => {
 
-    let tabla =
-    document.getElementById(
-        "tablaInspector"
-    );
-
+    let tabla = document.getElementById("tablaInspector");
     tabla.innerHTML = "";
 
     data.forEach(s => {
 
-        idsVistos.add(
-            s.id_solicitud
-        );
-
         let acciones = "";
 
-        if(
-            s.estado === "Pendiente"
-        ){
-
+        if(s.estado === "Pendiente"){
             acciones = `
-
             <a href="/aprobar/${s.id_solicitud}">
-
-                <button class="aprobar">
-                ✔
-                </button>
-
+                <button class="aprobar">✔</button>
             </a>
 
             <a href="/rechazar/${s.id_solicitud}">
-
-                <button class="rechazar">
-                ✖
-                </button>
-
-            </a>
-
-            `;
-        }
-
-        else{
-
+                <button class="rechazar">✖</button>
+            </a>`;
+        } else {
             acciones = s.estado;
         }
 
@@ -376,54 +301,32 @@ fetch('/api/solicitudes')
 
         if(s.dolor == 1){
             dolorTexto = "😊 Leve";
-        }
-
-        else if(s.dolor == 2){
+        } else if(s.dolor == 2){
             dolorTexto = "😐 Moderado";
-        }
-
-        else if(s.dolor == 3){
+        } else if(s.dolor == 3){
             dolorTexto = "😖 Urgente";
-        }
-
-        else{
+        } else {
             dolorTexto = s.dolor;
         }
 
         tabla.innerHTML += `
-
         <tr>
-
             <td>${s.curso || ""}</td>
-
             <td>${s.nombre}</td>
-
             <td>${s.motivo}</td>
-
             <td>${dolorTexto}</td>
-
             <td>${s.estado}</td>
-
             <td>${s.fecha}</td>
-
             <td>${acciones}</td>
-
-        </tr>
-
-        `;
+        </tr>`;
     });
 
     primeraCarga = false;
 });
 }
 
-setInterval(
-    cargarInspector,
-    1000
-);
-
+setInterval(cargarInspector, 1000);
 cargarInspector();
-
 </script>
 
 </body>
