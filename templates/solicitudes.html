@@ -15,24 +15,84 @@
 
 <h1>MediGo</h1>
 
-<p class="subtitulo">
-Curso seleccionado: {{ curso }}
-</p>
+<p class="subtitulo">Panel del Profesor</p>
 
 <form method="POST">
 
-<input type="hidden" name="curso" value="{{ curso }}">
-
 <div class="card-seccion">
 
-<h3>Estudiante</h3>
+<h3>Curso</h3>
 
-<select name="estudiante" required>
-<option value="">Seleccionar estudiante</option>
+<select name="curso" required>
+<option value="">Seleccionar curso</option>
 
-{% for e in estudiantes %}
-<option value="{{ e.id_estudiante }}">{{ e.nombre }}</option>
-{% endfor %}
+<option>Inicial 1</option>
+<option>Inicial 2</option>
+
+<option>1ro A</option>
+<option>1ro B</option>
+<option>1ro C</option>
+<option>1ro D</option>
+
+<option>2do A</option>
+<option>2do B</option>
+<option>2do C</option>
+<option>2do D</option>
+
+<option>3ro A</option>
+<option>3ro B</option>
+<option>3ro C</option>
+<option>3ro D</option>
+
+<option>4to A</option>
+<option>4to B</option>
+<option>4to C</option>
+<option>4to D</option>
+
+<option>5to A</option>
+<option>5to B</option>
+<option>5to C</option>
+<option>5to D</option>
+
+<option>6to A</option>
+<option>6to B</option>
+<option>6to C</option>
+<option>6to D</option>
+
+<option>7mo A</option>
+<option>7mo B</option>
+<option>7mo C</option>
+<option>7mo D</option>
+
+<option>8vo A</option>
+<option>8vo B</option>
+<option>8vo C</option>
+<option>8vo D</option>
+
+<option>9no A</option>
+<option>9no B</option>
+<option>9no C</option>
+<option>9no D</option>
+
+<option>10mo A</option>
+<option>10mo B</option>
+<option>10mo C</option>
+<option>10mo D</option>
+
+<option>1ro Bachillerato INF</option>
+<option>1ro Bachillerato ET</option>
+<option>1ro Bachillerato CCA</option>
+<option>1ro Bachillerato CCB</option>
+
+<option>2do Bachillerato INF</option>
+<option>2do Bachillerato ET</option>
+<option>2do Bachillerato CCA</option>
+<option>2do Bachillerato CCB</option>
+
+<option>3ro Bachillerato INF</option>
+<option>3ro Bachillerato ET</option>
+<option>3ro Bachillerato CCA</option>
+<option>3ro Bachillerato CCB</option>
 
 </select>
 
@@ -40,9 +100,24 @@ Curso seleccionado: {{ curso }}
 
 <div class="card-seccion">
 
+<h3>Nombre del estudiante</h3>
+
+<input
+type="text"
+name="nombre_manual"
+placeholder="Escribe el nombre del estudiante"
+required>
+
+</div>
+
+<div class="card-seccion">
+
 <h3>Motivo</h3>
 
-<textarea name="motivo" placeholder="Escribe el motivo..." required></textarea>
+<textarea
+name="motivo"
+placeholder="Escribe el motivo..."
+required></textarea>
 
 </div>
 
