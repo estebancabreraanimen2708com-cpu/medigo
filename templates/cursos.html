@@ -25,6 +25,7 @@ href="{{ url_for('static', filename='style.css') }}">
         opacity:0;
         transform:translateY(-10px);
     }
+
     to{
         opacity:1;
         transform:translateY(0);
@@ -60,7 +61,7 @@ href="{{ url_for('static', filename='style.css') }}">
 
 .btn-curso{
     height:85px;
-    font-size:28px;
+    font-size:26px;
     border-radius:22px;
 }
 
@@ -92,202 +93,113 @@ Sistema Médico Escolar Salesiano
 
 </div>
 
-<!-- 7MO -->
-
-<div class="curso-card">
-
-<button
-class="btn profesor btn-curso"
-onclick="toggleParalelos('p7')">
-
-7mo
-
-</button>
-
-<div id="p7" class="paralelos">
-
-<div class="grid-paralelos">
-
-<a href="/solicitudes?curso=7mo A">
-<button class="btn inspector btn-paralelo">
-A
-</button>
-</a>
-
-<a href="/solicitudes?curso=7mo B">
-<button class="btn inspector btn-paralelo">
-B
-</button>
-</a>
-
-<a href="/solicitudes?curso=7mo C">
-<button class="btn inspector btn-paralelo">
-C
-</button>
-</a>
-
-<a href="/solicitudes?curso=7mo D">
-<button class="btn inspector btn-paralelo">
-D
-</button>
-</a>
-
-</div>
-
-</div>
-
-</div>
-
-<!-- 8VO -->
-
-<div class="curso-card">
-
-<button
-class="btn profesor btn-curso"
-onclick="toggleParalelos('p8')">
-
-8vo
-
-</button>
-
-<div id="p8" class="paralelos">
-
-<div class="grid-paralelos">
-
-<a href="/solicitudes?curso=8vo A">
-<button class="btn inspector btn-paralelo">
-A
-</button>
-</a>
-
-<a href="/solicitudes?curso=8vo B">
-<button class="btn inspector btn-paralelo">
-B
-</button>
-</a>
-
-<a href="/solicitudes?curso=8vo C">
-<button class="btn inspector btn-paralelo">
-C
-</button>
-</a>
-
-<a href="/solicitudes?curso=8vo D">
-<button class="btn inspector btn-paralelo">
-D
-</button>
-</a>
-
-</div>
-
-</div>
-
-</div>
-
-<!-- 9NO -->
-
-<div class="curso-card">
-
-<button
-class="btn profesor btn-curso"
-onclick="toggleParalelos('p9')">
-
-9no
-
-</button>
-
-<div id="p9" class="paralelos">
-
-<div class="grid-paralelos">
-
-<a href="/solicitudes?curso=9no A">
-<button class="btn inspector btn-paralelo">
-A
-</button>
-</a>
-
-<a href="/solicitudes?curso=9no B">
-<button class="btn inspector btn-paralelo">
-B
-</button>
-</a>
-
-<a href="/solicitudes?curso=9no C">
-<button class="btn inspector btn-paralelo">
-C
-</button>
-</a>
-
-<a href="/solicitudes?curso=9no D">
-<button class="btn inspector btn-paralelo">
-D
-</button>
-</a>
-
-</div>
-
-</div>
-
-</div>
-
-<!-- 10MO -->
-
-<div class="curso-card">
-
-<button
-class="btn profesor btn-curso"
-onclick="toggleParalelos('p10')">
-
-10mo
-
-</button>
-
-<div id="p10" class="paralelos">
-
-<div class="grid-paralelos">
-
-<a href="/solicitudes?curso=10mo A">
-<button class="btn inspector btn-paralelo">
-A
-</button>
-</a>
-
-<a href="/solicitudes?curso=10mo B">
-<button class="btn inspector btn-paralelo">
-B
-</button>
-</a>
-
-<a href="/solicitudes?curso=10mo C">
-<button class="btn inspector btn-paralelo">
-C
-</button>
-</a>
-
-<a href="/solicitudes?curso=10mo D">
-<button class="btn inspector btn-paralelo">
-D
-</button>
-</a>
-
-</div>
-
-</div>
-
-</div>
+<div id="contenedorCursos"></div>
 
 </div>
 
 <script>
 
+const cursos = [
+
+"Inicial 1",
+"Inicial 2",
+
+"1ro EGB",
+"2do EGB",
+"3ro EGB",
+"4to EGB",
+"5to EGB",
+"6to EGB",
+"7mo EGB",
+
+"8vo EGB",
+"9no EGB",
+"10mo EGB",
+
+"1ro Bachillerato",
+"2do Bachillerato",
+"3ro Bachillerato"
+
+];
+
+const paralelos = [
+
+"A",
+"B",
+"C",
+"D"
+
+];
+
+const contenedor =
+document.getElementById(
+    "contenedorCursos"
+);
+
+cursos.forEach((curso,index)=>{
+
+    let html = `
+
+    <div class="curso-card">
+
+        <button
+        class="btn profesor btn-curso"
+        onclick="toggleParalelos('p${index}')">
+
+        ${curso}
+
+        </button>
+
+        <div
+        id="p${index}"
+        class="paralelos">
+
+            <div class="grid-paralelos">
+
+    `;
+
+    paralelos.forEach(p=>{
+
+        html += `
+
+        <a href="/solicitudes?curso=${curso} ${p}">
+
+            <button
+            class="btn inspector btn-paralelo">
+
+            ${p}
+
+            </button>
+
+        </a>
+
+        `;
+    });
+
+    html += `
+
+            </div>
+
+        </div>
+
+    </div>
+
+    `;
+
+    contenedor.innerHTML += html;
+});
+
 function toggleParalelos(id){
 
     let todos =
-    document.querySelectorAll(".paralelos");
+    document.querySelectorAll(
+        ".paralelos"
+    );
 
-    todos.forEach(p => {
+    todos.forEach(p=>{
 
         if(p.id !== id){
+
             p.style.display = "none";
         }
     });
@@ -298,10 +210,12 @@ function toggleParalelos(id){
     if(
         actual.style.display === "block"
     ){
+
         actual.style.display = "none";
     }
 
     else{
+
         actual.style.display = "block";
     }
 }
