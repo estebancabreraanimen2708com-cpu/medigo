@@ -1,26 +1,77 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Historial</title>
-
-<link rel="stylesheet"
-href="{{ url_for('static', filename='style.css') }}">
-
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body>
 
 <div class="contenedor">
 
+<img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
+
 <h1>Historial Clínico</h1>
 
-<p>Aquí aparecerá el historial del estudiante.</p>
+<p class="subtitulo">
+Estudiante: {{ nombre }}
+</p>
+
+<h2>
+Veces registradas en enfermería: {{ total }}
+</h2>
+
+<button class="btn profesor" onclick="history.back()">
+Volver
+</button>
+
+<div class="tabla-scroll">
+
+<table>
+<thead>
+<tr>
+<th>Curso</th>
+<th>Motivo</th>
+<th>Dolor</th>
+<th>Estado</th>
+<th>Fecha</th>
+<th>Observaciones</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for h in historial %}
+
+<tr>
+<td>{{ h.curso }}</td>
+<td>{{ h.motivo }}</td>
+
+<td>
+{% if h.dolor == 1 or h.dolor == "1" %}
+😊 Leve
+{% elif h.dolor == 2 or h.dolor == "2" %}
+😐 Moderado
+{% elif h.dolor == 3 or h.dolor == "3" %}
+😖 Urgente
+{% else %}
+{{ h.dolor }}
+{% endif %}
+</td>
+
+<td>{{ h.estado }}</td>
+<td>{{ h.fecha }}</td>
+<td>{{ h.observaciones or "Sin observaciones" }}</td>
+</tr>
+
+{% endfor %}
+
+</tbody>
+</table>
+
+</div>
 
 </div>
 
