@@ -33,6 +33,7 @@ body::before{
     transform:rotate(18deg);
     opacity:.55;
     z-index:-1;
+    animation:moverTriangulo1 8s ease-in-out infinite alternate;
 }
 
 body::after{
@@ -48,6 +49,49 @@ body::after{
     transform:rotate(-28deg);
     opacity:.65;
     z-index:-1;
+    animation:moverTriangulo2 9s ease-in-out infinite alternate;
+}
+
+@keyframes moverTriangulo1{
+    from{
+        transform:translateY(0) rotate(18deg) scale(1);
+    }
+    to{
+        transform:translateY(45px) rotate(28deg) scale(1.08);
+    }
+}
+
+@keyframes moverTriangulo2{
+    from{
+        transform:translateY(0) rotate(-28deg) scale(1);
+    }
+    to{
+        transform:translateY(-45px) rotate(-18deg) scale(1.08);
+    }
+}
+
+.contenedor::before{
+    content:"";
+    position:fixed;
+    top:18%;
+    right:14%;
+    width:210px;
+    height:210px;
+    background:white;
+    clip-path:polygon(50% 0%, 100% 85%, 0% 85%);
+    border-radius:35px;
+    opacity:.45;
+    z-index:-1;
+    animation:flotarTriangulo3 7s ease-in-out infinite alternate;
+}
+
+@keyframes flotarTriangulo3{
+    from{
+        transform:translateX(0) rotate(10deg);
+    }
+    to{
+        transform:translateX(-55px) rotate(25deg);
+    }
 }
 
 .contenedor{
@@ -247,7 +291,7 @@ textarea{
 
 table{
     width:100%;
-    min-width:720px;
+    min-width:900px;
     border-collapse:collapse;
     overflow:hidden;
     border-radius:18px;
@@ -346,7 +390,7 @@ a{
     }
 
     table{
-        min-width:760px;
+        min-width:950px;
         font-size:12px;
     }
 
@@ -367,5 +411,10 @@ a{
     body::after{
         width:300px;
         height:300px;
+    }
+
+    .contenedor::before{
+        width:150px;
+        height:150px;
     }
 }
