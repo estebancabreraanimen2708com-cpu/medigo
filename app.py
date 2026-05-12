@@ -24,16 +24,11 @@ def fecha_ecuador():
 def asegurar_columna_curso():
     conn = conectar_bd()
     cursor = conn.cursor()
-
     try:
-        cursor.execute("""
-        ALTER TABLE solicitudes
-        ADD COLUMN curso VARCHAR(50)
-        """)
+        cursor.execute("ALTER TABLE solicitudes ADD COLUMN curso VARCHAR(50)")
         conn.commit()
     except:
         pass
-
     conn.close()
 
 @app.route('/')
@@ -74,27 +69,20 @@ def solicitudes():
         nombre_manual = request.form['nombre_manual']
         motivo = request.form['motivo']
         dolor = request.form['dolor']
+        origen = request.form.get('origen', 'profesor')
 
         cursor.execute("""
-        INSERT INTO estudiantes(nombre)
-        VALUES(%s)
+            INSERT INTO estudiantes(nombre)
+            VALUES(%s)
         """, (nombre_manual,))
 
         conn.commit()
-
         estudiante = cursor.lastrowid
 
         cursor.execute("""
-        INSERT INTO solicitudes
-        (
-            id_estudiante,
-            motivo,
-            dolor,
-            estado,
-            fecha,
-            curso
-        )
-        VALUES(%s,%s,%s,%s,%s,%s)
+            INSERT INTO solicitudes
+            (id_estudiante, motivo, dolor, estado, fecha, curso)
+            VALUES(%s,%s,%s,%s,%s,%s)
         """, (
             estudiante,
             motivo,
@@ -107,10 +95,15 @@ def solicitudes():
         conn.commit()
         conn.close()
 
+        if origen == "inspector":
+            return redirect('/inspector')
+
+        if origen == "medico":
+            return redirect('/medico')
+
         return redirect('/solicitudes')
 
     conn.close()
-
     return render_template('solicitudes.html')
 
 @app.route('/api/solicitudes')
@@ -121,18 +114,18 @@ def api_solicitudes():
     cursor = conn.cursor(dictionary=True)
 
     cursor.execute("""
-    SELECT
-        s.id_solicitud,
-        e.nombre,
-        s.motivo,
-        s.dolor,
-        s.estado,
-        COALESCE(s.curso, '') AS curso,
-        DATE_FORMAT(s.fecha, '%Y-%m-%d %H:%i:%s') AS fecha
-    FROM solicitudes s
-    JOIN estudiantes e
-    ON s.id_estudiante = e.id_estudiante
-    ORDER BY s.id_solicitud DESC
+        SELECT
+            s.id_solicitud,
+            e.nombre,
+            s.motivo,
+            s.dolor,
+            s.estado,
+            COALESCE(s.curso, '') AS curso,
+            DATE_FORMAT(s.fecha, '%Y-%m-%d %H:%i:%s') AS fecha
+        FROM solicitudes s
+        JOIN estudiantes e
+        ON s.id_estudiante = e.id_estudiante
+        ORDER BY s.id_solicitud DESC
     """)
 
     solicitudes = cursor.fetchall()
@@ -154,9 +147,9 @@ def aprobar(id):
     cursor = conn.cursor()
 
     cursor.execute("""
-    UPDATE solicitudes
-    SET estado='Aprobado'
-    WHERE id_solicitud=%s
+        UPDATE solicitudes
+        SET estado='Aprobado'
+        WHERE id_solicitud=%s
     """, (id,))
 
     conn.commit()
@@ -170,9 +163,9 @@ def rechazar(id):
     cursor = conn.cursor()
 
     cursor.execute("""
-    UPDATE solicitudes
-    SET estado='Rechazado'
-    WHERE id_solicitud=%s
+        UPDATE solicitudes
+        SET estado='Rechazado'
+        WHERE id_solicitud=%s
     """, (id,))
 
     conn.commit()
@@ -186,9 +179,9 @@ def atendido(id):
     cursor = conn.cursor()
 
     cursor.execute("""
-    UPDATE solicitudes
-    SET estado='Atendido'
-    WHERE id_solicitud=%s
+        UPDATE solicitudes
+        SET estado='Atendido'
+        WHERE id_solicitud=%s
     """, (id,))
 
     conn.commit()
@@ -204,17 +197,17 @@ def pdf():
     cursor = conn.cursor(dictionary=True)
 
     cursor.execute("""
-    SELECT
-        e.nombre,
-        COALESCE(s.curso, '') AS curso,
-        s.motivo,
-        s.dolor,
-        s.estado,
-        DATE_FORMAT(s.fecha, '%Y-%m-%d %H:%i:%s') AS fecha
-    FROM solicitudes s
-    JOIN estudiantes e
-    ON s.id_estudiante = e.id_estudiante
-    ORDER BY s.id_solicitud DESC
+        SELECT
+            e.nombre,
+            COALESCE(s.curso, '') AS curso,
+            s.motivo,
+            s.dolor,
+            s.estado,
+            DATE_FORMAT(s.fecha, '%Y-%m-%d %H:%i:%s') AS fecha
+        FROM solicitudes s
+        JOIN estudiantes e
+        ON s.id_estudiante = e.id_estudiante
+        ORDER BY s.id_solicitud DESC
     """)
 
     datos = cursor.fetchall()
@@ -250,7 +243,6 @@ def pdf():
             f"Estado: {d['estado']} | "
             f"Fecha: {d['fecha']}"
         )
-
         pdf.multi_cell(0, 8, texto)
 
     pdf.output(archivo)
