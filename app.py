@@ -125,6 +125,7 @@ def api_solicitudes():
     cursor.execute("""
         SELECT
             s.id_solicitud,
+            s.id_estudiante,
             e.nombre,
             s.motivo,
             s.dolor,
@@ -143,12 +144,24 @@ def api_solicitudes():
 
     return jsonify(solicitudes)
 
-@app.route('/historial/<path:nombre>')
-def historial(nombre):
+@app.route('/historial/<int:id_estudiante>')
+def historial(id_estudiante):
     asegurar_columnas()
 
     conn = conectar_bd()
     cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT nombre
+        FROM estudiantes
+        WHERE id_estudiante=%s
+    """, (id_estudiante,))
+
+    estudiante = cursor.fetchone()
+
+    if not estudiante:
+        conn.close()
+        return "Estudiante no encontrado"
 
     cursor.execute("""
         SELECT
@@ -162,9 +175,9 @@ def historial(nombre):
         FROM solicitudes s
         JOIN estudiantes e
         ON s.id_estudiante = e.id_estudiante
-        WHERE e.nombre = %s
-        ORDER BY s.fecha DESC
-    """, (nombre,))
+        WHERE s.id_estudiante=%s
+        ORDER BY s.id_solicitud DESC
+    """, (id_estudiante,))
 
     historial = cursor.fetchall()
     total = len(historial)
@@ -174,7 +187,7 @@ def historial(nombre):
     return render_template(
         'historial.html',
         historial=historial,
-        nombre=nombre,
+        nombre=estudiante["nombre"],
         total=total
     )
 
