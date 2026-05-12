@@ -25,7 +25,6 @@ ecuador = pytz.timezone("America/Guayaquil")
 def fecha_ecuador():
     return datetime.now(ecuador).strftime("%Y-%m-%d %H:%M:%S")
 
-
 # =========================
 # ASEGURAR COLUMNAS
 # =========================
@@ -64,7 +63,6 @@ def asegurar_columnas():
 
     conn.close()
 
-
 # =========================
 # INICIO
 # =========================
@@ -73,11 +71,9 @@ def asegurar_columnas():
 def inicio():
     return render_template('inicio.html')
 
-
 @app.route('/roles')
 def roles():
     return render_template('roles.html')
-
 
 # =========================
 # LOGIN
@@ -114,7 +110,6 @@ def login(rol):
         rol=rol,
         error=error
     )
-
 
 # =========================
 # SOLICITUDES
@@ -180,13 +175,10 @@ def solicitudes():
 
     conn.close()
 
-    return render_template(
-        'solicitudes.html'
-    )
-
+    return render_template('solicitudes.html')
 
 # =========================
-# API
+# API SOLICITUDES
 # =========================
 
 @app.route('/api/solicitudes')
@@ -225,7 +217,6 @@ def api_solicitudes():
     conn.close()
 
     return jsonify(datos)
-
 
 # =========================
 # HISTORIAL
@@ -272,7 +263,6 @@ def historial(nombre):
         total=len(historial)
     )
 
-
 # =========================
 # INSPECTOR
 # =========================
@@ -280,7 +270,6 @@ def historial(nombre):
 @app.route('/inspector')
 def inspector():
     return render_template('inspector.html')
-
 
 @app.route('/aprobar/<int:id>')
 def aprobar(id):
@@ -301,7 +290,6 @@ def aprobar(id):
 
     return redirect('/inspector')
 
-
 @app.route('/rechazar/<int:id>')
 def rechazar(id):
 
@@ -321,7 +309,6 @@ def rechazar(id):
 
     return redirect('/inspector')
 
-
 # =========================
 # MÉDICO
 # =========================
@@ -329,7 +316,6 @@ def rechazar(id):
 @app.route('/medico')
 def medico():
     return render_template('medico.html')
-
 
 @app.route('/atendido/<int:id>')
 def atendido(id):
@@ -349,7 +335,6 @@ def atendido(id):
     conn.close()
 
     return redirect('/medico')
-
 
 @app.route('/observacion/<int:id>', methods=['POST'])
 def observacion(id):
@@ -377,7 +362,6 @@ def observacion(id):
     conn.close()
 
     return redirect('/medico')
-
 
 # =========================
 # PDF
@@ -446,7 +430,6 @@ def pdf():
         archivo,
         as_attachment=True
     )
-
 
 # =========================
 # RUN
