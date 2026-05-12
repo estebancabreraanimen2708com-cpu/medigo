@@ -161,7 +161,7 @@ def historial(id_estudiante):
 
     if not estudiante:
         conn.close()
-        return "Estudiante no encontrado"
+        return "No se encontró el estudiante"
 
     cursor.execute("""
         SELECT
@@ -179,16 +179,14 @@ def historial(id_estudiante):
         ORDER BY s.id_solicitud DESC
     """, (id_estudiante,))
 
-    historial = cursor.fetchall()
-    total = len(historial)
-
+    datos = cursor.fetchall()
     conn.close()
 
     return render_template(
         'historial.html',
-        historial=historial,
         nombre=estudiante["nombre"],
-        total=total
+        historial=datos,
+        total=len(datos)
     )
 
 @app.route('/inspector')
