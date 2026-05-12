@@ -21,14 +21,22 @@ ecuador = pytz.timezone("America/Guayaquil")
 def fecha_ecuador():
     return datetime.now(ecuador).strftime("%Y-%m-%d %H:%M:%S")
 
-def asegurar_columna_curso():
+def asegurar_columnas():
     conn = conectar_bd()
     cursor = conn.cursor()
+
     try:
         cursor.execute("ALTER TABLE solicitudes ADD COLUMN curso VARCHAR(50)")
         conn.commit()
     except:
         pass
+
+    try:
+        cursor.execute("ALTER TABLE solicitudes ADD COLUMN observaciones TEXT")
+        conn.commit()
+    except:
+        pass
+
     conn.close()
 
 @app.route('/')
@@ -59,7 +67,7 @@ def login(rol):
 
 @app.route('/solicitudes', methods=['GET', 'POST'])
 def solicitudes():
-    asegurar_columna_curso()
+    asegurar_columnas()
 
     conn = conectar_bd()
     cursor = conn.cursor(dictionary=True)
@@ -81,15 +89,16 @@ def solicitudes():
 
         cursor.execute("""
             INSERT INTO solicitudes
-            (id_estudiante, motivo, dolor, estado, fecha, curso)
-            VALUES(%s,%s,%s,%s,%s,%s)
+            (id_estudiante, motivo, dolor, estado, fecha, curso, observaciones)
+            VALUES(%s,%s,%s,%s,%s,%s,%s)
         """, (
             estudiante,
             motivo,
             dolor,
             "Pendiente",
             fecha_ecuador(),
-            curso
+            curso,
+            ""
         ))
 
         conn.commit()
@@ -108,7 +117,7 @@ def solicitudes():
 
 @app.route('/api/solicitudes')
 def api_solicitudes():
-    asegurar_columna_curso()
+    asegurar_columnas()
 
     conn = conectar_bd()
     cursor = conn.cursor(dictionary=True)
@@ -121,6 +130,7 @@ def api_solicitudes():
             s.dolor,
             s.estado,
             COALESCE(s.curso, '') AS curso,
+            COALESCE(s.observaciones, '') AS observaciones,
             DATE_FORMAT(s.fecha, '%Y-%m-%d %H:%i:%s') AS fecha
         FROM solicitudes s
         JOIN estudiantes e
@@ -189,9 +199,29 @@ def atendido(id):
 
     return redirect('/medico')
 
+@app.route('/observacion/<int:id>', methods=['POST'])
+def observacion(id):
+    asegurar_columnas()
+
+    texto = request.form.get('observaciones', '')
+
+    conn = conectar_bd()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        UPDATE solicitudes
+        SET observaciones=%s
+        WHERE id_solicitud=%s
+    """, (texto, id))
+
+    conn.commit()
+    conn.close()
+
+    return redirect('/medico')
+
 @app.route('/pdf')
 def pdf():
-    asegurar_columna_curso()
+    asegurar_columnas()
 
     conn = conectar_bd()
     cursor = conn.cursor(dictionary=True)
@@ -203,6 +233,7 @@ def pdf():
             s.motivo,
             s.dolor,
             s.estado,
+            COALESCE(s.observaciones, '') AS observaciones,
             DATE_FORMAT(s.fecha, '%Y-%m-%d %H:%i:%s') AS fecha
         FROM solicitudes s
         JOIN estudiantes e
@@ -241,7 +272,8 @@ def pdf():
             f"Motivo: {d['motivo']} | "
             f"Dolor: {d['dolor']} | "
             f"Estado: {d['estado']} | "
-            f"Fecha: {d['fecha']}"
+            f"Fecha: {d['fecha']} | "
+            f"Observaciones: {d['observaciones']}"
         )
         pdf.multi_cell(0, 8, texto)
 
