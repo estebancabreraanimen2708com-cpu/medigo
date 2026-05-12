@@ -8,7 +8,7 @@ import os
 app = Flask(__name__)
 
 # =========================
-# CONEXIÓN MYSQL
+# MYSQL
 # =========================
 
 def conectar_bd():
@@ -27,7 +27,7 @@ def fecha_ecuador():
 
 
 # =========================
-# CREAR COLUMNAS SI NO EXISTEN
+# ASEGURAR COLUMNAS
 # =========================
 
 def asegurar_columnas():
@@ -48,6 +48,15 @@ def asegurar_columnas():
         cursor.execute("""
         ALTER TABLE solicitudes
         ADD COLUMN observaciones TEXT
+        """)
+        conn.commit()
+    except:
+        pass
+
+    try:
+        cursor.execute("""
+        ALTER TABLE solicitudes
+        ADD COLUMN nombre VARCHAR(255)
         """)
         conn.commit()
     except:
@@ -108,7 +117,7 @@ def login(rol):
 
 
 # =========================
-# PROFESOR
+# SOLICITUDES
 # =========================
 
 @app.route('/solicitudes', methods=['GET', 'POST'])
@@ -131,21 +140,11 @@ def solicitudes():
             'profesor'
         )
 
-        # CREAR ESTUDIANTE
         cursor.execute("""
-        INSERT INTO estudiantes(nombre)
-        VALUES(%s)
-        """, (nombre,))
 
-        conn.commit()
-
-        id_estudiante = cursor.lastrowid
-
-        # CREAR SOLICITUD
-        cursor.execute("""
         INSERT INTO solicitudes
         (
-            id_estudiante,
+            nombre,
             motivo,
             dolor,
             estado,
@@ -153,15 +152,19 @@ def solicitudes():
             curso,
             observaciones
         )
+
         VALUES(%s,%s,%s,%s,%s,%s,%s)
+
         """, (
-            id_estudiante,
+
+            nombre,
             motivo,
             dolor,
             "Pendiente",
             fecha_ecuador(),
             curso,
             ""
+
         ))
 
         conn.commit()
@@ -183,7 +186,7 @@ def solicitudes():
 
 
 # =========================
-# API SOLICITUDES
+# API
 # =========================
 
 @app.route('/api/solicitudes')
@@ -198,33 +201,22 @@ def api_solicitudes():
 
     SELECT
 
-        s.id_solicitud,
-        s.id_estudiante,
-
-        e.nombre,
-
-        s.motivo,
-        s.dolor,
-        s.estado,
-
-        COALESCE(s.curso,'') AS curso,
-
-        COALESCE(
-            s.observaciones,
-            ''
-        ) AS observaciones,
+        id_solicitud,
+        nombre,
+        motivo,
+        dolor,
+        estado,
+        curso,
+        observaciones,
 
         DATE_FORMAT(
-            s.fecha,
+            fecha,
             '%Y-%m-%d %H:%i:%s'
         ) AS fecha
 
-    FROM solicitudes s
+    FROM solicitudes
 
-    JOIN estudiantes e
-    ON s.id_estudiante = e.id_estudiante
-
-    ORDER BY s.id_solicitud DESC
+    ORDER BY id_solicitud DESC
 
     """)
 
@@ -239,67 +231,35 @@ def api_solicitudes():
 # HISTORIAL
 # =========================
 
-@app.route('/historial/<int:id_estudiante>')
-def historial(id_estudiante):
+@app.route('/historial/<path:nombre>')
+def historial(nombre):
 
     conn = conectar_bd()
     cursor = conn.cursor(dictionary=True)
 
-    # DATOS ESTUDIANTE
-    cursor.execute("""
-
-    SELECT nombre
-
-    FROM estudiantes
-
-    WHERE id_estudiante=%s
-
-    """, (id_estudiante,))
-
-    estudiante = cursor.fetchone()
-
-    if not estudiante:
-
-        conn.close()
-
-        return "Estudiante no encontrado"
-
-    # HISTORIAL
     cursor.execute("""
 
     SELECT
 
-        e.nombre,
-
-        COALESCE(
-            s.curso,
-            ''
-        ) AS curso,
-
-        s.motivo,
-        s.dolor,
-        s.estado,
-
-        COALESCE(
-            s.observaciones,
-            ''
-        ) AS observaciones,
+        nombre,
+        curso,
+        motivo,
+        dolor,
+        estado,
+        observaciones,
 
         DATE_FORMAT(
-            s.fecha,
+            fecha,
             '%Y-%m-%d %H:%i:%s'
         ) AS fecha
 
-    FROM solicitudes s
+    FROM solicitudes
 
-    JOIN estudiantes e
-    ON s.id_estudiante = e.id_estudiante
+    WHERE nombre=%s
 
-    WHERE s.id_estudiante=%s
+    ORDER BY id_solicitud DESC
 
-    ORDER BY s.id_solicitud DESC
-
-    """, (id_estudiante,))
+    """, (nombre,))
 
     historial = cursor.fetchall()
 
@@ -308,7 +268,7 @@ def historial(id_estudiante):
     return render_template(
         'historial.html',
         historial=historial,
-        nombre=estudiante["nombre"],
+        nombre=nombre,
         total=len(historial)
     )
 
@@ -329,9 +289,11 @@ def aprobar(id):
     cursor = conn.cursor()
 
     cursor.execute("""
+
     UPDATE solicitudes
     SET estado='Aprobado'
     WHERE id_solicitud=%s
+
     """, (id,))
 
     conn.commit()
@@ -347,9 +309,11 @@ def rechazar(id):
     cursor = conn.cursor()
 
     cursor.execute("""
+
     UPDATE solicitudes
     SET estado='Rechazado'
     WHERE id_solicitud=%s
+
     """, (id,))
 
     conn.commit()
@@ -374,9 +338,11 @@ def atendido(id):
     cursor = conn.cursor()
 
     cursor.execute("""
+
     UPDATE solicitudes
     SET estado='Atendido'
     WHERE id_solicitud=%s
+
     """, (id,))
 
     conn.commit()
@@ -397,9 +363,11 @@ def observacion(id):
     cursor = conn.cursor()
 
     cursor.execute("""
+
     UPDATE solicitudes
     SET observaciones=%s
     WHERE id_solicitud=%s
+
     """, (
         texto,
         id
@@ -423,35 +391,11 @@ def pdf():
 
     cursor.execute("""
 
-    SELECT
+    SELECT *
 
-        e.nombre,
+    FROM solicitudes
 
-        COALESCE(
-            s.curso,
-            ''
-        ) AS curso,
-
-        s.motivo,
-        s.dolor,
-        s.estado,
-
-        COALESCE(
-            s.observaciones,
-            ''
-        ) AS observaciones,
-
-        DATE_FORMAT(
-            s.fecha,
-            '%Y-%m-%d %H:%i:%s'
-        ) AS fecha
-
-    FROM solicitudes s
-
-    JOIN estudiantes e
-    ON s.id_estudiante = e.id_estudiante
-
-    ORDER BY s.id_solicitud DESC
+    ORDER BY id_solicitud DESC
 
     """)
 
@@ -464,22 +408,6 @@ def pdf():
     pdf = FPDF()
     pdf.add_page()
 
-    try:
-
-        if os.path.exists("static/logo.jpg"):
-
-            pdf.image(
-                "static/logo.jpg",
-                75,
-                8,
-                60
-            )
-
-            pdf.ln(45)
-
-    except:
-        pdf.ln(10)
-
     pdf.set_font("Arial", "B", 18)
 
     pdf.cell(
@@ -490,17 +418,7 @@ def pdf():
         align="C"
     )
 
-    pdf.set_font("Arial", "", 11)
-
-    pdf.cell(
-        0,
-        8,
-        "Fecha: " + fecha_ecuador(),
-        ln=True,
-        align="C"
-    )
-
-    pdf.ln(8)
+    pdf.ln(10)
 
     pdf.set_font("Arial", "", 10)
 
