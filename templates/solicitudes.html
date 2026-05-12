@@ -264,14 +264,7 @@ fetch('/api/solicitudes')
         tabla.innerHTML += `
         <tr>
             <td>${s.curso || ""}</td>
-
-            <td>
-                <a href="/historial/${encodeURIComponent(s.nombre)}"
-                style="color:#0056b3; font-weight:bold; text-decoration:none;">
-                    ${s.nombre}
-                </a>
-            </td>
-
+            <td>${s.nombre}</td>
             <td>${s.motivo}</td>
             <td>${dolorTexto}</td>
             <td>${s.estado}</td>
