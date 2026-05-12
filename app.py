@@ -1,9 +1,9 @@
+```python
 from flask import Flask, render_template, request, redirect, jsonify, send_file
 import mysql.connector
 from fpdf import FPDF
 from datetime import datetime
 import pytz
-import os
 
 app = Flask(__name__)
 
@@ -24,44 +24,6 @@ ecuador = pytz.timezone("America/Guayaquil")
 
 def fecha_ecuador():
     return datetime.now(ecuador).strftime("%Y-%m-%d %H:%M:%S")
-
-# =========================
-# ASEGURAR COLUMNAS
-# =========================
-
-def asegurar_columnas():
-
-    conn = conectar_bd()
-    cursor = conn.cursor()
-
-    try:
-        cursor.execute("""
-        ALTER TABLE solicitudes
-        ADD COLUMN curso VARCHAR(50)
-        """)
-        conn.commit()
-    except:
-        pass
-
-    try:
-        cursor.execute("""
-        ALTER TABLE solicitudes
-        ADD COLUMN observaciones TEXT
-        """)
-        conn.commit()
-    except:
-        pass
-
-    try:
-        cursor.execute("""
-        ALTER TABLE solicitudes
-        ADD COLUMN nombre VARCHAR(255)
-        """)
-        conn.commit()
-    except:
-        pass
-
-    conn.close()
 
 # =========================
 # INICIO
@@ -117,8 +79,6 @@ def login(rol):
 
 @app.route('/solicitudes', methods=['GET', 'POST'])
 def solicitudes():
-
-    asegurar_columnas()
 
     conn = conectar_bd()
     cursor = conn.cursor(dictionary=True)
@@ -178,33 +138,18 @@ def solicitudes():
     return render_template('solicitudes.html')
 
 # =========================
-# API SOLICITUDES
+# API
 # =========================
 
 @app.route('/api/solicitudes')
 def api_solicitudes():
-
-    asegurar_columnas()
 
     conn = conectar_bd()
     cursor = conn.cursor(dictionary=True)
 
     cursor.execute("""
 
-    SELECT
-
-        id_solicitud,
-        nombre,
-        motivo,
-        dolor,
-        estado,
-        curso,
-        observaciones,
-
-        DATE_FORMAT(
-            fecha,
-            '%Y-%m-%d %H:%i:%s'
-        ) AS fecha
+    SELECT *
 
     FROM solicitudes
 
@@ -230,19 +175,7 @@ def historial(nombre):
 
     cursor.execute("""
 
-    SELECT
-
-        nombre,
-        curso,
-        motivo,
-        dolor,
-        estado,
-        observaciones,
-
-        DATE_FORMAT(
-            fecha,
-            '%Y-%m-%d %H:%i:%s'
-        ) AS fecha
+    SELECT *
 
     FROM solicitudes
 
@@ -278,11 +211,9 @@ def aprobar(id):
     cursor = conn.cursor()
 
     cursor.execute("""
-
     UPDATE solicitudes
     SET estado='Aprobado'
     WHERE id_solicitud=%s
-
     """, (id,))
 
     conn.commit()
@@ -297,11 +228,9 @@ def rechazar(id):
     cursor = conn.cursor()
 
     cursor.execute("""
-
     UPDATE solicitudes
     SET estado='Rechazado'
     WHERE id_solicitud=%s
-
     """, (id,))
 
     conn.commit()
@@ -324,11 +253,9 @@ def atendido(id):
     cursor = conn.cursor()
 
     cursor.execute("""
-
     UPDATE solicitudes
     SET estado='Atendido'
     WHERE id_solicitud=%s
-
     """, (id,))
 
     conn.commit()
@@ -348,11 +275,9 @@ def observacion(id):
     cursor = conn.cursor()
 
     cursor.execute("""
-
     UPDATE solicitudes
     SET observaciones=%s
     WHERE id_solicitud=%s
-
     """, (
         texto,
         id
@@ -374,25 +299,19 @@ def pdf():
     cursor = conn.cursor(dictionary=True)
 
     cursor.execute("""
-
     SELECT *
-
     FROM solicitudes
-
     ORDER BY id_solicitud DESC
-
     """)
 
     datos = cursor.fetchall()
 
     conn.close()
 
-    archivo = "reporte_medigo.pdf"
-
     pdf = FPDF()
     pdf.add_page()
 
-    pdf.set_font("Arial", "B", 18)
+    pdf.set_font("Arial","B",18)
 
     pdf.cell(
         0,
@@ -404,25 +323,21 @@ def pdf():
 
     pdf.ln(10)
 
-    pdf.set_font("Arial", "", 10)
+    pdf.set_font("Arial","",10)
 
     for d in datos:
 
         texto = (
-            f"Curso: {d['curso']} | "
-            f"Nombre: {d['nombre']} | "
-            f"Motivo: {d['motivo']} | "
-            f"Dolor: {d['dolor']} | "
-            f"Estado: {d['estado']} | "
-            f"Fecha: {d['fecha']} | "
-            f"Observaciones: {d['observaciones']}"
+            f"{d['curso']} | "
+            f"{d['nombre']} | "
+            f"{d['motivo']} | "
+            f"{d['estado']} | "
+            f"{d['fecha']}"
         )
 
-        pdf.multi_cell(
-            0,
-            8,
-            texto
-        )
+        pdf.multi_cell(0,8,texto)
+
+    archivo = "reporte.pdf"
 
     pdf.output(archivo)
 
@@ -437,3 +352,4 @@ def pdf():
 
 if __name__ == '__main__':
     app.run(debug=True)
+```
