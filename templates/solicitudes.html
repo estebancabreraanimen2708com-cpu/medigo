@@ -168,6 +168,7 @@ ENVIAR SOLICITUD
 <th>Dolor</th>
 <th>Estado</th>
 <th>Fecha</th>
+<th>Observaciones</th>
 </tr>
 </thead>
 
@@ -268,6 +269,7 @@ fetch('/api/solicitudes')
             <td>${dolorTexto}</td>
             <td>${s.estado}</td>
             <td>${s.fecha}</td>
+            <td>${s.observaciones || "Sin observaciones"}</td>
         </tr>`;
     });
 
