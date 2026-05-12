@@ -4,9 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Médico</title>
+
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
 <style>
+
 .medico-layout{
     display:grid;
     grid-template-columns:220px 1fr 220px;
@@ -39,38 +41,6 @@
     font-weight:bold;
     cursor:pointer;
     z-index:999;
-    box-shadow:0 12px 35px rgba(0,0,0,.35);
-}
-
-.modal{
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,.70);
-    display:none;
-    justify-content:center;
-    align-items:center;
-    z-index:1000;
-    padding:18px;
-}
-
-.modal-content{
-    width:95%;
-    max-width:620px;
-    max-height:90vh;
-    overflow-y:auto;
-    background:linear-gradient(135deg,#ffffff,#e0f7ff);
-    border-radius:28px;
-    padding:30px;
-    border:3px solid #ffcc00;
-    color:#002b5c;
-}
-
-.cerrar{
-    float:right;
-    font-size:35px;
-    cursor:pointer;
-    color:#002b5c;
-    font-weight:bold;
 }
 
 .obs-area{
@@ -94,41 +64,6 @@
     cursor:pointer;
 }
 
-@media(max-width:1150px){
-    .medico-layout{
-        display:block;
-    }
-
-    .medico-img{
-        display:none;
-    }
-}
-
-@media(max-width:700px){
-    .modal{
-        align-items:flex-start;
-        overflow-y:auto;
-    }
-
-    .modal-content{
-        margin-top:20px;
-        margin-bottom:35px;
-        max-height:none;
-        padding:20px;
-    }
-
-    .btn-mas-medico{
-        width:65px;
-        height:65px;
-        font-size:36px;
-        bottom:18px;
-        right:18px;
-    }
-
-    .obs-area{
-        width:200px;
-    }
-}
 </style>
 </head>
 
@@ -138,7 +73,6 @@
 
 <img
 src="{{ url_for('static', filename='donbosco1.jpg') }}"
-onerror="this.src='{{ url_for('static', filename='logo.jpg') }}'"
 class="medico-img">
 
 <div class="contenedor">
@@ -172,181 +106,22 @@ class="medico-img">
 
 <img
 src="{{ url_for('static', filename='donbosco2.jpg') }}"
-onerror="this.src='{{ url_for('static', filename='logo.jpg') }}'"
 class="medico-img">
 
 </div>
 
-<button class="btn-mas-medico" onclick="abrirModal()">+</button>
-
-<div id="modal" class="modal">
-
-<div class="modal-content">
-
-<span class="cerrar" onclick="cerrarModal()">×</span>
-
-<h2>Nueva Solicitud Médica</h2>
-
-<form method="POST" action="/solicitudes">
-
-<input type="hidden" name="origen" value="medico">
-
-<div class="card-seccion">
-
-<h3>Curso</h3>
-
-<select name="curso" required>
-<option value="">Seleccionar curso</option>
-
-<option>Inicial 1</option>
-<option>Inicial 2</option>
-
-<option>1ro A</option>
-<option>1ro B</option>
-<option>1ro C</option>
-<option>1ro D</option>
-
-<option>2do A</option>
-<option>2do B</option>
-<option>2do C</option>
-<option>2do D</option>
-
-<option>3ro A</option>
-<option>3ro B</option>
-<option>3ro C</option>
-<option>3ro D</option>
-
-<option>4to A</option>
-<option>4to B</option>
-<option>4to C</option>
-<option>4to D</option>
-
-<option>5to A</option>
-<option>5to B</option>
-<option>5to C</option>
-<option>5to D</option>
-
-<option>6to A</option>
-<option>6to B</option>
-<option>6to C</option>
-<option>6to D</option>
-
-<option>7mo A</option>
-<option>7mo B</option>
-<option>7mo C</option>
-<option>7mo D</option>
-
-<option>8vo A</option>
-<option>8vo B</option>
-<option>8vo C</option>
-<option>8vo D</option>
-
-<option>9no A</option>
-<option>9no B</option>
-<option>9no C</option>
-<option>9no D</option>
-
-<option>10mo A</option>
-<option>10mo B</option>
-<option>10mo C</option>
-<option>10mo D</option>
-
-<option>1ro Bachillerato INF</option>
-<option>1ro Bachillerato ET</option>
-<option>1ro Bachillerato CCA</option>
-<option>1ro Bachillerato CCB</option>
-
-<option>2do Bachillerato INF</option>
-<option>2do Bachillerato ET</option>
-<option>2do Bachillerato CCA</option>
-<option>2do Bachillerato CCB</option>
-
-<option>3ro Bachillerato INF</option>
-<option>3ro Bachillerato ET</option>
-<option>3ro Bachillerato CCA</option>
-<option>3ro Bachillerato CCB</option>
-
-</select>
-
-</div>
-
-<div class="card-seccion">
-
-<h3>Nombre del estudiante</h3>
-
-<input
-type="text"
-name="nombre_manual"
-placeholder="Escribe el nombre del estudiante"
-required>
-
-</div>
-
-<div class="card-seccion">
-
-<h3>Motivo</h3>
-
-<textarea
-name="motivo"
-placeholder="Motivo de atención médica..."
-required></textarea>
-
-</div>
-
-<div class="card-seccion">
-
-<h3>Nivel de Dolor</h3>
-
-<div class="emociones">
-
-<input type="radio" name="dolor" value="1" id="medDolor1" required>
-<label for="medDolor1" class="cara verde">
-<div class="emoji">😊</div>
-<span>Leve</span>
-</label>
-
-<input type="radio" name="dolor" value="2" id="medDolor2">
-<label for="medDolor2" class="cara amarillo">
-<div class="emoji">😐</div>
-<span>Moderado</span>
-</label>
-
-<input type="radio" name="dolor" value="3" id="medDolor3">
-<label for="medDolor3" class="cara rojo">
-<div class="emoji">😖</div>
-<span>Urgente</span>
-</label>
-
-</div>
-
-</div>
-
-<button type="submit" class="btn medico">
-ENVIAR SOLICITUD
-</button>
-
-</form>
-
-</div>
-
-</div>
-
 <script>
-function abrirModal(){
-    document.getElementById("modal").style.display = "flex";
-}
-
-function cerrarModal(){
-    document.getElementById("modal").style.display = "none";
-}
 
 function cargarMedico(){
 
 fetch('/api/solicitudes')
+
 .then(r => r.json())
+
 .then(data => {
 
     let tabla = document.getElementById("tablaMedico");
+
     tabla.innerHTML = "";
 
     data.forEach(s => {
@@ -354,45 +129,69 @@ fetch('/api/solicitudes')
         let accion = "";
 
         if(s.estado === "Aprobado"){
+
             accion = `
             <a href="/atendido/${s.id_solicitud}">
-                <button class="aprobar">Atendido</button>
-            </a>`;
-        } else {
+                <button class="aprobar">
+                Atendido
+                </button>
+            </a>
+            `;
+
+        }else{
+
             accion = "-";
+
         }
 
         let dolorTexto = "";
 
         if(s.dolor == 1){
             dolorTexto = "😊 Leve";
-        } else if(s.dolor == 2){
+        }
+
+        else if(s.dolor == 2){
             dolorTexto = "😐 Moderado";
-        } else if(s.dolor == 3){
+        }
+
+        else if(s.dolor == 3){
             dolorTexto = "😖 Urgente";
-        } else {
-            dolorTexto = s.dolor;
         }
 
         tabla.innerHTML += `
+
         <tr>
+
             <td>${s.curso || ""}</td>
 
             <td>
-                <a href="/historial/${s.id_estudiante}"
-                style="color:#0056b3; font-weight:bold; text-decoration:none;">
+                <a
+                href="/historial/${encodeURIComponent(s.nombre)}"
+                style="
+                color:#0056b3;
+                font-weight:bold;
+                text-decoration:none;
+                ">
                     ${s.nombre}
                 </a>
             </td>
 
             <td>${s.motivo}</td>
+
             <td>${dolorTexto}</td>
+
             <td>${s.estado}</td>
+
             <td>${s.fecha}</td>
+
             <td>${accion}</td>
 
             <td>
-                <form method="POST" action="/observacion/${s.id_solicitud}">
+
+                <form
+                method="POST"
+                action="/observacion/${s.id_solicitud}">
+
                     <textarea
                     class="obs-area"
                     name="observaciones"
@@ -401,32 +200,32 @@ fetch('/api/solicitudes')
 
                     <br>
 
-                    <button class="btn-obs" type="submit">
+                    <button
+                    class="btn-obs"
+                    type="submit">
+
                     Guardar
+
                     </button>
+
                 </form>
+
             </td>
-        </tr>`;
+
+        </tr>
+
+        `;
+
     });
+
 });
+
 }
 
-setInterval(() => {
-
-    let escribiendo = document.activeElement;
-
-    if(
-        escribiendo &&
-        escribiendo.classList.contains("obs-area")
-    ){
-        return;
-    }
-
-    cargarMedico();
-
-}, 3000);
+setInterval(cargarMedico,3000);
 
 cargarMedico();
+
 </script>
 
 </body>
