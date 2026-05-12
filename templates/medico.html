@@ -4,12 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Médico</title>
-
-<link rel="stylesheet"
-href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
 <style>
-
 .medico-layout{
     display:grid;
     grid-template-columns:220px 1fr 220px;
@@ -98,7 +95,6 @@ href="{{ url_for('static', filename='style.css') }}">
 }
 
 @media(max-width:1150px){
-
     .medico-layout{
         display:block;
     }
@@ -109,7 +105,6 @@ href="{{ url_for('static', filename='style.css') }}">
 }
 
 @media(max-width:700px){
-
     .modal{
         align-items:flex-start;
         overflow-y:auto;
@@ -134,7 +129,6 @@ href="{{ url_for('static', filename='style.css') }}">
         width:200px;
     }
 }
-
 </style>
 </head>
 
@@ -156,9 +150,7 @@ class="medico-img">
 <table>
 
 <thead>
-
 <tr>
-
 <th>Curso</th>
 <th>Nombre</th>
 <th>Motivo</th>
@@ -167,9 +159,7 @@ class="medico-img">
 <th>Fecha</th>
 <th>Acción</th>
 <th>Observaciones</th>
-
 </tr>
-
 </thead>
 
 <tbody id="tablaMedico"></tbody>
@@ -187,44 +177,26 @@ class="medico-img">
 
 </div>
 
-<button
-class="btn-mas-medico"
-onclick="abrirModal()">
-
-+
-
-</button>
+<button class="btn-mas-medico" onclick="abrirModal()">+</button>
 
 <div id="modal" class="modal">
 
 <div class="modal-content">
 
-<span
-class="cerrar"
-onclick="cerrarModal()">
-
-×
-
-</span>
+<span class="cerrar" onclick="cerrarModal()">×</span>
 
 <h2>Nueva Solicitud Médica</h2>
 
 <form method="POST" action="/solicitudes">
 
-<input
-type="hidden"
-name="origen"
-value="medico">
+<input type="hidden" name="origen" value="medico">
 
 <div class="card-seccion">
 
 <h3>Curso</h3>
 
 <select name="curso" required>
-
-<option value="">
-Seleccionar curso
-</option>
+<option value="">Seleccionar curso</option>
 
 <option>Inicial 1</option>
 <option>Inicial 2</option>
@@ -327,65 +299,30 @@ required></textarea>
 
 <div class="emociones">
 
-<input
-type="radio"
-name="dolor"
-value="1"
-id="medDolor1"
-required>
-
-<label
-for="medDolor1"
-class="cara verde">
-
+<input type="radio" name="dolor" value="1" id="medDolor1" required>
+<label for="medDolor1" class="cara verde">
 <div class="emoji">😊</div>
-
 <span>Leve</span>
-
 </label>
 
-<input
-type="radio"
-name="dolor"
-value="2"
-id="medDolor2">
-
-<label
-for="medDolor2"
-class="cara amarillo">
-
+<input type="radio" name="dolor" value="2" id="medDolor2">
+<label for="medDolor2" class="cara amarillo">
 <div class="emoji">😐</div>
-
 <span>Moderado</span>
-
 </label>
 
-<input
-type="radio"
-name="dolor"
-value="3"
-id="medDolor3">
-
-<label
-for="medDolor3"
-class="cara rojo">
-
+<input type="radio" name="dolor" value="3" id="medDolor3">
+<label for="medDolor3" class="cara rojo">
 <div class="emoji">😖</div>
-
 <span>Urgente</span>
-
 </label>
 
 </div>
 
 </div>
 
-<button
-type="submit"
-class="btn medico">
-
+<button type="submit" class="btn medico">
 ENVIAR SOLICITUD
-
 </button>
 
 </form>
@@ -395,99 +332,67 @@ ENVIAR SOLICITUD
 </div>
 
 <script>
-
 function abrirModal(){
-
-    document.getElementById(
-        "modal"
-    ).style.display = "flex";
+    document.getElementById("modal").style.display = "flex";
 }
 
 function cerrarModal(){
-
-    document.getElementById(
-        "modal"
-    ).style.display = "none";
+    document.getElementById("modal").style.display = "none";
 }
 
 function cargarMedico(){
 
 fetch('/api/solicitudes')
-
 .then(r => r.json())
-
 .then(data => {
 
-    let tabla =
-    document.getElementById(
-        "tablaMedico"
-    );
-
+    let tabla = document.getElementById("tablaMedico");
     tabla.innerHTML = "";
 
     data.forEach(s => {
 
         let accion = "";
 
-        if(
-            s.estado === "Aprobado"
-        ){
-
+        if(s.estado === "Aprobado"){
             accion = `
             <a href="/atendido/${s.id_solicitud}">
-                <button class="aprobar">
-                    Atendido
-                </button>
+                <button class="aprobar">Atendido</button>
             </a>`;
-
         } else {
-
             accion = "-";
         }
 
         let dolorTexto = "";
 
         if(s.dolor == 1){
-
             dolorTexto = "😊 Leve";
-
         } else if(s.dolor == 2){
-
             dolorTexto = "😐 Moderado";
-
         } else if(s.dolor == 3){
-
             dolorTexto = "😖 Urgente";
-
         } else {
-
             dolorTexto = s.dolor;
         }
 
         tabla.innerHTML += `
-
         <tr>
-
             <td>${s.curso || ""}</td>
 
-            <td>${s.nombre}</td>
+            <td>
+                <a href="/historial/${encodeURIComponent(s.nombre)}"
+                style="color:#0056b3; font-weight:bold; text-decoration:none;">
+                    ${s.nombre}
+                </a>
+            </td>
 
             <td>${s.motivo}</td>
-
             <td>${dolorTexto}</td>
-
             <td>${s.estado}</td>
-
             <td>${s.fecha}</td>
-
             <td>${accion}</td>
 
             <td>
-
-                <form
-                method="POST"
-                action="/observacion/${s.id_solicitud}">
-
+                <form method="POST" action="/observacion/${s.id_solicitud}">
                     <textarea
                     class="obs-area"
                     name="observaciones"
@@ -496,35 +401,23 @@ fetch('/api/solicitudes')
 
                     <br>
 
-                    <button
-                    class="btn-obs"
-                    type="submit">
-
+                    <button class="btn-obs" type="submit">
                     Guardar
-
                     </button>
-
                 </form>
-
             </td>
-
-        </tr>
-
-        `;
+        </tr>`;
     });
 });
 }
 
 setInterval(() => {
 
-    let escribiendo =
-    document.activeElement;
+    let escribiendo = document.activeElement;
 
     if(
         escribiendo &&
-        escribiendo.classList.contains(
-            "obs-area"
-        )
+        escribiendo.classList.contains("obs-area")
     ){
         return;
     }
@@ -534,7 +427,6 @@ setInterval(() => {
 }, 3000);
 
 cargarMedico();
-
 </script>
 
 </body>
