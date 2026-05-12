@@ -379,7 +379,7 @@ fetch('/api/solicitudes')
             <td>${s.curso || ""}</td>
 
             <td>
-                <a href="/historial/${encodeURIComponent(s.nombre)}"
+                <a href="/historial/${s.id_estudiante}"
                 style="color:#0056b3; font-weight:bold; text-decoration:none;">
                     ${s.nombre}
                 </a>
