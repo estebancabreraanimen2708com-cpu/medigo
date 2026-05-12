@@ -90,6 +90,7 @@
 </a>
 
 <div class="tabla-scroll">
+
 <table>
 <thead>
 <tr>
@@ -106,6 +107,7 @@
 
 <tbody id="tablaInspector"></tbody>
 </table>
+
 </div>
 
 </div>
@@ -113,6 +115,7 @@
 <button class="btn-mas" onclick="abrirModal()">+</button>
 
 <div id="modal" class="modal">
+
 <div class="modal-content">
 
 <span class="cerrar" onclick="cerrarModal()">×</span>
@@ -124,6 +127,7 @@
 <input type="hidden" name="origen" value="inspector">
 
 <div class="card-seccion">
+
 <h3>Curso</h3>
 
 <select name="curso" required>
@@ -196,20 +200,36 @@
 <option>3ro Bachillerato ET</option>
 <option>3ro Bachillerato CCA</option>
 <option>3ro Bachillerato CCB</option>
+
 </select>
+
 </div>
 
 <div class="card-seccion">
+
 <h3>Nombre del estudiante</h3>
-<input type="text" name="nombre_manual" placeholder="Escribe el nombre del estudiante" required>
+
+<input
+type="text"
+name="nombre_manual"
+placeholder="Escribe el nombre del estudiante"
+required>
+
 </div>
 
 <div class="card-seccion">
+
 <h3>Motivo</h3>
-<textarea name="motivo" placeholder="Escribe el motivo..." required></textarea>
+
+<textarea
+name="motivo"
+placeholder="Escribe el motivo..."
+required></textarea>
+
 </div>
 
 <div class="card-seccion">
+
 <h3>Nivel de Dolor</h3>
 
 <div class="emociones">
@@ -233,12 +253,17 @@
 </label>
 
 </div>
+
 </div>
 
-<button type="submit" class="btn inspector">ENVIAR SOLICITUD</button>
+<button type="submit" class="btn inspector">
+ENVIAR SOLICITUD
+</button>
 
 </form>
+
 </div>
+
 </div>
 
 <script>
@@ -251,6 +276,7 @@ function cerrarModal(){
 }
 
 function cargarInspector(){
+
 fetch('/api/solicitudes')
 .then(r => r.json())
 .then(data => {
@@ -267,6 +293,7 @@ fetch('/api/solicitudes')
             <a href="/aprobar/${s.id_solicitud}">
                 <button class="aprobar">✔</button>
             </a>
+
             <a href="/rechazar/${s.id_solicitud}">
                 <button class="rechazar">✖</button>
             </a>`;
@@ -289,7 +316,14 @@ fetch('/api/solicitudes')
         tabla.innerHTML += `
         <tr>
             <td>${s.curso || ""}</td>
-            <td>${s.nombre}</td>
+
+            <td>
+                <a href="/historial/${encodeURIComponent(s.nombre)}"
+                style="color:#0056b3; font-weight:bold; text-decoration:none;">
+                    ${s.nombre}
+                </a>
+            </td>
+
             <td>${s.motivo}</td>
             <td>${dolorTexto}</td>
             <td>${s.estado}</td>
