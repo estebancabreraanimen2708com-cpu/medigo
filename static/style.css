@@ -7,29 +7,60 @@
 body{
     font-family:Arial, Helvetica, sans-serif;
     min-height:100vh;
-    background:
-        radial-gradient(circle at top left, rgba(255,204,0,.20), transparent 28%),
-        radial-gradient(circle at bottom right, rgba(0,86,179,.28), transparent 30%),
-        linear-gradient(135deg,#002b5c,#0056b3,#0f172a);
-    color:white;
+    color:#002b5c;
     padding:30px;
     display:flex;
     justify-content:center;
     align-items:center;
     overflow-x:hidden;
+    background:
+        linear-gradient(135deg, transparent 0 70%, rgba(56,189,248,.35) 70% 100%),
+        linear-gradient(45deg, transparent 0 72%, rgba(255,204,0,.35) 72% 100%),
+        linear-gradient(160deg, rgba(255,255,255,.96), rgba(224,247,255,.95));
+    position:relative;
+}
+
+body::before{
+    content:"";
+    position:fixed;
+    top:-120px;
+    left:-80px;
+    width:380px;
+    height:380px;
+    background:#38bdf8;
+    clip-path:polygon(50% 0%, 100% 85%, 0% 85%);
+    border-radius:45px;
+    transform:rotate(18deg);
+    opacity:.55;
+    z-index:-1;
+}
+
+body::after{
+    content:"";
+    position:fixed;
+    right:-90px;
+    bottom:-120px;
+    width:430px;
+    height:430px;
+    background:#ffcc00;
+    clip-path:polygon(50% 0%, 100% 85%, 0% 85%);
+    border-radius:45px;
+    transform:rotate(-28deg);
+    opacity:.65;
+    z-index:-1;
 }
 
 .contenedor{
     width:100%;
     max-width:1050px;
-    background:rgba(255,255,255,.10);
-    border:2px solid rgba(255,204,0,.35);
-    border-radius:28px;
+    background:rgba(255,255,255,.82);
+    border:2px solid rgba(56,189,248,.45);
+    border-radius:30px;
     padding:40px;
     backdrop-filter:blur(16px);
     box-shadow:
-        0 15px 45px rgba(0,0,0,.35),
-        0 0 25px rgba(255,204,0,.15);
+        0 15px 45px rgba(0,43,92,.20),
+        0 0 25px rgba(56,189,248,.18);
     animation:entrada .6s ease;
 }
 
@@ -48,43 +79,42 @@ body{
     width:170px;
     display:block;
     margin:0 auto 18px auto;
-    filter:drop-shadow(0 0 18px rgba(255,204,0,.35));
+    filter:drop-shadow(0 0 14px rgba(56,189,248,.35));
 }
 
 h1{
     text-align:center;
     font-size:42px;
     margin-bottom:10px;
-    color:#ffcc00;
-    text-shadow:0 0 18px rgba(255,204,0,.25);
+    color:#0056b3;
 }
 
 h2{
     text-align:center;
     margin-top:35px;
     margin-bottom:18px;
-    color:#ffcc00;
+    color:#0056b3;
 }
 
 h3{
     margin-bottom:15px;
-    color:#ffcc00;
+    color:#0056b3;
 }
 
 .subtitulo{
     text-align:center;
     margin-bottom:28px;
-    color:#eaf4ff;
+    color:#002b5c;
     font-size:18px;
 }
 
 .card-seccion{
-    background:rgba(255,255,255,.09);
-    border:1px solid rgba(255,204,0,.25);
+    background:rgba(255,255,255,.70);
+    border:1px solid rgba(56,189,248,.35);
     border-radius:22px;
     padding:22px;
     margin-bottom:22px;
-    box-shadow:0 8px 24px rgba(0,0,0,.20);
+    box-shadow:0 8px 24px rgba(0,43,92,.12);
 }
 
 input,
@@ -96,10 +126,10 @@ textarea{
     border-radius:15px;
     margin-top:12px;
     outline:none;
-    background:rgba(255,255,255,.92);
-    color:#0f172a;
+    background:white;
+    color:#002b5c;
     font-size:16px;
-    border:2px solid transparent;
+    border:2px solid rgba(56,189,248,.25);
     transition:.25s;
 }
 
@@ -127,7 +157,7 @@ textarea{
     cursor:pointer;
     color:white;
     transition:.25s;
-    box-shadow:0 8px 20px rgba(0,0,0,.25);
+    box-shadow:0 8px 20px rgba(0,43,92,.20);
 }
 
 .btn:hover{
@@ -135,21 +165,20 @@ textarea{
 }
 
 .profesor{
-    background:linear-gradient(135deg,#0056b3,#007bff);
+    background:linear-gradient(135deg,#38bdf8,#0056b3);
 }
 
 .inspector{
-    background:linear-gradient(135deg,#ffb703,#ffcc00);
+    background:linear-gradient(135deg,#ffcc00,#38bdf8);
     color:#002b5c;
 }
 
 .medico{
-    background:linear-gradient(135deg,#008f5a,#22c55e);
+    background:linear-gradient(135deg,#38bdf8,#22c55e);
 }
 
 .pdf{
-    background:linear-gradient(135deg,#002b5c,#0056b3);
-    border:2px solid #ffcc00;
+    background:linear-gradient(135deg,#0056b3,#38bdf8);
 }
 
 .emociones{
@@ -176,8 +205,8 @@ textarea{
     transition:.25s;
     color:white;
     font-weight:bold;
-    box-shadow:0 10px 28px rgba(0,0,0,.30);
-    border:3px solid rgba(255,255,255,.25);
+    box-shadow:0 10px 28px rgba(0,43,92,.20);
+    border:3px solid rgba(255,255,255,.55);
 }
 
 .cara:hover{
@@ -187,10 +216,6 @@ textarea{
 .emoji{
     font-size:55px;
     margin-bottom:10px;
-}
-
-.cara span{
-    font-size:18px;
 }
 
 .verde{
@@ -207,11 +232,9 @@ textarea{
 }
 
 .emociones input:checked + .cara{
-    border:5px solid #ffcc00;
+    border:5px solid #38bdf8;
     transform:scale(1.07);
-    box-shadow:
-        0 0 25px rgba(255,204,0,.75),
-        0 10px 28px rgba(0,0,0,.35);
+    box-shadow:0 0 25px rgba(56,189,248,.75);
 }
 
 .tabla-scroll{
@@ -228,11 +251,11 @@ table{
     border-collapse:collapse;
     overflow:hidden;
     border-radius:18px;
-    box-shadow:0 10px 30px rgba(0,0,0,.25);
+    box-shadow:0 10px 30px rgba(0,43,92,.18);
 }
 
 th{
-    background:#ffcc00;
+    background:#38bdf8;
     color:#002b5c;
     padding:15px;
     font-size:14px;
@@ -240,16 +263,17 @@ th{
 }
 
 td{
-    background:rgba(255,255,255,.12);
+    background:rgba(0,86,179,.08);
     padding:14px;
     text-align:center;
-    border-bottom:1px solid rgba(255,255,255,.15);
-    color:white;
+    border-bottom:1px solid rgba(0,86,179,.12);
+    color:#002b5c;
     white-space:nowrap;
+    font-weight:bold;
 }
 
 tr:hover td{
-    background:rgba(255,204,0,.16);
+    background:rgba(255,204,0,.20);
 }
 
 .aprobar,
@@ -275,34 +299,6 @@ tr:hover td{
 .aprobar:hover,
 .rechazar:hover{
     transform:scale(1.1);
-}
-
-.imagenes-donbosco{
-    display:flex;
-    justify-content:center;
-    gap:15px;
-    flex-wrap:wrap;
-    margin-bottom:30px;
-}
-
-.imagenes-donbosco img{
-    width:220px;
-    height:130px;
-    object-fit:cover;
-    border-radius:20px;
-    border:3px solid #ffcc00;
-    box-shadow:0 10px 25px rgba(0,0,0,.35);
-}
-
-.grid-cursos{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-    gap:20px;
-}
-
-.curso-btn{
-    height:85px;
-    font-size:24px;
 }
 
 a{
@@ -350,7 +346,7 @@ a{
     }
 
     table{
-        min-width:720px;
+        min-width:760px;
         font-size:12px;
     }
 
@@ -363,13 +359,13 @@ a{
         font-size:15px;
     }
 
-    .imagenes-donbosco img{
-        width:100%;
-        height:150px;
+    body::before{
+        width:260px;
+        height:260px;
     }
 
-    .curso-btn{
-        height:75px;
-        font-size:20px;
+    body::after{
+        width:300px;
+        height:300px;
     }
 }
