@@ -7,81 +7,150 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
 <style>
-.imagen-lateral{
-    position:fixed;
-    top:130px;
-    width:220px;
+body{
+    background:
+        radial-gradient(circle at top left, rgba(255,204,0,.25), transparent 25%),
+        radial-gradient(circle at bottom right, rgba(34,197,94,.28), transparent 28%),
+        linear-gradient(135deg,#002b5c,#064e3b,#0f172a);
+}
+
+.medico-layout{
+    display:grid;
+    grid-template-columns:220px 1fr 220px;
+    gap:25px;
+    align-items:center;
+    width:100%;
+    max-width:1500px;
+}
+
+.medico-img{
+    width:100%;
     height:430px;
     object-fit:cover;
     border-radius:28px;
     border:3px solid #ffcc00;
-    box-shadow:0 15px 35px rgba(0,0,0,.35);
-    opacity:.9;
+    box-shadow:0 15px 35px rgba(0,0,0,.40);
+    transition:.3s;
 }
 
-.img-izquierda{
-    left:45px;
+.medico-img:hover{
+    transform:scale(1.04);
+    box-shadow:0 0 30px rgba(255,204,0,.55);
 }
 
-.img-derecha{
-    right:45px;
+.panel-medico{
+    max-width:1000px;
+    background:rgba(255,255,255,.12);
+    border:2px solid rgba(255,204,0,.45);
 }
 
 .btn-mas-medico{
     position:fixed;
-    top:135px;
-    right:65px;
-    width:70px;
-    height:70px;
+    bottom:28px;
+    right:28px;
+    width:78px;
+    height:78px;
     border-radius:50%;
     border:none;
-    background:linear-gradient(135deg,#ffcc00,#ffb703);
+    background:linear-gradient(135deg,#ffcc00,#22c55e);
     color:#002b5c;
-    font-size:42px;
+    font-size:44px;
     font-weight:bold;
     cursor:pointer;
     z-index:999;
-    box-shadow:0 10px 30px rgba(0,0,0,.35);
+    box-shadow:0 12px 35px rgba(0,0,0,.45);
+    transition:.25s;
+}
+
+.btn-mas-medico:hover{
+    transform:scale(1.12) rotate(90deg);
 }
 
 .modal{
     position:fixed;
     inset:0;
-    background:rgba(0,0,0,.65);
+    background:rgba(0,0,0,.70);
     display:none;
     justify-content:center;
     align-items:center;
     z-index:1000;
-    padding:15px;
+    padding:18px;
 }
 
 .modal-content{
     width:95%;
-    max-width:600px;
+    max-width:620px;
     max-height:90vh;
     overflow-y:auto;
-    background:#0f172a;
-    border-radius:25px;
+    background:linear-gradient(135deg,#002b5c,#0f172a);
+    border-radius:28px;
     padding:30px;
-    border:2px solid #ffcc00;
+    border:3px solid #ffcc00;
+    box-shadow:0 15px 45px rgba(0,0,0,.50);
+    animation:aparecerModal .3s ease;
+}
+
+@keyframes aparecerModal{
+    from{
+        opacity:0;
+        transform:scale(.85);
+    }
+    to{
+        opacity:1;
+        transform:scale(1);
+    }
 }
 
 .cerrar{
     float:right;
-    font-size:32px;
+    font-size:35px;
     cursor:pointer;
-    color:white;
+    color:#ffcc00;
+    font-weight:bold;
 }
 
-@media(max-width:1100px){
-    .imagen-lateral{
+.medico-titulo{
+    color:#ffcc00;
+}
+
+@media(max-width:1150px){
+    .medico-layout{
+        display:block;
+    }
+
+    .medico-img{
         display:none;
     }
 
+    .panel-medico{
+        max-width:100%;
+    }
+}
+
+@media(max-width:700px){
+    body{
+        padding:12px;
+        align-items:flex-start;
+    }
+
     .btn-mas-medico{
-        top:auto;
-        bottom:20px;
-        right:20px;
+        width:65px;
+        height:65px;
+        font-size:36px;
+        bottom:18px;
+        right:18px;
+    }
+
+    .modal{
+        align-items:flex-start;
+        overflow-y:auto;
+    }
+
+    .modal-content{
+        margin-top:20px;
+        margin-bottom:35px;
+        padding:20px;
+        max-height:none;
     }
 }
 </style>
@@ -89,21 +158,16 @@
 
 <body>
 
-<img 
-src="{{ url_for('static', filename='donbosco1.jpg') }}" 
-onerror="this.src='{{ url_for('static', filename='logo.jpg') }}'"
-class="imagen-lateral img-izquierda">
+<div class="medico-layout">
 
 <img 
-src="{{ url_for('static', filename='donbosco2.jpg') }}" 
+src="{{ url_for('static', filename='donbosco1.jpg') }}"
 onerror="this.src='{{ url_for('static', filename='logo.jpg') }}'"
-class="imagen-lateral img-derecha">
+class="medico-img">
 
-<button class="btn-mas-medico" onclick="abrirModal()">+</button>
+<div class="contenedor panel-medico">
 
-<div class="contenedor">
-
-<h1>Panel Médico</h1>
+<h1 class="medico-titulo">Panel Médico</h1>
 
 <div class="tabla-scroll">
 
@@ -127,24 +191,99 @@ class="imagen-lateral img-derecha">
 
 </div>
 
+<img 
+src="{{ url_for('static', filename='donbosco2.jpg') }}"
+onerror="this.src='{{ url_for('static', filename='logo.jpg') }}'"
+class="medico-img">
+
+</div>
+
+<button class="btn-mas-medico" onclick="abrirModal()">+</button>
+
 <div id="modal" class="modal">
 
 <div class="modal-content">
 
 <span class="cerrar" onclick="cerrarModal()">×</span>
 
-<h2>Nueva Solicitud</h2>
+<h2>Nueva Solicitud Médica</h2>
 
 <form method="POST" action="/solicitudes">
 
 <div class="card-seccion">
 <h3>Curso</h3>
 
-<input
-type="text"
-name="curso"
-placeholder="Ejemplo: 7mo A"
-required>
+<select name="curso" required>
+<option value="">Seleccionar curso</option>
+
+<option>Inicial 1</option>
+<option>Inicial 2</option>
+
+<option>1ro A</option>
+<option>1ro B</option>
+<option>1ro C</option>
+<option>1ro D</option>
+
+<option>2do A</option>
+<option>2do B</option>
+<option>2do C</option>
+<option>2do D</option>
+
+<option>3ro A</option>
+<option>3ro B</option>
+<option>3ro C</option>
+<option>3ro D</option>
+
+<option>4to A</option>
+<option>4to B</option>
+<option>4to C</option>
+<option>4to D</option>
+
+<option>5to A</option>
+<option>5to B</option>
+<option>5to C</option>
+<option>5to D</option>
+
+<option>6to A</option>
+<option>6to B</option>
+<option>6to C</option>
+<option>6to D</option>
+
+<option>7mo A</option>
+<option>7mo B</option>
+<option>7mo C</option>
+<option>7mo D</option>
+
+<option>8vo A</option>
+<option>8vo B</option>
+<option>8vo C</option>
+<option>8vo D</option>
+
+<option>9no A</option>
+<option>9no B</option>
+<option>9no C</option>
+<option>9no D</option>
+
+<option>10mo A</option>
+<option>10mo B</option>
+<option>10mo C</option>
+<option>10mo D</option>
+
+<option>1ro Bachillerato INF</option>
+<option>1ro Bachillerato ET</option>
+<option>1ro Bachillerato CCA</option>
+<option>1ro Bachillerato CCB</option>
+
+<option>2do Bachillerato INF</option>
+<option>2do Bachillerato ET</option>
+<option>2do Bachillerato CCA</option>
+<option>2do Bachillerato CCB</option>
+
+<option>3ro Bachillerato INF</option>
+<option>3ro Bachillerato ET</option>
+<option>3ro Bachillerato CCA</option>
+<option>3ro Bachillerato CCB</option>
+</select>
 </div>
 
 <div class="card-seccion">
@@ -162,7 +301,7 @@ required>
 
 <textarea
 name="motivo"
-placeholder="Motivo"
+placeholder="Motivo de atención médica..."
 required></textarea>
 </div>
 
