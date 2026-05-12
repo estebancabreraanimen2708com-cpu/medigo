@@ -15,7 +15,7 @@
     height:75px;
     border-radius:50%;
     border:none;
-    background:linear-gradient(135deg,#ffcc00,#ffb703);
+    background:linear-gradient(135deg,#ffcc00,#38bdf8);
     color:#002b5c;
     font-size:42px;
     font-weight:bold;
@@ -37,32 +37,25 @@
 
 .modal-content{
     width:95%;
-    max-width:600px;
+    max-width:620px;
     max-height:90vh;
     overflow-y:auto;
-    background:#0f172a;
+    background:linear-gradient(135deg,#ffffff,#e0f7ff);
     border-radius:25px;
     padding:30px;
-    border:2px solid #ffcc00;
-    box-shadow:0 15px 40px rgba(0,0,0,.45);
+    border:3px solid #ffcc00;
+    color:#002b5c;
 }
 
 .cerrar{
     float:right;
     font-size:32px;
     cursor:pointer;
-    color:white;
+    color:#002b5c;
+    font-weight:bold;
 }
 
 @media(max-width:700px){
-    .btn-mas{
-        width:65px;
-        height:65px;
-        font-size:36px;
-        bottom:18px;
-        right:18px;
-    }
-
     .modal{
         align-items:flex-start;
         overflow-y:auto;
@@ -70,9 +63,17 @@
 
     .modal-content{
         margin-top:20px;
-        margin-bottom:30px;
-        padding:20px;
+        margin-bottom:35px;
         max-height:none;
+        padding:20px;
+    }
+
+    .btn-mas{
+        width:65px;
+        height:65px;
+        font-size:36px;
+        bottom:18px;
+        right:18px;
     }
 }
 </style>
@@ -111,7 +112,6 @@
 <button class="btn-mas" onclick="abrirModal()">+</button>
 
 <div id="modal" class="modal">
-
 <div class="modal-content">
 
 <span class="cerrar" onclick="cerrarModal()">×</span>
@@ -120,8 +120,9 @@
 
 <form method="POST" action="/solicitudes">
 
-<div class="card-seccion">
+<input type="hidden" name="origen" value="inspector">
 
+<div class="card-seccion">
 <h3>Curso</h3>
 
 <select name="curso" required>
@@ -194,36 +195,20 @@
 <option>3ro Bachillerato ET</option>
 <option>3ro Bachillerato CCA</option>
 <option>3ro Bachillerato CCB</option>
-
 </select>
-
 </div>
 
 <div class="card-seccion">
-
 <h3>Nombre del estudiante</h3>
-
-<input
-type="text"
-name="nombre_manual"
-placeholder="Escribe el nombre del estudiante"
-required>
-
+<input type="text" name="nombre_manual" placeholder="Escribe el nombre del estudiante" required>
 </div>
 
 <div class="card-seccion">
-
 <h3>Motivo</h3>
-
-<textarea
-name="motivo"
-placeholder="Escribe el motivo..."
-required></textarea>
-
+<textarea name="motivo" placeholder="Escribe el motivo..." required></textarea>
 </div>
 
 <div class="card-seccion">
-
 <h3>Nivel de Dolor</h3>
 
 <div class="emociones">
@@ -247,15 +232,11 @@ required></textarea>
 </label>
 
 </div>
-
 </div>
 
-<button type="submit" class="btn inspector">
-ENVIAR SOLICITUD
-</button>
+<button type="submit" class="btn inspector">ENVIAR SOLICITUD</button>
 
 </form>
-
 </div>
 </div>
 
@@ -268,11 +249,7 @@ function cerrarModal(){
     document.getElementById("modal").style.display = "none";
 }
 
-let idsVistos = new Set();
-let primeraCarga = true;
-
 function cargarInspector(){
-
 fetch('/api/solicitudes')
 .then(r => r.json())
 .then(data => {
@@ -289,7 +266,6 @@ fetch('/api/solicitudes')
             <a href="/aprobar/${s.id_solicitud}">
                 <button class="aprobar">✔</button>
             </a>
-
             <a href="/rechazar/${s.id_solicitud}">
                 <button class="rechazar">✖</button>
             </a>`;
@@ -320,8 +296,6 @@ fetch('/api/solicitudes')
             <td>${acciones}</td>
         </tr>`;
     });
-
-    primeraCarga = false;
 });
 }
 
