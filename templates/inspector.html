@@ -4,9 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Inspector</title>
+
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
 <style>
+
 .btn-mas{
     position:fixed;
     bottom:25px;
@@ -55,27 +57,6 @@
     font-weight:bold;
 }
 
-@media(max-width:700px){
-    .modal{
-        align-items:flex-start;
-        overflow-y:auto;
-    }
-
-    .modal-content{
-        margin-top:20px;
-        margin-bottom:35px;
-        max-height:none;
-        padding:20px;
-    }
-
-    .btn-mas{
-        width:65px;
-        height:65px;
-        font-size:36px;
-        bottom:18px;
-        right:18px;
-    }
-}
 </style>
 </head>
 
@@ -86,13 +67,17 @@
 <h1>Panel Inspector</h1>
 
 <a href="/pdf">
-<button class="btn pdf">📄 DESCARGAR PDF</button>
+<button class="btn pdf">
+📄 DESCARGAR PDF
+</button>
 </a>
 
 <div class="tabla-scroll">
 
 <table>
+
 <thead>
+
 <tr>
 <th>Curso</th>
 <th>Nombre</th>
@@ -103,9 +88,11 @@
 <th>Observaciones</th>
 <th>Acciones</th>
 </tr>
+
 </thead>
 
 <tbody id="tablaInspector"></tbody>
+
 </table>
 
 </div>
@@ -131,6 +118,7 @@
 <h3>Curso</h3>
 
 <select name="curso" required>
+
 <option value="">Seleccionar curso</option>
 
 <option>Inicial 1</option>
@@ -200,6 +188,7 @@
 <option>3ro Bachillerato ET</option>
 <option>3ro Bachillerato CCA</option>
 <option>3ro Bachillerato CCB</option>
+
 </select>
 
 </div>
@@ -233,20 +222,23 @@ required></textarea>
 
 <div class="emociones">
 
-<input type="radio" name="dolor" value="1" id="insDolor1" required>
-<label for="insDolor1" class="cara verde">
+<input type="radio" name="dolor" value="1" id="dolor1" required>
+
+<label for="dolor1" class="cara verde">
 <div class="emoji">😊</div>
 <span>Leve</span>
 </label>
 
-<input type="radio" name="dolor" value="2" id="insDolor2">
-<label for="insDolor2" class="cara amarillo">
+<input type="radio" name="dolor" value="2" id="dolor2">
+
+<label for="dolor2" class="cara amarillo">
 <div class="emoji">😐</div>
 <span>Moderado</span>
 </label>
 
-<input type="radio" name="dolor" value="3" id="insDolor3">
-<label for="insDolor3" class="cara rojo">
+<input type="radio" name="dolor" value="3" id="dolor3">
+
+<label for="dolor3" class="cara rojo">
 <div class="emoji">😖</div>
 <span>Urgente</span>
 </label>
@@ -266,6 +258,7 @@ ENVIAR SOLICITUD
 </div>
 
 <script>
+
 function abrirModal(){
     document.getElementById("modal").style.display = "flex";
 }
@@ -277,10 +270,13 @@ function cerrarModal(){
 function cargarInspector(){
 
 fetch('/api/solicitudes')
+
 .then(r => r.json())
+
 .then(data => {
 
     let tabla = document.getElementById("tablaInspector");
+
     tabla.innerHTML = "";
 
     data.forEach(s => {
@@ -288,6 +284,7 @@ fetch('/api/solicitudes')
         let acciones = "";
 
         if(s.estado === "Pendiente"){
+
             acciones = `
             <a href="/aprobar/${s.id_solicitud}">
                 <button class="aprobar">✔</button>
@@ -295,47 +292,73 @@ fetch('/api/solicitudes')
 
             <a href="/rechazar/${s.id_solicitud}">
                 <button class="rechazar">✖</button>
-            </a>`;
-        } else {
+            </a>
+            `;
+
+        }else{
+
             acciones = s.estado;
+
         }
 
         let dolorTexto = "";
 
         if(s.dolor == 1){
             dolorTexto = "😊 Leve";
-        } else if(s.dolor == 2){
+        }
+
+        else if(s.dolor == 2){
             dolorTexto = "😐 Moderado";
-        } else if(s.dolor == 3){
+        }
+
+        else if(s.dolor == 3){
             dolorTexto = "😖 Urgente";
-        } else {
-            dolorTexto = s.dolor;
         }
 
         tabla.innerHTML += `
+
         <tr>
+
             <td>${s.curso || ""}</td>
 
             <td>
-                <a href="/historial/${s.id_estudiante}"
-                style="color:#0056b3; font-weight:bold; text-decoration:none;">
+                <a
+                href="/historial/${encodeURIComponent(s.nombre)}"
+                style="
+                color:#0056b3;
+                font-weight:bold;
+                text-decoration:none;
+                ">
                     ${s.nombre}
                 </a>
             </td>
 
             <td>${s.motivo}</td>
+
             <td>${dolorTexto}</td>
+
             <td>${s.estado}</td>
+
             <td>${s.fecha}</td>
+
             <td>${s.observaciones || "Sin observaciones"}</td>
+
             <td>${acciones}</td>
-        </tr>`;
+
+        </tr>
+
+        `;
+
     });
+
 });
+
 }
 
-setInterval(cargarInspector, 1000);
+setInterval(cargarInspector,1000);
+
 cargarInspector();
+
 </script>
 
 </body>
