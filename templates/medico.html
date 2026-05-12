@@ -73,6 +73,27 @@
     font-weight:bold;
 }
 
+.obs-area{
+    width:220px;
+    min-height:80px;
+    padding:10px;
+    border-radius:12px;
+    border:2px solid #38bdf8;
+    resize:vertical;
+    font-size:13px;
+}
+
+.btn-obs{
+    margin-top:8px;
+    padding:8px 12px;
+    border:none;
+    border-radius:10px;
+    background:#ffcc00;
+    color:#002b5c;
+    font-weight:bold;
+    cursor:pointer;
+}
+
 @media(max-width:1150px){
     .medico-layout{
         display:block;
@@ -103,6 +124,10 @@
         bottom:18px;
         right:18px;
     }
+
+    .obs-area{
+        width:200px;
+    }
 }
 </style>
 </head>
@@ -128,6 +153,7 @@
 <th>Estado</th>
 <th>Fecha</th>
 <th>Acción</th>
+<th>Observaciones</th>
 </tr>
 </thead>
 
@@ -326,12 +352,19 @@ fetch('/api/solicitudes')
             <td>${s.estado}</td>
             <td>${s.fecha}</td>
             <td>${accion}</td>
+            <td>
+                <form method="POST" action="/observacion/${s.id_solicitud}">
+                    <textarea class="obs-area" name="observaciones" placeholder="Escribir observación...">${s.observaciones || ""}</textarea>
+                    <br>
+                    <button class="btn-obs" type="submit">Guardar</button>
+                </form>
+            </td>
         </tr>`;
     });
 });
 }
 
-setInterval(cargarMedico, 1000);
+setInterval(cargarMedico, 3000);
 cargarMedico();
 </script>
 
