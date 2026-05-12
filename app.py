@@ -143,6 +143,41 @@ def api_solicitudes():
 
     return jsonify(solicitudes)
 
+@app.route('/historial/<path:nombre>')
+def historial(nombre):
+    asegurar_columnas()
+
+    conn = conectar_bd()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT
+            e.nombre,
+            COALESCE(s.curso, '') AS curso,
+            s.motivo,
+            s.dolor,
+            s.estado,
+            COALESCE(s.observaciones, '') AS observaciones,
+            DATE_FORMAT(s.fecha, '%Y-%m-%d %H:%i:%s') AS fecha
+        FROM solicitudes s
+        JOIN estudiantes e
+        ON s.id_estudiante = e.id_estudiante
+        WHERE e.nombre = %s
+        ORDER BY s.fecha DESC
+    """, (nombre,))
+
+    historial = cursor.fetchall()
+    total = len(historial)
+
+    conn.close()
+
+    return render_template(
+        'historial.html',
+        historial=historial,
+        nombre=nombre,
+        total=total
+    )
+
 @app.route('/inspector')
 def inspector():
     return render_template('inspector.html')
