@@ -105,6 +105,7 @@ background-position:0% 50%;
 
 <img
 src="{{ url_for('static', filename='donbosco1.jpg') }}"
+onerror="this.src='{{ url_for('static', filename='logo.jpg') }}'"
 class="medico-img">
 
 <div class="contenedor">
@@ -140,119 +141,146 @@ class="medico-img">
 
 <img
 src="{{ url_for('static', filename='donbosco2.jpg') }}"
+onerror="this.src='{{ url_for('static', filename='logo.jpg') }}'"
 class="medico-img">
 
 </div>
 
 <script>
 
+let escribiendoObservacion = false;
+
 function cargarMedico(){
 
-fetch('/api/solicitudes')
+    if(escribiendoObservacion){
+        return;
+    }
 
-.then(r => r.json())
+    fetch('/api/solicitudes')
 
-.then(data => {
+    .then(r => r.json())
 
-    let tabla = document.getElementById("tablaMedico");
+    .then(data => {
 
-    tabla.innerHTML = "";
+        if(escribiendoObservacion){
+            return;
+        }
 
-    data.forEach(s => {
+        let tabla = document.getElementById("tablaMedico");
 
-        let accion = "-";
+        tabla.innerHTML = "";
 
-        if(s.estado === "Aprobado"){
+        data.forEach(s => {
 
-            accion = `
-            <a href="/atendido/${s.id_solicitud}">
-                <button class="aprobar">
-                Atendido
-                </button>
-            </a>
+            let accion = "-";
+
+            if(s.estado === "Aprobado"){
+
+                accion = `
+                <a href="/atendido/${s.id_solicitud}">
+                    <button class="aprobar">
+                    Atendido
+                    </button>
+                </a>
+                `;
+
+            }
+
+            let dolorTexto = "";
+
+            if(s.dolor == 1){
+                dolorTexto = "😊 Leve";
+            }
+
+            else if(s.dolor == 2){
+                dolorTexto = "😐 Moderado";
+            }
+
+            else if(s.dolor == 3){
+                dolorTexto = "😖 Urgente";
+            }
+
+            tabla.innerHTML += `
+
+            <tr>
+
+                <td>${s.curso || ""}</td>
+
+                <td>
+                    <a
+                    href="/historial/${encodeURIComponent(s.nombre)}"
+                    style="
+                    color:#0056b3;
+                    font-weight:bold;
+                    text-decoration:none;
+                    ">
+                        ${s.nombre}
+                    </a>
+                </td>
+
+                <td>${s.motivo}</td>
+
+                <td>${dolorTexto}</td>
+
+                <td>${s.estado}</td>
+
+                <td>${s.fecha}</td>
+
+                <td>${accion}</td>
+
+                <td>
+
+                    <form
+                    method="POST"
+                    action="/observacion/${s.id_solicitud}">
+
+                        <textarea
+                        class="obs-area"
+                        name="observaciones"
+                        placeholder="Escribir observación..."
+                        onfocus="escribiendoObservacion = true"
+                        onblur="setTimeout(() => { escribiendoObservacion = false; }, 1500)"
+                        >${s.observaciones || ""}</textarea>
+
+                        <br>
+
+                        <button
+                        class="btn-obs"
+                        type="submit">
+
+                        Guardar
+
+                        </button>
+
+                    </form>
+
+                </td>
+
+            </tr>
+
             `;
 
-        }
-
-        let dolorTexto = "";
-
-        if(s.dolor == 1){
-            dolorTexto = "😊 Leve";
-        }
-
-        else if(s.dolor == 2){
-            dolorTexto = "😐 Moderado";
-        }
-
-        else if(s.dolor == 3){
-            dolorTexto = "😖 Urgente";
-        }
-
-        tabla.innerHTML += `
-
-        <tr>
-
-            <td>${s.curso || ""}</td>
-
-            <td>
-                <a
-                href="/historial/${encodeURIComponent(s.nombre)}"
-                style="
-                color:#0056b3;
-                font-weight:bold;
-                text-decoration:none;
-                ">
-                    ${s.nombre}
-                </a>
-            </td>
-
-            <td>${s.motivo}</td>
-
-            <td>${dolorTexto}</td>
-
-            <td>${s.estado}</td>
-
-            <td>${s.fecha}</td>
-
-            <td>${accion}</td>
-
-            <td>
-
-                <form
-                method="POST"
-                action="/observacion/${s.id_solicitud}">
-
-                    <textarea
-                    class="obs-area"
-                    name="observaciones"
-                    placeholder="Escribir observación..."
-                    >${s.observaciones || ""}</textarea>
-
-                    <br>
-
-                    <button
-                    class="btn-obs"
-                    type="submit">
-
-                    Guardar
-
-                    </button>
-
-                </form>
-
-            </td>
-
-        </tr>
-
-        `;
+        });
 
     });
 
-});
-
 }
 
-setInterval(cargarMedico,3000);
+setInterval(() => {
+
+    let activo = document.activeElement;
+
+    if(
+        activo &&
+        activo.classList &&
+        activo.classList.contains("obs-area")
+    ){
+        return;
+    }
+
+    cargarMedico();
+
+}, 3000);
 
 cargarMedico();
 
