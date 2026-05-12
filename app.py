@@ -20,6 +20,25 @@ ecuador = pytz.timezone("America/Guayaquil")
 def fecha_ecuador():
     return datetime.now(ecuador).strftime("%Y-%m-%d %H:%M:%S")
 
+def asegurar_columnas():
+    conn = conectar_bd()
+    cursor = conn.cursor()
+
+    columnas = [
+        ("nombre", "VARCHAR(255)"),
+        ("curso", "VARCHAR(100)"),
+        ("observaciones", "TEXT")
+    ]
+
+    for nombre, tipo in columnas:
+        try:
+            cursor.execute(f"ALTER TABLE solicitudes ADD COLUMN {nombre} {tipo}")
+            conn.commit()
+        except:
+            pass
+
+    conn.close()
+
 @app.route('/')
 def inicio():
     return render_template('inicio.html')
@@ -48,14 +67,16 @@ def login(rol):
 
 @app.route('/solicitudes', methods=['GET', 'POST'])
 def solicitudes():
+    asegurar_columnas()
+
     conn = conectar_bd()
     cursor = conn.cursor(dictionary=True)
 
     if request.method == 'POST':
-        curso = request.form['curso']
-        nombre = request.form['nombre_manual']
-        motivo = request.form['motivo']
-        dolor = request.form['dolor']
+        curso = request.form.get('curso', '')
+        nombre = request.form.get('nombre_manual', '')
+        motivo = request.form.get('motivo', '')
+        dolor = request.form.get('dolor', '')
         origen = request.form.get('origen', 'profesor')
 
         cursor.execute("""
@@ -88,19 +109,21 @@ def solicitudes():
 
 @app.route('/api/solicitudes')
 def api_solicitudes():
+    asegurar_columnas()
+
     conn = conectar_bd()
     cursor = conn.cursor(dictionary=True)
 
     cursor.execute("""
         SELECT
             id_solicitud,
-            nombre,
-            motivo,
-            dolor,
-            estado,
-            curso,
-            observaciones,
-            DATE_FORMAT(fecha, '%%Y-%%m-%%d %%H:%%i:%%s') AS fecha
+            COALESCE(nombre, '') AS nombre,
+            COALESCE(motivo, '') AS motivo,
+            COALESCE(dolor, '') AS dolor,
+            COALESCE(estado, '') AS estado,
+            COALESCE(curso, '') AS curso,
+            COALESCE(observaciones, '') AS observaciones,
+            fecha
         FROM solicitudes
         ORDER BY id_solicitud DESC
     """)
@@ -108,29 +131,43 @@ def api_solicitudes():
     datos = cursor.fetchall()
     conn.close()
 
+    for d in datos:
+        if d["fecha"]:
+            d["fecha"] = str(d["fecha"])
+        else:
+            d["fecha"] = ""
+
     return jsonify(datos)
 
 @app.route('/historial/<path:nombre>')
 def historial(nombre):
+    asegurar_columnas()
+
     conn = conectar_bd()
     cursor = conn.cursor(dictionary=True)
 
     cursor.execute("""
         SELECT
-            nombre,
-            curso,
-            motivo,
-            dolor,
-            estado,
-            observaciones,
-            DATE_FORMAT(fecha, '%%Y-%%m-%%d %%H:%%i:%%s') AS fecha
+            COALESCE(nombre, '') AS nombre,
+            COALESCE(curso, '') AS curso,
+            COALESCE(motivo, '') AS motivo,
+            COALESCE(dolor, '') AS dolor,
+            COALESCE(estado, '') AS estado,
+            COALESCE(observaciones, '') AS observaciones,
+            fecha
         FROM solicitudes
-        WHERE nombre=%s
+        WHERE nombre = %s
         ORDER BY id_solicitud DESC
     """, (nombre,))
 
     datos = cursor.fetchall()
     conn.close()
+
+    for d in datos:
+        if d["fecha"]:
+            d["fecha"] = str(d["fecha"])
+        else:
+            d["fecha"] = ""
 
     return render_template(
         'historial.html',
@@ -215,18 +252,20 @@ def observacion(id):
 
 @app.route('/pdf')
 def pdf():
+    asegurar_columnas()
+
     conn = conectar_bd()
     cursor = conn.cursor(dictionary=True)
 
     cursor.execute("""
         SELECT
-            nombre,
-            curso,
-            motivo,
-            dolor,
-            estado,
-            observaciones,
-            DATE_FORMAT(fecha, '%%Y-%%m-%%d %%H:%%i:%%s') AS fecha
+            COALESCE(nombre, '') AS nombre,
+            COALESCE(curso, '') AS curso,
+            COALESCE(motivo, '') AS motivo,
+            COALESCE(dolor, '') AS dolor,
+            COALESCE(estado, '') AS estado,
+            COALESCE(observaciones, '') AS observaciones,
+            fecha
         FROM solicitudes
         ORDER BY id_solicitud DESC
     """)
@@ -242,15 +281,18 @@ def pdf():
     pdf.set_font("Arial", "", 10)
 
     for d in datos:
+        fecha = str(d["fecha"]) if d["fecha"] else ""
+
         texto = (
             f"Curso: {d['curso']} | "
             f"Nombre: {d['nombre']} | "
             f"Motivo: {d['motivo']} | "
             f"Dolor: {d['dolor']} | "
             f"Estado: {d['estado']} | "
-            f"Fecha: {d['fecha']} | "
+            f"Fecha: {fecha} | "
             f"Observaciones: {d['observaciones']}"
         )
+
         pdf.multi_cell(0, 8, texto)
 
     archivo = "reporte.pdf"
