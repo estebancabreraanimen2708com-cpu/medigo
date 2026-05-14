@@ -20,17 +20,23 @@ ecuador = pytz.timezone("America/Guayaquil")
 def fecha_ecuador():
     return datetime.now(ecuador).strftime("%Y-%m-%d %H:%M:%S")
 
+def columnas_solicitudes():
+    conn = conectar_bd()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("DESCRIBE solicitudes")
+    columnas = [c["Field"] for c in cursor.fetchall()]
+    conn.close()
+    return columnas
+
 def asegurar_columnas():
     conn = conectar_bd()
     cursor = conn.cursor()
 
-    columnas = [
+    for nombre, tipo in [
         ("nombre", "VARCHAR(255)"),
         ("curso", "VARCHAR(100)"),
         ("observaciones", "TEXT")
-    ]
-
-    for nombre, tipo in columnas:
+    ]:
         try:
             cursor.execute(f"ALTER TABLE solicitudes ADD COLUMN {nombre} {tipo}")
             conn.commit()
@@ -69,9 +75,6 @@ def login(rol):
 def solicitudes():
     asegurar_columnas()
 
-    conn = conectar_bd()
-    cursor = conn.cursor(dictionary=True)
-
     if request.method == 'POST':
         curso = request.form.get('curso', '')
         nombre = request.form.get('nombre_manual', '')
@@ -79,19 +82,50 @@ def solicitudes():
         dolor = request.form.get('dolor', '')
         origen = request.form.get('origen', 'profesor')
 
-        cursor.execute("""
-            INSERT INTO solicitudes
-            (nombre, motivo, dolor, estado, fecha, curso, observaciones)
-            VALUES (%s,%s,%s,%s,%s,%s,%s)
-        """, (
-            nombre,
-            motivo,
-            dolor,
-            "Pendiente",
-            fecha_ecuador(),
-            curso,
-            ""
-        ))
+        cols = columnas_solicitudes()
+
+        conn = conectar_bd()
+        cursor = conn.cursor()
+
+        if "id_estudiante" in cols:
+            try:
+                cursor.execute("""
+                    INSERT INTO estudiantes(nombre)
+                    VALUES(%s)
+                """, (nombre,))
+                conn.commit()
+                id_estudiante = cursor.lastrowid
+            except:
+                id_estudiante = 1
+
+            cursor.execute("""
+                INSERT INTO solicitudes
+                (id_estudiante, nombre, motivo, dolor, estado, fecha, curso, observaciones)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
+            """, (
+                id_estudiante,
+                nombre,
+                motivo,
+                dolor,
+                "Pendiente",
+                fecha_ecuador(),
+                curso,
+                ""
+            ))
+        else:
+            cursor.execute("""
+                INSERT INTO solicitudes
+                (nombre, motivo, dolor, estado, fecha, curso, observaciones)
+                VALUES (%s,%s,%s,%s,%s,%s,%s)
+            """, (
+                nombre,
+                motivo,
+                dolor,
+                "Pendiente",
+                fecha_ecuador(),
+                curso,
+                ""
+            ))
 
         conn.commit()
         conn.close()
@@ -104,7 +138,6 @@ def solicitudes():
 
         return redirect('/solicitudes')
 
-    conn.close()
     return render_template('solicitudes.html')
 
 @app.route('/api/solicitudes')
@@ -132,10 +165,7 @@ def api_solicitudes():
     conn.close()
 
     for d in datos:
-        if d["fecha"]:
-            d["fecha"] = str(d["fecha"])
-        else:
-            d["fecha"] = ""
+        d["fecha"] = str(d["fecha"]) if d["fecha"] else ""
 
     return jsonify(datos)
 
@@ -164,10 +194,7 @@ def historial(nombre):
     conn.close()
 
     for d in datos:
-        if d["fecha"]:
-            d["fecha"] = str(d["fecha"])
-        else:
-            d["fecha"] = ""
+        d["fecha"] = str(d["fecha"]) if d["fecha"] else ""
 
     return render_template(
         'historial.html',
