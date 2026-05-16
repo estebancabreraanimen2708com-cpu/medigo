@@ -20,25 +20,59 @@ body{
     inset:0;
     z-index:-1;
     background:
+    radial-gradient(circle at 20% 20%, rgba(56,189,248,.35), transparent 28%),
+    radial-gradient(circle at 80% 30%, rgba(255,204,0,.32), transparent 25%),
+    radial-gradient(circle at 50% 80%, rgba(255,255,255,.55), transparent 28%),
     linear-gradient(135deg,#38bdf8,#ffffff,#ffcc00);
     background-size:400% 400%;
     animation:fondo 12s ease infinite;
 }
 
 @keyframes fondo{
-
-0%{
-background-position:0% 50%;
+0%{background-position:0% 50%;}
+50%{background-position:100% 50%;}
+100%{background-position:0% 50%;}
 }
 
-50%{
-background-position:100% 50%;
+.lineas-medico{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:-1;
+    opacity:.35;
+    background:
+    linear-gradient(115deg, transparent 0 20%, rgba(0,86,179,.22) 20% 21%, transparent 21% 100%),
+    linear-gradient(65deg, transparent 0 28%, rgba(255,204,0,.30) 28% 29%, transparent 29% 100%),
+    linear-gradient(150deg, transparent 0 38%, rgba(56,189,248,.35) 38% 39%, transparent 39% 100%);
+    animation:moverLineas 8s ease-in-out infinite alternate;
 }
 
-100%{
-background-position:0% 50%;
+@keyframes moverLineas{
+    from{transform:translateX(-20px);}
+    to{transform:translateX(25px);}
 }
 
+.particula{
+    position:fixed;
+    width:14px;
+    height:14px;
+    border-radius:50%;
+    background:rgba(255,255,255,.75);
+    box-shadow:0 0 18px rgba(56,189,248,.75);
+    z-index:-1;
+    animation:subir 8s linear infinite;
+}
+
+.particula:nth-child(1){left:8%; animation-delay:0s;}
+.particula:nth-child(2){left:25%; animation-delay:2s;}
+.particula:nth-child(3){left:55%; animation-delay:4s;}
+.particula:nth-child(4){left:75%; animation-delay:1s;}
+.particula:nth-child(5){left:92%; animation-delay:3s;}
+
+@keyframes subir{
+    from{bottom:-30px; transform:translateX(0) scale(.8); opacity:0;}
+    20%{opacity:1;}
+    to{bottom:105%; transform:translateX(60px) scale(1.4); opacity:0;}
 }
 
 .medico-layout{
@@ -82,7 +116,6 @@ background-position:0% 50%;
 }
 
 @media(max-width:1200px){
-
 .medico-layout{
     grid-template-columns:1fr;
 }
@@ -90,7 +123,6 @@ background-position:0% 50%;
 .medico-img{
     height:250px;
 }
-
 }
 
 </style>
@@ -100,6 +132,12 @@ background-position:0% 50%;
 <body>
 
 <div class="fondo-animado"></div>
+<div class="lineas-medico"></div>
+<div class="particula"></div>
+<div class="particula"></div>
+<div class="particula"></div>
+<div class="particula"></div>
+<div class="particula"></div>
 
 <div class="medico-layout">
 
@@ -111,6 +149,11 @@ class="medico-img">
 <div class="contenedor">
 
 <h1>Panel Médico</h1>
+
+<div id="estadoMedicoBox" class="estado-medico disponible">
+<span class="punto-estado"></span>
+<span id="estadoMedicoTexto">Médico disponible</span>
+</div>
 
 <div class="tabla-scroll">
 
@@ -149,6 +192,73 @@ class="medico-img">
 <script>
 
 let escribiendoObservacion = false;
+let aprobadasMedico = JSON.parse(localStorage.getItem("aprobadasMedico") || "[]");
+let primeraCargaMedico = aprobadasMedico.length === 0;
+let audio = new Audio("/static/mixkit-correct-answer-tone-2870.wav");
+let audioListo = false;
+
+function desbloquearAudio(){
+    if(audioListo) return;
+
+    audio.play()
+    .then(() => {
+        audio.pause();
+        audio.currentTime = 0;
+        audioListo = true;
+    })
+    .catch(() => {});
+}
+
+document.addEventListener("click", desbloquearAudio, { once:true });
+document.addEventListener("touchstart", desbloquearAudio, { once:true });
+
+function sonido(){
+    if(audioListo){
+        audio.currentTime = 0;
+        audio.play().catch(() => {});
+    }
+}
+
+function toast(mensaje){
+    let div = document.createElement("div");
+    div.className = "toast-medigo";
+    div.textContent = mensaje;
+    document.body.appendChild(div);
+
+    setTimeout(() => {
+        div.remove();
+    }, 3700);
+}
+
+function notificar(mensaje){
+    toast(mensaje);
+
+    if("Notification" in window){
+        if(Notification.permission === "default"){
+            Notification.requestPermission();
+        }
+
+        if(Notification.permission === "granted"){
+            new Notification("MediGo", { body: mensaje });
+        }
+    }
+
+    sonido();
+}
+
+function actualizarEstadoMedico(data){
+    let pendientesMedico = data.filter(s => s.estado === "Aprobado").length;
+    let box = document.getElementById("estadoMedicoBox");
+    let texto = document.getElementById("estadoMedicoTexto");
+
+    if(pendientesMedico > 0){
+        box.className = "estado-medico ocupado";
+        texto.textContent = "Médico ocupado: " + pendientesMedico + " estudiante(s) esperando atención";
+    } else {
+        box.className = "estado-medico disponible";
+        texto.textContent = "Médico disponible: puede recibir estudiantes";
+    }
+}
 
 function cargarMedico(){
 
@@ -165,6 +275,27 @@ function cargarMedico(){
         if(escribiendoObservacion){
             return;
         }
+
+        actualizarEstadoMedico(data);
+
+        let aprobadasActuales = data
+        .filter(s => s.estado === "Aprobado")
+        .map(s => String(s.id_solicitud));
+
+        if(!primeraCargaMedico){
+            data.forEach(s => {
+                if(
+                    s.estado === "Aprobado" &&
+                    !aprobadasMedico.includes(String(s.id_solicitud))
+                ){
+                    notificar("🏥 Nuevo estudiante para atender: " + s.nombre);
+                }
+            });
+        }
+
+        aprobadasMedico = aprobadasActuales;
+        localStorage.setItem("aprobadasMedico", JSON.stringify(aprobadasMedico));
+        primeraCargaMedico = false;
 
         let tabla = document.getElementById("tablaMedico");
 
@@ -239,7 +370,7 @@ function cargarMedico(){
                         name="observaciones"
                         placeholder="Escribir observación..."
                         onfocus="escribiendoObservacion = true"
-                        onblur="setTimeout(() => { escribiendoObservacion = false; }, 1500)"
+                        onblur="setTimeout(() => { escribiendoObservacion = false; }, 1800)"
                         >${s.observaciones || ""}</textarea>
 
                         <br>
