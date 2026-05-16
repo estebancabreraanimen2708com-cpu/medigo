@@ -17,6 +17,11 @@
 
 <p class="subtitulo">Panel del Profesor</p>
 
+<div id="estadoMedicoBox" class="estado-medico disponible">
+<span class="punto-estado"></span>
+<span id="estadoMedicoTexto">Médico disponible</span>
+</div>
+
 <form method="POST">
 
 <div class="card-seccion">
@@ -180,8 +185,8 @@ ENVIAR SOLICITUD
 </div>
 
 <script>
-let estadosAnteriores = {};
-let primeraCarga = true;
+let estadosAnteriores = JSON.parse(localStorage.getItem("estadosProfesor") || "{}");
+let primeraCarga = Object.keys(estadosAnteriores).length === 0;
 let audio = new Audio("/static/mixkit-correct-answer-tone-2870.wav");
 let audioListo = false;
 
@@ -207,7 +212,20 @@ function sonido(){
     }
 }
 
+function toast(mensaje){
+    let div = document.createElement("div");
+    div.className = "toast-medigo";
+    div.textContent = mensaje;
+    document.body.appendChild(div);
+
+    setTimeout(() => {
+        div.remove();
+    }, 3700);
+}
+
 function notificar(mensaje){
+    toast(mensaje);
+
     if("Notification" in window){
         if(Notification.permission === "default"){
             Notification.requestPermission();
@@ -221,11 +239,27 @@ function notificar(mensaje){
     sonido();
 }
 
+function actualizarEstadoMedico(data){
+    let pendientesMedico = data.filter(s => s.estado === "Aprobado").length;
+    let box = document.getElementById("estadoMedicoBox");
+    let texto = document.getElementById("estadoMedicoTexto");
+
+    if(pendientesMedico > 0){
+        box.className = "estado-medico ocupado";
+        texto.textContent = "Médico ocupado: hay " + pendientesMedico + " estudiante(s) por atender";
+    } else {
+        box.className = "estado-medico disponible";
+        texto.textContent = "Médico disponible: puede recibir estudiantes";
+    }
+}
+
 function cargarSolicitudes(){
 
 fetch('/api/solicitudes')
 .then(r => r.json())
 .then(data => {
+
+    actualizarEstadoMedico(data);
 
     let tabla = document.getElementById("tablaSolicitudes");
     tabla.innerHTML = "";
@@ -235,15 +269,15 @@ fetch('/api/solicitudes')
         if(!primeraCarga && estadosAnteriores[s.id_solicitud] && estadosAnteriores[s.id_solicitud] !== s.estado){
 
             if(s.estado === "Aprobado"){
-                notificar("✅ Solicitud aprobada");
+                notificar("✅ Solicitud aprobada: " + s.nombre);
             }
 
             if(s.estado === "Rechazado"){
-                notificar("❌ Solicitud rechazada");
+                notificar("❌ Solicitud rechazada: " + s.nombre);
             }
 
             if(s.estado === "Atendido"){
-                notificar("🏥 Consulta finalizada");
+                notificar("🏥 Estudiante atendido: " + s.nombre);
             }
         }
 
@@ -273,11 +307,12 @@ fetch('/api/solicitudes')
         </tr>`;
     });
 
+    localStorage.setItem("estadosProfesor", JSON.stringify(estadosAnteriores));
     primeraCarga = false;
 });
 }
 
-setInterval(cargarSolicitudes, 1000);
+setInterval(cargarSolicitudes, 3000);
 cargarSolicitudes();
 </script>
 
