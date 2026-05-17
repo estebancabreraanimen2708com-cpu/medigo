@@ -686,3 +686,11 @@ a{
         text-align:center;
     }
 }
+
+.donbosco-cara{
+    width:82px;
+    height:82px;
+    object-fit:contain;
+    margin-bottom:8px;
+    filter:drop-shadow(0 4px 8px rgba(0,0,0,.18));
+}
