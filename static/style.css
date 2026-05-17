@@ -24,17 +24,9 @@ body{
 }
 
 @keyframes fondoMovimiento{
-    0%{
-        background-position:0% 50%;
-    }
-
-    50%{
-        background-position:100% 50%;
-    }
-
-    100%{
-        background-position:0% 50%;
-    }
+    0%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+    100%{background-position:0% 50%;}
 }
 
 body::before{
@@ -52,13 +44,8 @@ body::before{
 }
 
 @keyframes moverLineasMedico{
-    from{
-        transform:translateX(-30px) translateY(0);
-    }
-
-    to{
-        transform:translateX(35px) translateY(-25px);
-    }
+    from{transform:translateX(-30px) translateY(0);}
+    to{transform:translateX(35px) translateY(-25px);}
 }
 
 body::after{
@@ -77,13 +64,8 @@ body::after{
 }
 
 @keyframes trianguloAmarillo{
-    from{
-        transform:rotate(-25deg) translateY(0) scale(1);
-    }
-
-    to{
-        transform:rotate(-12deg) translateY(-45px) scale(1.08);
-    }
+    from{transform:rotate(-25deg) translateY(0) scale(1);}
+    to{transform:rotate(-12deg) translateY(-45px) scale(1.08);}
 }
 
 .contenedor::before{
@@ -102,19 +84,14 @@ body::after{
 }
 
 @keyframes trianguloCeleste{
-    from{
-        transform:rotate(18deg) translateY(0) scale(1);
-    }
-
-    to{
-        transform:rotate(30deg) translateY(45px) scale(1.08);
-    }
+    from{transform:rotate(18deg) translateY(0) scale(1);}
+    to{transform:rotate(30deg) translateY(45px) scale(1.08);}
 }
 
 .contenedor{
     width:100%;
     max-width:1050px;
-    background:rgba(255,255,255,.84);
+    background:rgba(255,255,255,.86);
     border:2px solid rgba(56,189,248,.48);
     border-radius:30px;
     padding:40px;
@@ -140,25 +117,13 @@ body::after{
 }
 
 @keyframes brilloCaja{
-    from{
-        transform:translateX(-100%);
-    }
-
-    to{
-        transform:translateX(100%);
-    }
+    from{transform:translateX(-100%);}
+    to{transform:translateX(100%);}
 }
 
 @keyframes entrada{
-    from{
-        opacity:0;
-        transform:translateY(20px);
-    }
-
-    to{
-        opacity:1;
-        transform:translateY(0);
-    }
+    from{opacity:0; transform:translateY(20px);}
+    to{opacity:1; transform:translateY(0);}
 }
 
 .logo{
@@ -196,7 +161,7 @@ h3{
 }
 
 .card-seccion{
-    background:rgba(255,255,255,.74);
+    background:rgba(255,255,255,.76);
     border:1px solid rgba(56,189,248,.38);
     border-radius:22px;
     padding:22px;
@@ -318,17 +283,9 @@ textarea{
 }
 
 @keyframes pulsoSuave{
-    0%{
-        transform:scale(1);
-    }
-
-    50%{
-        transform:scale(1.025);
-    }
-
-    100%{
-        transform:scale(1);
-    }
+    0%{transform:scale(1);}
+    50%{transform:scale(1.025);}
+    100%{transform:scale(1);}
 }
 
 .toast-medigo{
@@ -346,22 +303,12 @@ textarea{
 }
 
 @keyframes toastEntrada{
-    from{
-        opacity:0;
-        transform:translateX(80px);
-    }
-
-    to{
-        opacity:1;
-        transform:translateX(0);
-    }
+    from{opacity:0; transform:translateX(80px);}
+    to{opacity:1; transform:translateX(0);}
 }
 
 @keyframes toastSalida{
-    to{
-        opacity:0;
-        transform:translateX(80px);
-    }
+    to{opacity:0; transform:translateX(80px);}
 }
 
 .emociones{
@@ -438,25 +385,27 @@ table{
 }
 
 th{
-    background:linear-gradient(135deg,#38bdf8,#ffcc00);
-    color:#002b5c;
+    background:linear-gradient(135deg,#0056b3,#38bdf8);
+    color:white;
     padding:15px;
     font-size:14px;
     text-transform:uppercase;
+    border:none;
 }
 
 td{
-    background:rgba(0,86,179,.08);
+    background:rgba(255,255,255,.88);
     padding:14px;
     text-align:center;
-    border-bottom:1px solid rgba(0,86,179,.12);
+    border-bottom:1px solid rgba(0,86,179,.10);
     color:#002b5c;
     white-space:nowrap;
     font-weight:bold;
+    transition:.25s;
 }
 
 tr:hover td{
-    background:rgba(255,204,0,.22);
+    background:rgba(56,189,248,.18);
 }
 
 .aprobar,
@@ -484,8 +433,87 @@ tr:hover td{
     transform:scale(1.1);
 }
 
+.btn-subir{
+    background:#22c55e;
+    border:none;
+    padding:10px;
+    border-radius:12px;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+    width:100%;
+    transition:.2s;
+}
+
+.btn-nosubir{
+    background:#ef4444;
+    border:none;
+    padding:10px;
+    border-radius:12px;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+    width:100%;
+    transition:.2s;
+}
+
+.btn-subir:hover,
+.btn-nosubir:hover{
+    transform:scale(1.04);
+}
+
+.medico-layout{
+    display:grid;
+    grid-template-columns:220px 1fr 220px;
+    gap:25px;
+    align-items:center;
+    width:100%;
+    max-width:1500px;
+    margin:auto;
+    padding:25px;
+}
+
+.medico-img{
+    width:100%;
+    height:450px;
+    object-fit:cover;
+    border-radius:30px;
+    border:4px solid #ffcc00;
+    box-shadow:0 15px 35px rgba(0,0,0,.25);
+}
+
+.obs-area{
+    width:220px;
+    min-height:80px;
+    border-radius:15px;
+    border:2px solid #38bdf8;
+    padding:10px;
+    resize:vertical;
+}
+
+.btn-obs{
+    margin-top:8px;
+    padding:8px 15px;
+    border:none;
+    border-radius:10px;
+    background:#ffcc00;
+    color:#002b5c;
+    font-weight:bold;
+    cursor:pointer;
+}
+
 a{
     text-decoration:none;
+}
+
+@media(max-width:1200px){
+    .medico-layout{
+        grid-template-columns:1fr;
+    }
+
+    .medico-img{
+        height:250px;
+    }
 }
 
 @media(max-width:700px){
