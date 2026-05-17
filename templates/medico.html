@@ -6,213 +6,22 @@
 
 <title>Médico</title>
 
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
-<style>
-
-body{
-    margin:0;
-    overflow-x:hidden;
-}
-
-.fondo-animado{
-    position:fixed;
-    inset:0;
-    z-index:-1;
-    background:
-    radial-gradient(circle at 20% 20%, rgba(56,189,248,.35), transparent 28%),
-    radial-gradient(circle at 80% 30%, rgba(255,204,0,.32), transparent 25%),
-    radial-gradient(circle at 50% 80%, rgba(255,255,255,.55), transparent 28%),
-    linear-gradient(135deg,#38bdf8,#ffffff,#ffcc00);
-    background-size:400% 400%;
-    animation:fondo 12s ease infinite;
-}
-
-@keyframes fondo{
-0%{background-position:0% 50%;}
-50%{background-position:100% 50%;}
-100%{background-position:0% 50%;}
-}
-
-.lineas-medico{
-    position:fixed;
-    inset:0;
-    pointer-events:none;
-    z-index:-1;
-    opacity:.35;
-    background:
-    linear-gradient(115deg, transparent 0 20%, rgba(0,86,179,.22) 20% 21%, transparent 21% 100%),
-    linear-gradient(65deg, transparent 0 28%, rgba(255,204,0,.30) 28% 29%, transparent 29% 100%),
-    linear-gradient(150deg, transparent 0 38%, rgba(56,189,248,.35) 38% 39%, transparent 39% 100%);
-    animation:moverLineas 8s ease-in-out infinite alternate;
-}
-
-@keyframes moverLineas{
-    from{transform:translateX(-20px);}
-    to{transform:translateX(25px);}
-}
-
-.particula{
-    position:fixed;
-    width:14px;
-    height:14px;
-    border-radius:50%;
-    background:rgba(255,255,255,.75);
-    box-shadow:0 0 18px rgba(56,189,248,.75);
-    z-index:-1;
-    animation:subir 8s linear infinite;
-}
-
-.particula:nth-child(1){left:8%; animation-delay:0s;}
-.particula:nth-child(2){left:25%; animation-delay:2s;}
-.particula:nth-child(3){left:55%; animation-delay:4s;}
-.particula:nth-child(4){left:75%; animation-delay:1s;}
-.particula:nth-child(5){left:92%; animation-delay:3s;}
-
-@keyframes subir{
-    from{bottom:-30px; transform:translateX(0) scale(.8); opacity:0;}
-    20%{opacity:1;}
-    to{bottom:105%; transform:translateX(60px) scale(1.4); opacity:0;}
-}
-
-.medico-layout{
-    display:grid;
-    grid-template-columns:220px 1fr 220px;
-    gap:25px;
-    align-items:center;
-    width:100%;
-    max-width:1500px;
-    margin:auto;
-    padding:25px;
-}
-
-.medico-img{
-    width:100%;
-    height:450px;
-    object-fit:cover;
-    border-radius:30px;
-    border:4px solid #ffcc00;
-    box-shadow:0 15px 35px rgba(0,0,0,.25);
-}
-
-.control-medico{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:15px;
-    margin:15px 0 25px 0;
-}
-
-.btn-estado-medico{
-    padding:16px;
-    border:none;
-    border-radius:18px;
-    font-weight:bold;
-    cursor:pointer;
-    font-size:16px;
-    box-shadow:0 10px 25px rgba(0,43,92,.18);
-    transition:.25s;
-}
-
-.btn-estado-medico:hover{
-    transform:translateY(-3px) scale(1.02);
-}
-
-.btn-disponible{
-    background:linear-gradient(135deg,#22c55e,#16a34a);
-    color:white;
-}
-
-.btn-no-disponible{
-    background:linear-gradient(135deg,#ef4444,#dc2626);
-    color:white;
-}
-
-.estado-enviado{
-    text-align:center;
-    font-weight:bold;
-    color:#002b5c;
-    background:rgba(255,255,255,.65);
-    border-radius:18px;
-    padding:12px;
-    margin-bottom:20px;
-}
-
-.obs-area{
-    width:220px;
-    min-height:80px;
-    border-radius:15px;
-    border:2px solid #38bdf8;
-    padding:10px;
-    resize:vertical;
-}
-
-.btn-obs{
-    margin-top:8px;
-    padding:8px 15px;
-    border:none;
-    border-radius:10px;
-    background:#ffcc00;
-    color:#002b5c;
-    font-weight:bold;
-    cursor:pointer;
-}
-
-@media(max-width:1200px){
-.medico-layout{
-    grid-template-columns:1fr;
-}
-
-.medico-img{
-    height:250px;
-}
-
-.control-medico{
-    grid-template-columns:1fr;
-}
-}
-
-</style>
+<link rel="stylesheet"
+href="{{ url_for('static', filename='style.css') }}">
 
 </head>
 
 <body>
 
-<div class="fondo-animado"></div>
-<div class="lineas-medico"></div>
-<div class="particula"></div>
-<div class="particula"></div>
-<div class="particula"></div>
-<div class="particula"></div>
-<div class="particula"></div>
-
 <div class="medico-layout">
 
 <img
 src="{{ url_for('static', filename='donbosco1.jpg') }}"
-onerror="this.src='{{ url_for('static', filename='logo.jpg') }}'"
 class="medico-img">
 
 <div class="contenedor">
 
 <h1>Panel Médico</h1>
-
-<div class="control-medico">
-<a href="/estado_medico/disponible">
-<button class="btn-estado-medico btn-disponible">
-🟢 Sí puede subir el estudiante
-</button>
-</a>
-
-<a href="/estado_medico/no_disponible">
-<button class="btn-estado-medico btn-no-disponible">
-🔴 No puede subir el estudiante
-</button>
-</a>
-</div>
-
-<div id="estadoEnviado" class="estado-enviado">
-Estado médico cargando...
-</div>
 
 <div class="tabla-scroll">
 
@@ -221,14 +30,16 @@ Estado médico cargando...
 <thead>
 
 <tr>
+
 <th>Curso</th>
 <th>Nombre</th>
 <th>Motivo</th>
 <th>Dolor</th>
 <th>Estado</th>
 <th>Fecha</th>
-<th>Acción</th>
+<th>Subida</th>
 <th>Observaciones</th>
+
 </tr>
 
 </thead>
@@ -243,231 +54,154 @@ Estado médico cargando...
 
 <img
 src="{{ url_for('static', filename='donbosco2.jpg') }}"
-onerror="this.src='{{ url_for('static', filename='logo.jpg') }}'"
 class="medico-img">
 
 </div>
 
 <script>
 
-let escribiendoObservacion = false;
-let aprobadasMedico = JSON.parse(localStorage.getItem("aprobadasMedico") || "[]");
-let primeraCargaMedico = aprobadasMedico.length === 0;
-let audio = new Audio("/static/mixkit-correct-answer-tone-2870.wav");
-let audioListo = false;
-
-function desbloquearAudio(){
-    if(audioListo) return;
-
-    audio.play()
-    .then(() => {
-        audio.pause();
-        audio.currentTime = 0;
-        audioListo = true;
-    })
-    .catch(() => {});
-}
-
-document.addEventListener("click", desbloquearAudio, { once:true });
-document.addEventListener("touchstart", desbloquearAudio, { once:true });
-
-function sonido(){
-    if(audioListo){
-        audio.currentTime = 0;
-        audio.play().catch(() => {});
-    }
-}
-
-function toast(mensaje){
-    let div = document.createElement("div");
-    div.className = "toast-medigo";
-    div.textContent = mensaje;
-    document.body.appendChild(div);
-
-    setTimeout(() => {
-        div.remove();
-    }, 3700);
-}
-
-function notificar(mensaje){
-    toast(mensaje);
-
-    if("Notification" in window){
-        if(Notification.permission === "default"){
-            Notification.requestPermission();
-        }
-
-        if(Notification.permission === "granted"){
-            new Notification("MediGo", { body: mensaje });
-        }
-    }
-
-    sonido();
-}
-
-function cargarEstadoMedico(){
-    fetch('/api/estado_medico')
-    .then(r => r.json())
-    .then(e => {
-        document.getElementById("estadoEnviado").textContent =
-        e.mensaje + " | Actualizado: " + e.fecha;
-    });
-}
-
 function cargarMedico(){
 
-    if(escribiendoObservacion){
-        return;
-    }
+fetch('/api/solicitudes')
 
-    fetch('/api/solicitudes')
+.then(r=>r.json())
 
-    .then(r => r.json())
+.then(data=>{
 
-    .then(data => {
+let tabla=
+document.getElementById(
+"tablaMedico"
+);
 
-        if(escribiendoObservacion){
-            return;
-        }
+tabla.innerHTML="";
 
-        let aprobadasActuales = data
-        .filter(s => s.estado === "Aprobado")
-        .map(s => String(s.id_solicitud));
+data.forEach(s=>{
 
-        if(!primeraCargaMedico){
-            data.forEach(s => {
-                if(
-                    s.estado === "Aprobado" &&
-                    !aprobadasMedico.includes(String(s.id_solicitud))
-                ){
-                    notificar("🏥 Nuevo estudiante para atender: " + s.nombre);
-                }
-            });
-        }
+let dolorTexto="";
 
-        aprobadasMedico = aprobadasActuales;
-        localStorage.setItem("aprobadasMedico", JSON.stringify(aprobadasMedico));
-        primeraCargaMedico = false;
+if(s.dolor==1){
 
-        let tabla = document.getElementById("tablaMedico");
-
-        tabla.innerHTML = "";
-
-        data.forEach(s => {
-
-            let accion = "-";
-
-            if(s.estado === "Aprobado"){
-
-                accion = `
-                <a href="/atendido/${s.id_solicitud}">
-                    <button class="aprobar">
-                    Atendido
-                    </button>
-                </a>
-                `;
-
-            }
-
-            let dolorTexto = "";
-
-            if(s.dolor == 1){
-                dolorTexto = "😊 Leve";
-            }
-
-            else if(s.dolor == 2){
-                dolorTexto = "😐 Moderado";
-            }
-
-            else if(s.dolor == 3){
-                dolorTexto = "😖 Urgente";
-            }
-
-            tabla.innerHTML += `
-
-            <tr>
-
-                <td>${s.curso || ""}</td>
-
-                <td>
-                    <a
-                    href="/historial/${encodeURIComponent(s.nombre)}"
-                    style="
-                    color:#0056b3;
-                    font-weight:bold;
-                    text-decoration:none;
-                    ">
-                        ${s.nombre}
-                    </a>
-                </td>
-
-                <td>${s.motivo}</td>
-
-                <td>${dolorTexto}</td>
-
-                <td>${s.estado}</td>
-
-                <td>${s.fecha}</td>
-
-                <td>${accion}</td>
-
-                <td>
-
-                    <form
-                    method="POST"
-                    action="/observacion/${s.id_solicitud}">
-
-                        <textarea
-                        class="obs-area"
-                        name="observaciones"
-                        placeholder="Escribir observación..."
-                        onfocus="escribiendoObservacion = true"
-                        onblur="setTimeout(() => { escribiendoObservacion = false; }, 1800)"
-                        >${s.observaciones || ""}</textarea>
-
-                        <br>
-
-                        <button
-                        class="btn-obs"
-                        type="submit">
-
-                        Guardar
-
-                        </button>
-
-                    </form>
-
-                </td>
-
-            </tr>
-
-            `;
-
-        });
-
-    });
+dolorTexto="😊 Leve";
 
 }
 
-setInterval(() => {
+else if(s.dolor==2){
 
-    let activo = document.activeElement;
+dolorTexto="😐 Moderado";
 
-    if(
-        activo &&
-        activo.classList &&
-        activo.classList.contains("obs-area")
-    ){
-        return;
-    }
+}
 
-    cargarMedico();
-    cargarEstadoMedico();
+else{
 
-}, 3000);
+dolorTexto="😖 Urgente";
+
+}
+
+tabla.innerHTML+=`
+
+<tr>
+
+<td>${s.curso||""}</td>
+
+<td>
+
+<a
+href="/historial/${encodeURIComponent(s.nombre)}"
+style="
+color:#0056b3;
+font-weight:bold;
+">
+
+${s.nombre}
+
+</a>
+
+</td>
+
+<td>${s.motivo}</td>
+
+<td>${dolorTexto}</td>
+
+<td>${s.estado}</td>
+
+<td>${s.fecha}</td>
+
+<td>
+
+<div style="
+display:flex;
+flex-direction:column;
+gap:8px;
+">
+
+<a href="/estado_medico/disponible?id=${s.id_solicitud}">
+
+<button class="btn-subir">
+
+🟢 Puede subir
+
+</button>
+
+</a>
+
+<a href="/estado_medico/no_disponible?id=${s.id_solicitud}">
+
+<button class="btn-nosubir">
+
+🔴 No puede subir
+
+</button>
+
+</a>
+
+</div>
+
+</td>
+
+<td>
+
+<form
+method="POST"
+action="/observacion/${s.id_solicitud}">
+
+<textarea
+class="obs-area"
+name="observaciones"
+placeholder="Escribir..."
+>
+
+${s.observaciones||""}
+
+</textarea>
+
+<button
+class="btn-obs"
+type="submit">
+
+Guardar
+
+</button>
+
+</form>
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+});
+
+}
+
+setInterval(
+cargarMedico,
+3000
+);
 
 cargarMedico();
-cargarEstadoMedico();
 
 </script>
 
