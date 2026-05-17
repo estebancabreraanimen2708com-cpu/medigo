@@ -3,6 +3,7 @@ import mysql.connector
 from fpdf import FPDF
 from datetime import datetime
 import pytz
+import os
 
 app = Flask(__name__)
 
@@ -20,24 +21,29 @@ ecuador = pytz.timezone("America/Guayaquil")
 def fecha_ecuador():
     return datetime.now(ecuador).strftime("%Y-%m-%d %H:%M:%S")
 
-def columnas_solicitudes():
-    conn = conectar_bd()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("DESCRIBE solicitudes")
-    columnas = [c["Field"] for c in cursor.fetchall()]
-    conn.close()
-    return columnas
+def limpiar_pdf(texto):
+    if texto is None:
+        return ""
+    texto = str(texto)
+    texto = texto.replace("🟢", "[Puede subir]")
+    texto = texto.replace("🔴", "[No puede subir]")
+    texto = texto.replace("😊", "")
+    texto = texto.replace("😐", "")
+    texto = texto.replace("😖", "")
+    return texto.encode("latin-1", "ignore").decode("latin-1")
 
 def asegurar_columnas():
     conn = conectar_bd()
     cursor = conn.cursor()
 
-    for nombre, tipo in [
+    columnas = [
         ("nombre", "VARCHAR(255)"),
         ("curso", "VARCHAR(100)"),
         ("observaciones", "TEXT"),
         ("decision_medico", "VARCHAR(100)")
-    ]:
+    ]
+
+    for nombre, tipo in columnas:
         try:
             cursor.execute(f"ALTER TABLE solicitudes ADD COLUMN {nombre} {tipo}")
             conn.commit()
@@ -83,49 +89,23 @@ def solicitudes():
         dolor = request.form.get('dolor', '')
         origen = request.form.get('origen', 'profesor')
 
-        cols = columnas_solicitudes()
-
         conn = conectar_bd()
         cursor = conn.cursor()
 
-        if "id_estudiante" in cols:
-            try:
-                cursor.execute("INSERT INTO estudiantes(nombre) VALUES(%s)", (nombre,))
-                conn.commit()
-                id_estudiante = cursor.lastrowid
-            except:
-                id_estudiante = 1
-
-            cursor.execute("""
-                INSERT INTO solicitudes
-                (id_estudiante, nombre, motivo, dolor, estado, fecha, curso, observaciones, decision_medico)
-                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
-            """, (
-                id_estudiante,
-                nombre,
-                motivo,
-                dolor,
-                "Pendiente",
-                fecha_ecuador(),
-                curso,
-                "",
-                ""
-            ))
-        else:
-            cursor.execute("""
-                INSERT INTO solicitudes
-                (nombre, motivo, dolor, estado, fecha, curso, observaciones, decision_medico)
-                VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
-            """, (
-                nombre,
-                motivo,
-                dolor,
-                "Pendiente",
-                fecha_ecuador(),
-                curso,
-                "",
-                ""
-            ))
+        cursor.execute("""
+            INSERT INTO solicitudes
+            (nombre, motivo, dolor, estado, fecha, curso, observaciones, decision_medico)
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
+        """, (
+            nombre,
+            motivo,
+            dolor,
+            "Pendiente",
+            fecha_ecuador(),
+            curso,
+            "",
+            "Sin revisar"
+        ))
 
         conn.commit()
         conn.close()
@@ -156,7 +136,7 @@ def api_solicitudes():
             COALESCE(estado, '') AS estado,
             COALESCE(curso, '') AS curso,
             COALESCE(observaciones, '') AS observaciones,
-            COALESCE(decision_medico, '') AS decision_medico,
+            COALESCE(decision_medico, 'Sin revisar') AS decision_medico,
             fecha
         FROM solicitudes
         ORDER BY id_solicitud DESC
@@ -169,6 +149,29 @@ def api_solicitudes():
         d["fecha"] = str(d["fecha"]) if d["fecha"] else ""
 
     return jsonify(datos)
+
+@app.route('/decision_medico/<int:id>/<decision>')
+def decision_medico(id, decision):
+    asegurar_columnas()
+
+    if decision == "subir":
+        texto = "🟢 Puede subir"
+    else:
+        texto = "🔴 No puede subir"
+
+    conn = conectar_bd()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        UPDATE solicitudes
+        SET decision_medico=%s
+        WHERE id_solicitud=%s
+    """, (texto, id))
+
+    conn.commit()
+    conn.close()
+
+    return redirect('/medico')
 
 @app.route('/historial/<path:nombre>')
 def historial(nombre):
@@ -185,7 +188,7 @@ def historial(nombre):
             COALESCE(dolor, '') AS dolor,
             COALESCE(estado, '') AS estado,
             COALESCE(observaciones, '') AS observaciones,
-            COALESCE(decision_medico, '') AS decision_medico,
+            COALESCE(decision_medico, 'Sin revisar') AS decision_medico,
             fecha
         FROM solicitudes
         WHERE nombre = %s
@@ -261,31 +264,6 @@ def atendido(id):
 
     return redirect('/medico')
 
-@app.route('/estado_medico/<estado>')
-def estado_medico(estado):
-    asegurar_columnas()
-
-    id_solicitud = request.args.get("id")
-
-    if estado == "disponible":
-        decision = "🟢 Puede subir"
-    else:
-        decision = "🔴 No puede subir"
-
-    conn = conectar_bd()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        UPDATE solicitudes
-        SET decision_medico=%s
-        WHERE id_solicitud=%s
-    """, (decision, id_solicitud))
-
-    conn.commit()
-    conn.close()
-
-    return redirect('/medico')
-
 @app.route('/observacion/<int:id>', methods=['POST'])
 def observacion(id):
     texto = request.form.get('observaciones', '')
@@ -319,13 +297,13 @@ def pdf():
             COALESCE(dolor, '') AS dolor,
             COALESCE(estado, '') AS estado,
             COALESCE(observaciones, '') AS observaciones,
-            COALESCE(decision_medico, '') AS decision_medico,
+            COALESCE(decision_medico, 'Sin revisar') AS decision_medico,
             fecha
         FROM solicitudes
         ORDER BY id_solicitud DESC
     """)
 
-    solicitudes = cursor.fetchall()
+    datos = cursor.fetchall()
     conn.close()
 
     pdf = FPDF()
@@ -336,101 +314,49 @@ def pdf():
     except:
         pass
 
-    pdf.set_font("Arial", "B", 20)
+    pdf.set_font("Arial", "B", 18)
     pdf.set_text_color(0, 86, 179)
-
-    pdf.cell(
-        0,
-        15,
-        "MediGo - Reporte Médico",
-        0,
-        1,
-        "C"
-    )
+    pdf.cell(0, 12, limpiar_pdf("MediGo - Reporte Medico"), 0, 1, "C")
 
     pdf.set_font("Arial", "", 10)
-    pdf.set_text_color(80, 80, 80)
-
-    pdf.cell(
-        0,
-        8,
-        "Sistema Médico Escolar Salesiano",
-        0,
-        1,
-        "C"
-    )
-
-    pdf.cell(
-        0,
-        8,
-        "Fecha de descarga: " + fecha_ecuador(),
-        0,
-        1,
-        "C"
-    )
-
+    pdf.set_text_color(60, 60, 60)
+    pdf.cell(0, 8, limpiar_pdf("Sistema Medico Escolar Salesiano"), 0, 1, "C")
+    pdf.cell(0, 8, limpiar_pdf("Fecha de descarga: " + fecha_ecuador()), 0, 1, "C")
     pdf.ln(8)
 
-    pdf.set_draw_color(56, 189, 248)
-
-    for s in solicitudes:
-        fecha = str(s["fecha"]) if s["fecha"] else ""
+    for d in datos:
+        fecha = str(d["fecha"]) if d["fecha"] else ""
 
         pdf.set_fill_color(235, 248, 255)
         pdf.set_text_color(0, 43, 92)
         pdf.set_font("Arial", "B", 12)
-
-        pdf.cell(
-            0,
-            10,
-            "Solicitud Médica Escolar",
-            1,
-            1,
-            "C",
-            True
-        )
+        pdf.cell(0, 10, limpiar_pdf("Solicitud Medica Escolar"), 1, 1, "C", True)
 
         campos = [
-            ("Curso", s["curso"]),
-            ("Nombre", s["nombre"]),
-            ("Motivo", s["motivo"]),
-            ("Dolor", s["dolor"]),
-            ("Estado", s["estado"]),
-            ("Decisión médico", s["decision_medico"]),
+            ("Curso", d["curso"]),
+            ("Nombre", d["nombre"]),
+            ("Motivo", d["motivo"]),
+            ("Dolor", d["dolor"]),
+            ("Estado", d["estado"]),
+            ("Decision medico", d["decision_medico"]),
             ("Fecha", fecha),
-            ("Observaciones", s["observaciones"])
+            ("Observaciones", d["observaciones"])
         ]
 
         for etiqueta, valor in campos:
             pdf.set_font("Arial", "B", 10)
             pdf.set_fill_color(245, 252, 255)
-
-            pdf.cell(
-                45,
-                9,
-                etiqueta + ":",
-                1,
-                0,
-                "L",
-                True
-            )
+            pdf.cell(45, 9, limpiar_pdf(etiqueta + ":"), 1, 0, "L", True)
 
             pdf.set_font("Arial", "", 10)
+            pdf.multi_cell(145, 9, limpiar_pdf(valor), 1, "L")
 
-            pdf.multi_cell(
-                145,
-                9,
-                str(valor),
-                1,
-                "L"
-            )
+        pdf.ln(6)
 
-        pdf.ln(7)
-
-    archivo = "reporte_medigo.pdf"
+    archivo = "/tmp/reporte_medigo.pdf"
     pdf.output(archivo)
 
-    return send_file(archivo, as_attachment=True)
+    return send_file(archivo, as_attachment=True, download_name="reporte_medigo.pdf")
 
 if __name__ == '__main__':
     app.run(debug=True)
