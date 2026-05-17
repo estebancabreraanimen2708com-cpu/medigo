@@ -1,320 +1,181 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Solicitudes</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Nueva Solicitud</title>
+
+<link rel="stylesheet"
+href="{{ url_for('static',
+filename='style.css') }}">
+
 </head>
 
 <body>
 
 <div class="contenedor">
 
-<img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
+<img
+src="{{ url_for('static',
+filename='logo.jpg') }}"
+class="logo">
 
-<h1>MediGo</h1>
 
-<p class="subtitulo">Panel del Profesor</p>
+<h1>
 
-<div id="estadoMedicoBox" class="estado-medico disponible">
-<span class="punto-estado"></span>
-<span id="estadoMedicoTexto">Médico disponible</span>
-</div>
+Nueva Solicitud
 
-<form method="POST">
+</h1>
 
-<div class="card-seccion">
 
-<h3>Curso</h3>
+<form
+method="POST"
 
-<select name="curso" required>
-<option value="">Seleccionar curso</option>
+onsubmit="
+return confirm(
+'¿Seguro que deseas enviar esta solicitud médica?'
+)
+">
 
-<option>Inicial 1</option>
-<option>Inicial 2</option>
 
-<option>1ro A</option>
-<option>1ro B</option>
-<option>1ro C</option>
-<option>1ro D</option>
+<label>
 
-<option>2do A</option>
-<option>2do B</option>
-<option>2do C</option>
-<option>2do D</option>
+Curso
 
-<option>3ro A</option>
-<option>3ro B</option>
-<option>3ro C</option>
-<option>3ro D</option>
+</label>
 
-<option>4to A</option>
-<option>4to B</option>
-<option>4to C</option>
-<option>4to D</option>
+<select
+name="curso"
+required>
 
-<option>5to A</option>
-<option>5to B</option>
-<option>5to C</option>
-<option>5to D</option>
+<option value="">
+Seleccionar curso
+</option>
 
-<option>6to A</option>
-<option>6to B</option>
-<option>6to C</option>
-<option>6to D</option>
+<option>
+1ro Bachillerato A
+</option>
 
-<option>7mo A</option>
-<option>7mo B</option>
-<option>7mo C</option>
-<option>7mo D</option>
+<option>
+2do Bachillerato A
+</option>
 
-<option>8vo A</option>
-<option>8vo B</option>
-<option>8vo C</option>
-<option>8vo D</option>
+<option>
+3ro Bachillerato INF
+</option>
 
-<option>9no A</option>
-<option>9no B</option>
-<option>9no C</option>
-<option>9no D</option>
-
-<option>10mo A</option>
-<option>10mo B</option>
-<option>10mo C</option>
-<option>10mo D</option>
-
-<option>1ro Bachillerato INF</option>
-<option>1ro Bachillerato ET</option>
-<option>1ro Bachillerato CCA</option>
-<option>1ro Bachillerato CCB</option>
-
-<option>2do Bachillerato INF</option>
-<option>2do Bachillerato ET</option>
-<option>2do Bachillerato CCA</option>
-<option>2do Bachillerato CCB</option>
-
-<option>3ro Bachillerato INF</option>
-<option>3ro Bachillerato ET</option>
-<option>3ro Bachillerato CCA</option>
-<option>3ro Bachillerato CCB</option>
+<option>
+3ro Bachillerato ET
+</option>
 
 </select>
 
-</div>
 
-<div class="card-seccion">
 
-<h3>Nombre del estudiante</h3>
+<label>
+
+Nombre del estudiante
+
+</label>
 
 <input
 type="text"
-name="nombre_manual"
-placeholder="Escribe el nombre del estudiante"
+
+name="nombre"
+
+placeholder="
+Escribe el nombre
+"
+
 required>
 
-</div>
 
-<div class="card-seccion">
 
-<h3>Motivo</h3>
+<label>
+
+Motivo
+
+</label>
 
 <textarea
+
 name="motivo"
-placeholder="Escribe el motivo..."
-required></textarea>
+
+placeholder="
+Escribe el motivo...
+"
+
+required
+
+></textarea>
+
+
+
+<h2>
+
+Nivel de Dolor
+
+</h2>
+
+
+<div class="dolor">
+
+<label>
+
+<input
+type="radio"
+name="dolor"
+value="1"
+required>
+
+😊 Leve
+
+</label>
+
+<label>
+
+<input
+type="radio"
+name="dolor"
+value="2">
+
+😐 Moderado
+
+</label>
+
+<label>
+
+<input
+type="radio"
+name="dolor"
+value="3">
+
+😖 Urgente
+
+</label>
 
 </div>
 
-<div class="card-seccion">
 
-<h3>Nivel de Dolor</h3>
 
-<div class="emociones">
+<button
+type="submit"
+class="btn profesor">
 
-<input type="radio" name="dolor" value="1" id="dolor1" required>
-<label for="dolor1" class="cara verde">
-<div class="emoji">😊</div>
-<span>Leve</span>
-</label>
-
-<input type="radio" name="dolor" value="2" id="dolor2">
-<label for="dolor2" class="cara amarillo">
-<div class="emoji">😐</div>
-<span>Moderado</span>
-</label>
-
-<input type="radio" name="dolor" value="3" id="dolor3">
-<label for="dolor3" class="cara rojo">
-<div class="emoji">😖</div>
-<span>Urgente</span>
-</label>
-
-</div>
-
-</div>
-
-<button type="submit" class="btn profesor">
 ENVIAR SOLICITUD
+
 </button>
+
 
 </form>
 
-<h2>Estado de solicitudes</h2>
-
-<div class="tabla-scroll">
-
-<table>
-<thead>
-<tr>
-<th>Curso</th>
-<th>Nombre</th>
-<th>Motivo</th>
-<th>Dolor</th>
-<th>Estado</th>
-<th>Fecha</th>
-<th>Observaciones</th>
-</tr>
-</thead>
-
-<tbody id="tablaSolicitudes"></tbody>
-</table>
-
 </div>
-
-</div>
-
-<script>
-let estadosAnteriores = JSON.parse(localStorage.getItem("estadosProfesor") || "{}");
-let primeraCarga = Object.keys(estadosAnteriores).length === 0;
-let audio = new Audio("/static/mixkit-correct-answer-tone-2870.wav");
-let audioListo = false;
-
-function desbloquearAudio(){
-    if(audioListo) return;
-
-    audio.play()
-    .then(() => {
-        audio.pause();
-        audio.currentTime = 0;
-        audioListo = true;
-    })
-    .catch(() => {});
-}
-
-document.addEventListener("click", desbloquearAudio, { once:true });
-document.addEventListener("touchstart", desbloquearAudio, { once:true });
-
-function sonido(){
-    if(audioListo){
-        audio.currentTime = 0;
-        audio.play().catch(() => {});
-    }
-}
-
-function toast(mensaje){
-    let div = document.createElement("div");
-    div.className = "toast-medigo";
-    div.textContent = mensaje;
-    document.body.appendChild(div);
-
-    setTimeout(() => {
-        div.remove();
-    }, 3700);
-}
-
-function notificar(mensaje){
-    toast(mensaje);
-
-    if("Notification" in window){
-        if(Notification.permission === "default"){
-            Notification.requestPermission();
-        }
-
-        if(Notification.permission === "granted"){
-            new Notification("MediGo", { body: mensaje });
-        }
-    }
-
-    sonido();
-}
-
-function actualizarEstadoMedico(data){
-    let pendientesMedico = data.filter(s => s.estado === "Aprobado").length;
-    let box = document.getElementById("estadoMedicoBox");
-    let texto = document.getElementById("estadoMedicoTexto");
-
-    if(pendientesMedico > 0){
-        box.className = "estado-medico ocupado";
-        texto.textContent = "Médico ocupado: hay " + pendientesMedico + " estudiante(s) por atender";
-    } else {
-        box.className = "estado-medico disponible";
-        texto.textContent = "Médico disponible: puede recibir estudiantes";
-    }
-}
-
-function cargarSolicitudes(){
-
-fetch('/api/solicitudes')
-.then(r => r.json())
-.then(data => {
-
-    actualizarEstadoMedico(data);
-
-    let tabla = document.getElementById("tablaSolicitudes");
-    tabla.innerHTML = "";
-
-    data.forEach(s => {
-
-        if(!primeraCarga && estadosAnteriores[s.id_solicitud] && estadosAnteriores[s.id_solicitud] !== s.estado){
-
-            if(s.estado === "Aprobado"){
-                notificar("✅ Solicitud aprobada: " + s.nombre);
-            }
-
-            if(s.estado === "Rechazado"){
-                notificar("❌ Solicitud rechazada: " + s.nombre);
-            }
-
-            if(s.estado === "Atendido"){
-                notificar("🏥 Estudiante atendido: " + s.nombre);
-            }
-        }
-
-        estadosAnteriores[s.id_solicitud] = s.estado;
-
-        let dolorTexto = "";
-
-        if(s.dolor == 1){
-            dolorTexto = "😊 Leve";
-        } else if(s.dolor == 2){
-            dolorTexto = "😐 Moderado";
-        } else if(s.dolor == 3){
-            dolorTexto = "😖 Urgente";
-        } else {
-            dolorTexto = s.dolor;
-        }
-
-        tabla.innerHTML += `
-        <tr>
-            <td>${s.curso || ""}</td>
-            <td>${s.nombre}</td>
-            <td>${s.motivo}</td>
-            <td>${dolorTexto}</td>
-            <td>${s.estado}</td>
-            <td>${s.fecha}</td>
-            <td>${s.observaciones || "Sin observaciones"}</td>
-        </tr>`;
-    });
-
-    localStorage.setItem("estadosProfesor", JSON.stringify(estadosAnteriores));
-    primeraCarga = false;
-});
-}
-
-setInterval(cargarSolicitudes, 3000);
-cargarSolicitudes();
-</script>
 
 </body>
+
 </html>
