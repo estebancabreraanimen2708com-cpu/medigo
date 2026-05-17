@@ -46,27 +46,6 @@ def asegurar_columnas():
 
     conn.close()
 
-def asegurar_estado_medico():
-    conn = conectar_bd()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS estado_medico(
-            id INT PRIMARY KEY,
-            disponible TINYINT DEFAULT 1,
-            mensaje VARCHAR(255),
-            fecha VARCHAR(50)
-        )
-    """)
-
-    cursor.execute("""
-        INSERT IGNORE INTO estado_medico(id, disponible, mensaje, fecha)
-        VALUES(1, 1, 'Médico disponible', %s)
-    """, (fecha_ecuador(),))
-
-    conn.commit()
-    conn.close()
-
 @app.route('/')
 def inicio():
     return render_template('inicio.html')
@@ -191,61 +170,6 @@ def api_solicitudes():
 
     return jsonify(datos)
 
-@app.route('/api/estado_medico')
-def api_estado_medico():
-    asegurar_estado_medico()
-
-    conn = conectar_bd()
-    cursor = conn.cursor(dictionary=True)
-
-    cursor.execute("""
-        SELECT disponible, mensaje, fecha
-        FROM estado_medico
-        WHERE id=1
-    """)
-
-    estado = cursor.fetchone()
-    conn.close()
-
-    return jsonify(estado)
-
-@app.route('/estado_medico/<estado>')
-def cambiar_estado_medico(estado):
-    asegurar_estado_medico()
-    asegurar_columnas()
-
-    id_solicitud = request.args.get("id")
-
-    if estado == "disponible":
-        disponible = 1
-        mensaje = "Médico disponible"
-        decision = "🟢 Puede subir"
-    else:
-        disponible = 0
-        mensaje = "Médico no disponible"
-        decision = "🔴 No puede subir"
-
-    conn = conectar_bd()
-    cursor = conn.cursor()
-
-    if id_solicitud:
-        cursor.execute("""
-            UPDATE solicitudes
-            SET decision_medico=%s
-            WHERE id_solicitud=%s
-        """, (decision, id_solicitud))
-    else:
-        cursor.execute("""
-            UPDATE estado_medico
-            SET disponible=%s, mensaje=%s, fecha=%s
-            WHERE id=1
-        """, (disponible, mensaje, fecha_ecuador()))
-
-    conn.commit()
-    conn.close()
-
-    return redirect('/medico')
-
 @app.route('/historial/<path:nombre>')
 def historial(nombre):
     asegurar_columnas()
@@ -337,6 +261,31 @@ def atendido(id):
 
     return redirect('/medico')
 
+@app.route('/estado_medico/<estado>')
+def estado_medico(estado):
+    asegurar_columnas()
+
+    id_solicitud = request.args.get("id")
+
+    if estado == "disponible":
+        decision = "🟢 Puede subir"
+    else:
+        decision = "🔴 No puede subir"
+
+    conn = conectar_bd()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        UPDATE solicitudes
+        SET decision_medico=%s
+        WHERE id_solicitud=%s
+    """, (decision, id_solicitud))
+
+    conn.commit()
+    conn.close()
+
+    return redirect('/medico')
+
 @app.route('/observacion/<int:id>', methods=['POST'])
 def observacion(id):
     texto = request.form.get('observaciones', '')
@@ -376,50 +325,107 @@ def pdf():
         ORDER BY id_solicitud DESC
     """)
 
-    datos = cursor.fetchall()
+    solicitudes = cursor.fetchall()
     conn.close()
 
     pdf = FPDF()
     pdf.add_page()
 
-    pdf.set_fill_color(0, 86, 179)
-    pdf.set_text_color(255, 255, 255)
-    pdf.set_font("Arial", "B", 18)
-    pdf.cell(190, 15, "MediGo - Reporte Medico", 1, 1, "C", True)
+    try:
+        pdf.image("static/logo.jpg", 10, 8, 25)
+    except:
+        pass
+
+    pdf.set_font("Arial", "B", 20)
+    pdf.set_text_color(0, 86, 179)
+
+    pdf.cell(
+        0,
+        15,
+        "MediGo - Reporte Médico",
+        0,
+        1,
+        "C"
+    )
+
+    pdf.set_font("Arial", "", 10)
+    pdf.set_text_color(80, 80, 80)
+
+    pdf.cell(
+        0,
+        8,
+        "Sistema Médico Escolar Salesiano",
+        0,
+        1,
+        "C"
+    )
+
+    pdf.cell(
+        0,
+        8,
+        "Fecha de descarga: " + fecha_ecuador(),
+        0,
+        1,
+        "C"
+    )
 
     pdf.ln(8)
-    pdf.set_text_color(0, 43, 92)
 
-    for d in datos:
-        fecha = str(d["fecha"]) if d["fecha"] else ""
+    pdf.set_draw_color(56, 189, 248)
 
-        pdf.set_fill_color(56, 189, 248)
+    for s in solicitudes:
+        fecha = str(s["fecha"]) if s["fecha"] else ""
+
+        pdf.set_fill_color(235, 248, 255)
         pdf.set_text_color(0, 43, 92)
         pdf.set_font("Arial", "B", 12)
-        pdf.cell(190, 10, "Solicitud Medica Escolar", 1, 1, "C", True)
 
-        pdf.set_font("Arial", "B", 10)
-        pdf.set_fill_color(235, 248, 255)
+        pdf.cell(
+            0,
+            10,
+            "Solicitud Médica Escolar",
+            1,
+            1,
+            "C",
+            True
+        )
 
         campos = [
-            ("Curso", d["curso"]),
-            ("Nombre", d["nombre"]),
-            ("Motivo", d["motivo"]),
-            ("Dolor", d["dolor"]),
-            ("Estado", d["estado"]),
-            ("Decision Medico", d["decision_medico"]),
+            ("Curso", s["curso"]),
+            ("Nombre", s["nombre"]),
+            ("Motivo", s["motivo"]),
+            ("Dolor", s["dolor"]),
+            ("Estado", s["estado"]),
+            ("Decisión médico", s["decision_medico"]),
             ("Fecha", fecha),
-            ("Observaciones", d["observaciones"])
+            ("Observaciones", s["observaciones"])
         ]
 
         for etiqueta, valor in campos:
             pdf.set_font("Arial", "B", 10)
-            pdf.cell(45, 9, etiqueta + ":", 1, 0, "L", True)
+            pdf.set_fill_color(245, 252, 255)
+
+            pdf.cell(
+                45,
+                9,
+                etiqueta + ":",
+                1,
+                0,
+                "L",
+                True
+            )
 
             pdf.set_font("Arial", "", 10)
-            pdf.multi_cell(145, 9, str(valor), 1, "L")
 
-        pdf.ln(8)
+            pdf.multi_cell(
+                145,
+                9,
+                str(valor),
+                1,
+                "L"
+            )
+
+        pdf.ln(7)
 
     archivo = "reporte_medigo.pdf"
     pdf.output(archivo)
