@@ -121,19 +121,19 @@ required></textarea>
 
 <input type="radio" name="dolor" value="1" id="dolor1" required>
 <label for="dolor1" class="cara verde">
-<div class="emoji">😊</div>
+<img src="{{ url_for('static', filename='donbosco_leve.png') }}" class="donbosco-cara">
 <span>Leve</span>
 </label>
 
 <input type="radio" name="dolor" value="2" id="dolor2">
 <label for="dolor2" class="cara amarillo">
-<div class="emoji">😐</div>
+<img src="{{ url_for('static', filename='donbosco_moderado.png') }}" class="donbosco-cara">
 <span>Moderado</span>
 </label>
 
 <input type="radio" name="dolor" value="3" id="dolor3">
 <label for="dolor3" class="cara rojo">
-<div class="emoji">😖</div>
+<img src="{{ url_for('static', filename='donbosco_urgente.png') }}" class="donbosco-cara">
 <span>Urgente</span>
 </label>
 
@@ -204,55 +204,6 @@ function enviarSolicitud(){
     document.getElementById("formSolicitud").submit();
 }
 
-function desbloquearAudio(){
-    if(audioListo) return;
-
-    audio.play()
-    .then(() => {
-        audio.pause();
-        audio.currentTime = 0;
-        audioListo = true;
-    })
-    .catch(() => {});
-}
-
-document.addEventListener("click", desbloquearAudio, { once:true });
-document.addEventListener("touchstart", desbloquearAudio, { once:true });
-
-function sonido(){
-    if(audioListo){
-        audio.currentTime = 0;
-        audio.play().catch(() => {});
-    }
-}
-
-function toast(mensaje){
-    let div = document.createElement("div");
-    div.className = "toast-medigo";
-    div.textContent = mensaje;
-    document.body.appendChild(div);
-
-    setTimeout(() => {
-        div.remove();
-    }, 3700);
-}
-
-function notificar(mensaje){
-    toast(mensaje);
-
-    if("Notification" in window){
-        if(Notification.permission === "default"){
-            Notification.requestPermission();
-        }
-
-        if(Notification.permission === "granted"){
-            new Notification("MediGo", { body: mensaje });
-        }
-    }
-
-    sonido();
-}
-
 function cargarSolicitudes(){
 
 fetch('/api/solicitudes')
@@ -263,21 +214,6 @@ fetch('/api/solicitudes')
     tabla.innerHTML = "";
 
     data.forEach(s => {
-
-        if(!primeraCarga && estadosAnteriores[s.id_solicitud] && estadosAnteriores[s.id_solicitud] !== s.estado){
-
-            if(s.estado === "Aprobado"){
-                notificar("✅ Solicitud aprobada: " + s.nombre);
-            }
-
-            if(s.estado === "Rechazado"){
-                notificar("❌ Solicitud rechazada: " + s.nombre);
-            }
-
-            if(s.estado === "Atendido"){
-                notificar("🏥 Estudiante atendido: " + s.nombre);
-            }
-        }
 
         estadosAnteriores[s.id_solicitud] = s.estado;
 
