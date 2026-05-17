@@ -95,6 +95,48 @@ body{
     box-shadow:0 15px 35px rgba(0,0,0,.25);
 }
 
+.control-medico{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:15px;
+    margin:15px 0 25px 0;
+}
+
+.btn-estado-medico{
+    padding:16px;
+    border:none;
+    border-radius:18px;
+    font-weight:bold;
+    cursor:pointer;
+    font-size:16px;
+    box-shadow:0 10px 25px rgba(0,43,92,.18);
+    transition:.25s;
+}
+
+.btn-estado-medico:hover{
+    transform:translateY(-3px) scale(1.02);
+}
+
+.btn-disponible{
+    background:linear-gradient(135deg,#22c55e,#16a34a);
+    color:white;
+}
+
+.btn-no-disponible{
+    background:linear-gradient(135deg,#ef4444,#dc2626);
+    color:white;
+}
+
+.estado-enviado{
+    text-align:center;
+    font-weight:bold;
+    color:#002b5c;
+    background:rgba(255,255,255,.65);
+    border-radius:18px;
+    padding:12px;
+    margin-bottom:20px;
+}
+
 .obs-area{
     width:220px;
     min-height:80px;
@@ -123,6 +165,10 @@ body{
 .medico-img{
     height:250px;
 }
+
+.control-medico{
+    grid-template-columns:1fr;
+}
 }
 
 </style>
@@ -150,9 +196,22 @@ class="medico-img">
 
 <h1>Panel Médico</h1>
 
-<div id="estadoMedicoBox" class="estado-medico disponible">
-<span class="punto-estado"></span>
-<span id="estadoMedicoTexto">Médico disponible</span>
+<div class="control-medico">
+<a href="/estado_medico/disponible">
+<button class="btn-estado-medico btn-disponible">
+🟢 Sí puede subir el estudiante
+</button>
+</a>
+
+<a href="/estado_medico/no_disponible">
+<button class="btn-estado-medico btn-no-disponible">
+🔴 No puede subir el estudiante
+</button>
+</a>
+</div>
+
+<div id="estadoEnviado" class="estado-enviado">
+Estado médico cargando...
 </div>
 
 <div class="tabla-scroll">
@@ -246,18 +305,13 @@ function notificar(mensaje){
     sonido();
 }
 
-function actualizarEstadoMedico(data){
-    let pendientesMedico = data.filter(s => s.estado === "Aprobado").length;
-    let box = document.getElementById("estadoMedicoBox");
-    let texto = document.getElementById("estadoMedicoTexto");
-
-    if(pendientesMedico > 0){
-        box.className = "estado-medico ocupado";
-        texto.textContent = "Médico ocupado: " + pendientesMedico + " estudiante(s) esperando atención";
-    } else {
-        box.className = "estado-medico disponible";
-        texto.textContent = "Médico disponible: puede recibir estudiantes";
-    }
+function cargarEstadoMedico(){
+    fetch('/api/estado_medico')
+    .then(r => r.json())
+    .then(e => {
+        document.getElementById("estadoEnviado").textContent =
+        e.mensaje + " | Actualizado: " + e.fecha;
+    });
 }
 
 function cargarMedico(){
@@ -275,8 +329,6 @@ function cargarMedico(){
         if(escribiendoObservacion){
             return;
         }
-
-        actualizarEstadoMedico(data);
 
         let aprobadasActuales = data
         .filter(s => s.estado === "Aprobado")
@@ -410,10 +462,12 @@ setInterval(() => {
     }
 
     cargarMedico();
+    cargarEstadoMedico();
 
 }, 3000);
 
 cargarMedico();
+cargarEstadoMedico();
 
 </script>
 
