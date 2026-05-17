@@ -1,428 +1,665 @@
 *{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,sans-serif;
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+html{
+    scroll-behavior:smooth;
 }
 
 body{
-
-min-height:100vh;
-
-overflow-x:hidden;
-
-background:
-linear-gradient(
-135deg,
-#8fd3ff,
-#ffffff,
-#ffd93d
-);
-
-background-size:400% 400%;
-
-animation:fondo 15s ease infinite;
-
-position:relative;
-
+    min-height:100vh;
+    color:#002b5c;
+    padding:30px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow-x:hidden;
+    position:relative;
+    background:
+        linear-gradient(135deg, rgba(56,189,248,.35), rgba(255,255,255,.92), rgba(255,204,0,.45)),
+        linear-gradient(45deg, #dff6ff, #ffffff, #fff1a8);
+    background-size:400% 400%;
+    animation:fondoMovimiento 14s ease infinite;
 }
 
-/* fondo animado */
-
-@keyframes fondo{
-
-0%{
-background-position:0% 50%;
+@keyframes fondoMovimiento{
+    0%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+    100%{background-position:0% 50%;}
 }
 
-50%{
-background-position:100% 50%;
+/* LÍNEAS MÉDICAS GRANDES */
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    z-index:-3;
+    pointer-events:none;
+    background-image:
+        url("/static/lineas.png"),
+        url("/static/lineas.png"),
+        url("/static/lineas.png"),
+        url("/static/lineas.png");
+    background-repeat:no-repeat;
+    background-size:
+        430px auto,
+        360px auto,
+        300px auto,
+        390px auto;
+    background-position:
+        left 40px top 190px,
+        right -40px top 250px,
+        left 55% bottom 90px,
+        right 80px bottom 200px;
+    opacity:.78;
+    animation:latidoLineas 5s ease-in-out infinite;
 }
 
-100%{
-background-position:0% 50%;
+@keyframes latidoLineas{
+    0%{
+        transform:translateX(0) scale(1);
+        opacity:.55;
+    }
+    50%{
+        transform:translateX(25px) scale(1.04);
+        opacity:.9;
+    }
+    100%{
+        transform:translateX(0) scale(1);
+        opacity:.55;
+    }
 }
 
-}
-
-/* lineas grandes */
-
-body:before{
-
-content:"";
-
-position:fixed;
-
-width:200%;
-
-height:200%;
-
-top:-50%;
-
-left:-50%;
-
-background:
-
-linear-gradient(
-45deg,
-transparent 48%,
-rgba(0,180,255,.15) 49%,
-transparent 50%
-),
-
-linear-gradient(
--45deg,
-transparent 48%,
-rgba(255,204,0,.15) 49%,
-transparent 50%
-);
-
-background-size:
-350px 350px;
-
-animation:moverLineas 18s linear infinite;
-
-z-index:-3;
-
+/* LÍNEAS DIAGONALES DE FONDO */
+body::after{
+    content:"";
+    position:fixed;
+    inset:-80px;
+    z-index:-4;
+    pointer-events:none;
+    background:
+        linear-gradient(115deg, transparent 0 20%, rgba(56,189,248,.35) 20% 21%, transparent 21% 100%),
+        linear-gradient(65deg, transparent 0 35%, rgba(255,204,0,.32) 35% 36%, transparent 36% 100%),
+        linear-gradient(145deg, transparent 0 55%, rgba(56,189,248,.25) 55% 56%, transparent 56% 100%);
+    background-size:520px 520px;
+    animation:moverLineas 12s linear infinite;
 }
 
 @keyframes moverLineas{
-
-0%{
-transform:
-rotate(0deg)
-translateX(0);
+    from{transform:translateX(-40px) translateY(0);}
+    to{transform:translateX(45px) translateY(-30px);}
 }
 
-100%{
-transform:
-rotate(360deg)
-translateX(100px);
-}
-
-}
-
-/* lineas electrocardiograma */
-
-body:after{
-
-content:"";
-
-position:fixed;
-
-top:0;
-left:0;
-
-width:100%;
-height:100%;
-
-background-image:
-
-url("/static/lineas.png"),
-
-url("/static/lineas.png"),
-
-url("/static/lineas.png");
-
-background-repeat:no-repeat;
-
-background-size:
-
-250px,
-180px,
-220px;
-
-background-position:
-
-left 60px top 80px,
-
-right 80px bottom 100px,
-
-center bottom 50px;
-
-opacity:.12;
-
-animation:latidos 8s linear infinite;
-
-z-index:-2;
-
-}
-
-@keyframes latidos{
-
-0%{
-transform:
-translateX(0px)
-translateY(0px);
-}
-
-50%{
-
-transform:
-translateX(25px)
-translateY(-10px);
-
-}
-
-100%{
-
-transform:
-translateX(0px)
-translateY(0px);
-
-}
-
-}
-
+/* CONTENEDOR GENERAL */
 .contenedor{
-
-position:relative;
-
-width:90%;
-max-width:900px;
-
-margin:80px auto;
-
-padding:40px;
-
-background:
-rgba(255,255,255,.75);
-
-backdrop-filter:
-blur(12px);
-
-border-radius:30px;
-
-box-shadow:
-
-0 15px 45px
-rgba(0,0,0,.18);
-
-overflow:hidden;
-
-border:
-2px solid
-rgba(56,189,248,.35);
-
+    width:100%;
+    max-width:1050px;
+    margin:40px auto;
+    padding:55px 45px 45px 45px;
+    background:rgba(255,255,255,.86);
+    border:2px solid rgba(56,189,248,.55);
+    border-radius:30px;
+    backdrop-filter:blur(18px);
+    box-shadow:
+        0 20px 55px rgba(0,43,92,.22),
+        0 0 35px rgba(56,189,248,.25);
+    position:relative;
+    overflow:hidden;
+    animation:entrada .5s ease;
 }
 
-/* logo arriba izquierda */
+@keyframes entrada{
+    from{opacity:0; transform:translateY(25px);}
+    to{opacity:1; transform:translateY(0);}
+}
 
+/* LOGO ARRIBA IZQUIERDA */
 .logo{
-
-position:absolute;
-
-top:20px;
-
-left:20px;
-
-width:110px;
-
-height:110px;
-
-object-fit:contain;
-
-padding:10px;
-
-background:
-
-rgba(255,255,255,.55);
-
-border-radius:20px;
-
-box-shadow:
-
-0 0 25px
-rgba(0,180,255,.25);
-
-transition:.4s;
-
-z-index:10;
-
-}
-
-.logo:hover{
-
-transform:
-scale(1.08)
-rotate(4deg);
-
+    position:absolute;
+    top:22px;
+    left:22px;
+    width:95px;
+    height:95px;
+    object-fit:contain;
+    padding:10px;
+    background:rgba(255,255,255,.75);
+    border-radius:20px;
+    box-shadow:0 0 25px rgba(56,189,248,.35);
+    z-index:5;
 }
 
 h1{
-
-margin-top:80px;
-
-text-align:center;
-
-font-size:58px;
-
-color:#0056b3;
-
-margin-bottom:20px;
-
+    text-align:center;
+    font-size:48px;
+    color:#0056b3;
+    margin-bottom:15px;
+    font-weight:900;
 }
 
+h2{
+    text-align:center;
+    color:#0056b3;
+    margin-top:35px;
+    margin-bottom:20px;
+}
+
+h3{
+    color:#003b73;
+    font-size:24px;
+    margin-bottom:10px;
+}
+
+p,
 .subtitulo{
-
-text-align:center;
-
-font-size:20px;
-
-color:#003366;
-
-margin-bottom:30px;
-
+    text-align:center;
+    color:#002b5c;
+    font-size:17px;
+    margin-bottom:25px;
 }
 
+/* FORMULARIOS CORREGIDOS */
+form{
+    width:100%;
+}
+
+.card-seccion{
+    width:100%;
+    background:rgba(255,255,255,.78);
+    border:1px solid rgba(56,189,248,.38);
+    border-radius:22px;
+    padding:22px;
+    margin-bottom:22px;
+    box-shadow:0 8px 24px rgba(0,43,92,.12);
+}
+
+input,
+select,
+textarea,
+.contenedor input,
+.contenedor select,
+.contenedor textarea,
+.modal-content input,
+.modal-content select,
+.modal-content textarea{
+    display:block;
+    width:100%;
+    max-width:100%;
+    padding:15px;
+    margin-top:10px;
+    border-radius:14px;
+    border:2px solid rgba(56,189,248,.35);
+    outline:none;
+    background:white;
+    color:#002b5c;
+    font-size:16px;
+    font-weight:600;
+    transition:.25s;
+}
+
+textarea{
+    min-height:115px;
+    resize:vertical;
+}
+
+input:focus,
+select:focus,
+textarea:focus{
+    border-color:#ffcc00;
+    box-shadow:0 0 16px rgba(255,204,0,.45);
+}
+
+/* BOTONES */
 .btn{
-
-width:100%;
-
-padding:16px;
-
-border:none;
-
-border-radius:18px;
-
-font-size:18px;
-
-font-weight:bold;
-
-cursor:pointer;
-
-transition:.4s;
-
-color:white;
-
-margin-top:15px;
-
-}
-
-.profesor{
-
-background:
-linear-gradient(
-90deg,
-#38bdf8,
-#0056b3
-);
-
-}
-
-.inspector{
-
-background:
-linear-gradient(
-90deg,
-#ffcc00,
-#f59e0b
-);
-
-}
-
-.medico{
-
-background:
-linear-gradient(
-90deg,
-#00c853,
-#008f39
-);
-
+    width:100%;
+    padding:16px;
+    border:none;
+    border-radius:16px;
+    margin-top:20px;
+    font-size:18px;
+    font-weight:bold;
+    cursor:pointer;
+    color:white;
+    transition:.25s;
+    box-shadow:0 8px 22px rgba(0,43,92,.22);
 }
 
 .btn:hover{
+    transform:translateY(-3px) scale(1.02);
+}
 
-transform:
-translateY(-4px)
-scale(1.02);
+.profesor{
+    background:linear-gradient(135deg,#38bdf8,#0056b3);
+}
 
-box-shadow:
+.inspector{
+    background:linear-gradient(135deg,#ffcc00,#f59e0b);
+    color:#002b5c;
+}
 
-0 10px 25px
-rgba(0,0,0,.25);
+.medico{
+    background:linear-gradient(135deg,#22c55e,#008f39);
+}
 
+.pdf{
+    background:linear-gradient(135deg,#0056b3,#38bdf8);
+}
+
+/* CARITAS DOLOR */
+.emociones{
+    display:flex;
+    justify-content:center;
+    gap:22px;
+    flex-wrap:wrap;
+    margin-top:18px;
+}
+
+.emociones input{
+    display:none;
+}
+
+.cara{
+    width:145px;
+    min-height:145px;
+    border-radius:28px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition:.25s;
+    color:white;
+    font-weight:bold;
+    box-shadow:0 10px 28px rgba(0,43,92,.20);
+    border:3px solid rgba(255,255,255,.6);
+}
+
+.cara:hover{
+    transform:translateY(-7px) scale(1.03);
+}
+
+.emoji{
+    font-size:55px;
+    margin-bottom:10px;
+}
+
+.verde{
+    background:linear-gradient(135deg,#16a34a,#22c55e);
+}
+
+.amarillo{
+    background:linear-gradient(135deg,#facc15,#ffb703);
+    color:#002b5c;
+}
+
+.rojo{
+    background:linear-gradient(135deg,#dc2626,#ef4444);
+}
+
+.emociones input:checked + .cara{
+    border:5px solid #38bdf8;
+    transform:scale(1.07);
+    box-shadow:0 0 25px rgba(56,189,248,.75);
+}
+
+/* TABLAS */
+.tabla-scroll{
+    width:100%;
+    overflow-x:auto;
+    margin-top:20px;
+    border-radius:20px;
+    -webkit-overflow-scrolling:touch;
 }
 
 table{
-
-width:100%;
-
-border-collapse:collapse;
-
-overflow:hidden;
-
-border-radius:20px;
-
-background:
-rgba(255,255,255,.70);
-
+    width:100%;
+    min-width:950px;
+    border-collapse:collapse;
+    overflow:hidden;
+    border-radius:20px;
+    box-shadow:0 10px 30px rgba(0,43,92,.18);
 }
 
 th{
-
-padding:15px;
-
-background:
-
-linear-gradient(
-135deg,
-#0056b3,
-#38bdf8
-);
-
-color:white;
-
-font-size:14px;
-
+    background:linear-gradient(135deg,#0056b3,#38bdf8);
+    color:white;
+    padding:16px;
+    font-size:14px;
+    text-transform:uppercase;
+    border:none;
 }
 
 td{
-
-padding:15px;
-
-background:
-
-rgba(255,255,255,.85);
-
-font-weight:bold;
-
-color:#003366;
-
+    background:rgba(255,255,255,.90);
+    padding:15px;
+    text-align:center;
+    border-bottom:1px solid rgba(0,86,179,.12);
+    color:#002b5c;
+    white-space:nowrap;
+    font-weight:bold;
+    transition:.25s;
 }
 
 tr:hover td{
-
-background:
-
-rgba(56,189,248,.12);
-
-transition:.3s;
-
+    background:rgba(56,189,248,.18);
 }
 
-.tabla-scroll{
+/* BOTONES TABLA */
+.aprobar,
+.rechazar{
+    border:none;
+    padding:10px 14px;
+    border-radius:12px;
+    color:white;
+    cursor:pointer;
+    font-weight:bold;
+    transition:.2s;
+}
 
-overflow:auto;
+.aprobar{
+    background:#22c55e;
+    margin-right:5px;
+}
 
-border-radius:20px;
+.rechazar{
+    background:#ef4444;
+}
 
+.aprobar:hover,
+.rechazar:hover{
+    transform:scale(1.1);
+}
+
+.btn-subir{
+    background:#22c55e;
+    border:none;
+    padding:10px;
+    border-radius:12px;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+    width:100%;
+    transition:.2s;
+}
+
+.btn-nosubir{
+    background:#ef4444;
+    border:none;
+    padding:10px;
+    border-radius:12px;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+    width:100%;
+    transition:.2s;
+}
+
+.btn-subir:hover,
+.btn-nosubir:hover{
+    transform:scale(1.04);
+}
+
+/* ESTADO MÉDICO */
+.estado-medico{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    padding:16px;
+    margin:15px auto 25px auto;
+    border-radius:18px;
+    font-weight:bold;
+    box-shadow:0 10px 25px rgba(0,43,92,.15);
+    border:2px solid rgba(255,255,255,.65);
+    max-width:650px;
+    animation:pulsoSuave 2.5s infinite;
+    backdrop-filter:blur(10px);
+}
+
+.estado-medico.disponible{
+    background:rgba(34,197,94,.20);
+    color:#166534;
+}
+
+.estado-medico.ocupado{
+    background:rgba(239,68,68,.20);
+    color:#991b1b;
+}
+
+.punto-estado{
+    width:22px;
+    height:22px;
+    border-radius:50%;
+    display:inline-block;
+    box-shadow:0 0 18px currentColor;
+}
+
+.estado-medico.disponible .punto-estado{
+    background:#22c55e;
+}
+
+.estado-medico.ocupado .punto-estado{
+    background:#ef4444;
+}
+
+@keyframes pulsoSuave{
+    0%{transform:scale(1);}
+    50%{transform:scale(1.025);}
+    100%{transform:scale(1);}
+}
+
+/* MODAL INSPECTOR */
+.btn-mas{
+    position:fixed;
+    bottom:25px;
+    right:25px;
+    width:75px;
+    height:75px;
+    border-radius:50%;
+    border:none;
+    background:linear-gradient(135deg,#ffcc00,#38bdf8);
+    color:#002b5c;
+    font-size:42px;
+    font-weight:bold;
+    cursor:pointer;
+    z-index:999;
+    box-shadow:0 10px 30px rgba(0,0,0,.35);
+}
+
+.modal{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.65);
+    display:none;
+    justify-content:center;
+    align-items:center;
+    z-index:1000;
+    padding:15px;
+}
+
+.modal-content{
+    width:95%;
+    max-width:650px;
+    max-height:90vh;
+    overflow-y:auto;
+    background:rgba(240,250,255,.96);
+    border-radius:25px;
+    padding:35px;
+    border:3px solid #ffcc00;
+    color:#002b5c;
+    box-shadow:0 20px 50px rgba(0,0,0,.28);
+}
+
+.cerrar{
+    float:right;
+    font-size:34px;
+    cursor:pointer;
+    color:#002b5c;
+    font-weight:bold;
+}
+
+/* MÉDICO */
+.medico-layout{
+    display:grid;
+    grid-template-columns:220px 1fr 220px;
+    gap:25px;
+    align-items:center;
+    width:100%;
+    max-width:1500px;
+    margin:auto;
+    padding:25px;
+}
+
+.medico-img{
+    width:100%;
+    height:450px;
+    object-fit:cover;
+    border-radius:30px;
+    border:4px solid #ffcc00;
+    box-shadow:0 15px 35px rgba(0,0,0,.25);
+}
+
+.obs-area{
+    width:220px !important;
+    min-height:80px;
+    border-radius:15px;
+    border:2px solid #38bdf8;
+    padding:10px;
+    resize:vertical;
+}
+
+.btn-obs{
+    margin-top:8px;
+    padding:8px 15px;
+    border:none;
+    border-radius:10px;
+    background:#ffcc00;
+    color:#002b5c;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+/* TOAST */
+.toast-medigo{
+    position:fixed;
+    top:20px;
+    right:20px;
+    background:#0056b3;
+    color:white;
+    padding:15px 20px;
+    border-radius:16px;
+    box-shadow:0 12px 30px rgba(0,0,0,.25);
+    font-weight:bold;
+    z-index:9999;
+    animation:toastEntrada .35s ease, toastSalida .35s ease 3.3s forwards;
+}
+
+@keyframes toastEntrada{
+    from{opacity:0; transform:translateX(80px);}
+    to{opacity:1; transform:translateX(0);}
+}
+
+@keyframes toastSalida{
+    to{opacity:0; transform:translateX(80px);}
+}
+
+a{
+    text-decoration:none;
+}
+
+/* RESPONSIVE */
+@media(max-width:1200px){
+    .medico-layout{
+        grid-template-columns:1fr;
+    }
+
+    .medico-img{
+        height:250px;
+    }
 }
 
 @media(max-width:700px){
+    body{
+        padding:12px;
+        align-items:flex-start;
+    }
 
-.logo{
+    .contenedor{
+        width:100%;
+        padding:130px 22px 25px 22px;
+        border-radius:22px;
+        margin:20px auto;
+    }
 
-width:80px;
-height:80px;
+    .logo{
+        width:82px;
+        height:82px;
+        top:20px;
+        left:20px;
+    }
 
-}
+    h1{
+        font-size:36px;
+    }
 
-h1{
+    h2{
+        font-size:24px;
+    }
 
-font-size:40px;
+    h3{
+        font-size:20px;
+    }
 
-}
+    .subtitulo{
+        font-size:15px;
+    }
 
+    .card-seccion{
+        padding:18px;
+    }
+
+    .emociones{
+        gap:14px;
+    }
+
+    .cara{
+        width:100%;
+        min-height:115px;
+    }
+
+    .emoji{
+        font-size:40px;
+    }
+
+    table{
+        min-width:980px;
+        font-size:12px;
+    }
+
+    th,
+    td{
+        padding:10px;
+    }
+
+    .btn{
+        font-size:15px;
+    }
+
+    body::before{
+        background-size:
+            300px auto,
+            260px auto,
+            220px auto,
+            300px auto;
+        opacity:.65;
+    }
+
+    .toast-medigo{
+        left:15px;
+        right:15px;
+        top:15px;
+        text-align:center;
+    }
 }
