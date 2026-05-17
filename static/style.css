@@ -14,21 +14,25 @@ body{
     align-items:center;
     overflow-x:hidden;
     background:
-        linear-gradient(135deg, transparent 0 70%, rgba(56,189,248,.35) 70% 100%),
-        linear-gradient(45deg, transparent 0 72%, rgba(255,204,0,.35) 72% 100%),
-        linear-gradient(160deg, rgba(255,255,255,.96), rgba(224,247,255,.95));
-    background-size:400% 400%;
-    animation:fondoAnimado 14s ease infinite;
+        radial-gradient(circle at 20% 20%, rgba(56,189,248,.28), transparent 30%),
+        radial-gradient(circle at 80% 80%, rgba(255,204,0,.25), transparent 32%),
+        linear-gradient(135deg, #eefaff, #ffffff, #fff8d6);
+    background-size:120% 120%;
+    animation:fondoRespira 9s ease-in-out infinite alternate;
     position:relative;
 }
 
-@keyframes fondoAnimado{
-    0%{background-position:0% 50%;}
-    50%{background-position:100% 50%;}
-    100%{background-position:0% 50%;}
+@keyframes fondoRespira{
+    from{
+        background-position:left top;
+    }
+
+    to{
+        background-position:right bottom;
+    }
 }
 
-/* ECG central sin huecos */
+/* ECG central */
 body::before{
     content:"";
     position:fixed;
@@ -40,7 +44,7 @@ body::before{
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1000' height='230' viewBox='0 0 1000 230'%3E%3Cpolyline points='0,115 90,115 120,105 150,70 180,115 230,115 250,45 285,180 320,115 390,115 420,155 445,85 470,115 500,115 525,60 550,170 580,115 630,115 650,95 675,145 700,75 730,160 760,115 820,115 850,100 880,130 910,115 1000,115' fill='none' stroke='%23e11d48' stroke-width='10' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
     background-repeat:repeat-x;
     background-size:1000px 230px;
-    opacity:.35;
+    opacity:.32;
     z-index:-2;
     pointer-events:none;
     animation:ecgMover 13s linear infinite;
@@ -51,6 +55,7 @@ body::before{
     to{background-position-x:-1000px;}
 }
 
+/* líneas suaves */
 body::after{
     content:"";
     position:fixed;
@@ -61,19 +66,19 @@ body::after{
         repeating-linear-gradient(115deg,
         transparent 0px,
         transparent 230px,
-        rgba(56,189,248,.25) 236px,
+        rgba(56,189,248,.22) 236px,
         transparent 242px),
         repeating-linear-gradient(65deg,
         transparent 0px,
         transparent 280px,
-        rgba(255,204,0,.25) 286px,
+        rgba(255,204,0,.22) 286px,
         transparent 292px);
-    animation:moverLineas 12s linear infinite alternate;
+    animation:moverLineas 14s ease-in-out infinite alternate;
 }
 
 @keyframes moverLineas{
-    from{transform:translateX(-35px) translateY(0);}
-    to{transform:translateX(35px) translateY(-25px);}
+    from{transform:translateX(-25px) translateY(0);}
+    to{transform:translateX(25px) translateY(-20px);}
 }
 
 .contenedor{
@@ -109,6 +114,23 @@ body::after{
     box-shadow:0 0 25px rgba(56,189,248,.35);
 }
 
+.corazon-portada{
+    position:absolute;
+    top:32px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:70px;
+    line-height:1;
+    filter:drop-shadow(0 0 18px rgba(56,189,248,.55));
+    animation:latidoCorazon 1.8s ease-in-out infinite;
+}
+
+@keyframes latidoCorazon{
+    0%{transform:translateX(-50%) scale(1);}
+    50%{transform:translateX(-50%) scale(1.16);}
+    100%{transform:translateX(-50%) scale(1);}
+}
+
 h1{
     text-align:center;
     font-size:42px;
@@ -133,6 +155,11 @@ h3{
     margin-bottom:28px;
     color:#002b5c;
     font-size:18px;
+}
+
+p{
+    text-align:center;
+    margin-bottom:25px;
 }
 
 .card-seccion{
@@ -611,6 +638,11 @@ a{
         height:82px;
         top:20px;
         left:20px;
+    }
+
+    .corazon-portada{
+        font-size:48px;
+        top:35px;
     }
 
     h1{
