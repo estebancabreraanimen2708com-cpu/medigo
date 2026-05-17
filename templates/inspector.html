@@ -6,98 +6,38 @@
 <title>Inspector</title>
 
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
-<style>
-
-.btn-mas{
-    position:fixed;
-    bottom:25px;
-    right:25px;
-    width:75px;
-    height:75px;
-    border-radius:50%;
-    border:none;
-    background:linear-gradient(135deg,#ffcc00,#38bdf8);
-    color:#002b5c;
-    font-size:42px;
-    font-weight:bold;
-    cursor:pointer;
-    z-index:999;
-    box-shadow:0 10px 30px rgba(0,0,0,.35);
-}
-
-.modal{
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,.65);
-    display:none;
-    justify-content:center;
-    align-items:center;
-    z-index:1000;
-    padding:15px;
-}
-
-.modal-content{
-    width:95%;
-    max-width:620px;
-    max-height:90vh;
-    overflow-y:auto;
-    background:linear-gradient(135deg,#ffffff,#e0f7ff);
-    border-radius:25px;
-    padding:30px;
-    border:3px solid #ffcc00;
-    color:#002b5c;
-}
-
-.cerrar{
-    float:right;
-    font-size:32px;
-    cursor:pointer;
-    color:#002b5c;
-    font-weight:bold;
-}
-
-</style>
 </head>
 
 <body>
 
 <div class="contenedor">
 
+<img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
+
 <h1>Panel Inspector</h1>
 
-<div id="estadoMedicoBox" class="estado-medico disponible">
-<span class="punto-estado"></span>
-<span id="estadoMedicoTexto">Médico disponible</span>
-</div>
-
 <a href="/pdf">
-<button class="btn pdf">
-📄 DESCARGAR PDF
-</button>
+<button class="btn pdf">📄 DESCARGAR PDF</button>
 </a>
 
 <div class="tabla-scroll">
 
 <table>
-
 <thead>
-
 <tr>
 <th>Curso</th>
 <th>Nombre</th>
 <th>Motivo</th>
 <th>Dolor</th>
+<th>Decisión Médico</th>
 <th>Estado</th>
 <th>Fecha</th>
 <th>Observaciones</th>
 <th>Acciones</th>
 </tr>
-
 </thead>
 
 <tbody id="tablaInspector"></tbody>
-
 </table>
 
 </div>
@@ -114,16 +54,14 @@
 
 <h2>Nueva Solicitud</h2>
 
-<form method="POST" action="/solicitudes">
+<form method="POST" action="/solicitudes" id="formInspector">
 
 <input type="hidden" name="origen" value="inspector">
 
 <div class="card-seccion">
-
 <h3>Curso</h3>
 
 <select name="curso" required>
-
 <option value="">Seleccionar curso</option>
 
 <option>Inicial 1</option>
@@ -193,66 +131,46 @@
 <option>3ro Bachillerato ET</option>
 <option>3ro Bachillerato CCA</option>
 <option>3ro Bachillerato CCB</option>
-
 </select>
-
 </div>
 
 <div class="card-seccion">
-
 <h3>Nombre del estudiante</h3>
-
-<input
-type="text"
-name="nombre_manual"
-placeholder="Escribe el nombre del estudiante"
-required>
-
+<input type="text" name="nombre_manual" placeholder="Escribe el nombre del estudiante" required>
 </div>
 
 <div class="card-seccion">
-
 <h3>Motivo</h3>
-
-<textarea
-name="motivo"
-placeholder="Escribe el motivo..."
-required></textarea>
-
+<textarea name="motivo" placeholder="Escribe el motivo..." required></textarea>
 </div>
 
 <div class="card-seccion">
-
 <h3>Nivel de Dolor</h3>
 
 <div class="emociones">
 
-<input type="radio" name="dolor" value="1" id="dolor1" required>
-
-<label for="dolor1" class="cara verde">
-<div class="emoji">😊</div>
+<input type="radio" name="dolor" value="1" id="insDolor1" required>
+<label for="insDolor1" class="cara verde">
+<img src="{{ url_for('static', filename='donbosco_leve.png') }}" class="donbosco-cara">
 <span>Leve</span>
 </label>
 
-<input type="radio" name="dolor" value="2" id="dolor2">
-
-<label for="dolor2" class="cara amarillo">
-<div class="emoji">😐</div>
+<input type="radio" name="dolor" value="2" id="insDolor2">
+<label for="insDolor2" class="cara amarillo">
+<img src="{{ url_for('static', filename='donbosco_moderado.png') }}" class="donbosco-cara">
 <span>Moderado</span>
 </label>
 
-<input type="radio" name="dolor" value="3" id="dolor3">
-
-<label for="dolor3" class="cara rojo">
-<div class="emoji">😖</div>
+<input type="radio" name="dolor" value="3" id="insDolor3">
+<label for="insDolor3" class="cara rojo">
+<img src="{{ url_for('static', filename='donbosco_urgente.png') }}" class="donbosco-cara">
 <span>Urgente</span>
 </label>
 
 </div>
-
 </div>
 
-<button type="submit" class="btn inspector">
+<button type="button" class="btn inspector" onclick="abrirConfirmacionInspector()">
 ENVIAR SOLICITUD
 </button>
 
@@ -260,6 +178,18 @@ ENVIAR SOLICITUD
 
 </div>
 
+</div>
+
+<div id="modalConfirmacionInspector" class="confirm-modal">
+<div class="confirm-card">
+<h2>Confirmar solicitud</h2>
+<p>¿Seguro que deseas enviar esta solicitud desde Inspector?</p>
+
+<div class="confirm-actions">
+<button class="btn-cancelar" onclick="cerrarConfirmacionInspector()">Cancelar</button>
+<button class="btn-confirmar" onclick="enviarSolicitudInspector()">Sí, enviar</button>
+</div>
+</div>
 </div>
 
 <script>
@@ -274,6 +204,24 @@ function abrirModal(){
 
 function cerrarModal(){
     document.getElementById("modal").style.display = "none";
+}
+
+function abrirConfirmacionInspector(){
+    let form = document.getElementById("formInspector");
+
+    if(form.checkValidity()){
+        document.getElementById("modalConfirmacionInspector").style.display = "flex";
+    }else{
+        form.reportValidity();
+    }
+}
+
+function cerrarConfirmacionInspector(){
+    document.getElementById("modalConfirmacionInspector").style.display = "none";
+}
+
+function enviarSolicitudInspector(){
+    document.getElementById("formInspector").submit();
 }
 
 function desbloquearAudio(){
@@ -311,43 +259,14 @@ function toast(mensaje){
 
 function notificar(mensaje){
     toast(mensaje);
-
-    if("Notification" in window){
-        if(Notification.permission === "default"){
-            Notification.requestPermission();
-        }
-
-        if(Notification.permission === "granted"){
-            new Notification("MediGo", { body: mensaje });
-        }
-    }
-
     sonido();
-}
-
-function actualizarEstadoMedico(data){
-    let pendientesMedico = data.filter(s => s.estado === "Aprobado").length;
-    let box = document.getElementById("estadoMedicoBox");
-    let texto = document.getElementById("estadoMedicoTexto");
-
-    if(pendientesMedico > 0){
-        box.className = "estado-medico ocupado";
-        texto.textContent = "Médico ocupado: hay " + pendientesMedico + " estudiante(s) por atender";
-    } else {
-        box.className = "estado-medico disponible";
-        texto.textContent = "Médico disponible: puede recibir estudiantes";
-    }
 }
 
 function cargarInspector(){
 
 fetch('/api/solicitudes')
-
 .then(r => r.json())
-
 .then(data => {
-
-    actualizarEstadoMedico(data);
 
     let actuales = data.map(s => String(s.id_solicitud));
 
@@ -364,7 +283,6 @@ fetch('/api/solicitudes')
     primeraCargaInspector = false;
 
     let tabla = document.getElementById("tablaInspector");
-
     tabla.innerHTML = "";
 
     data.forEach(s => {
@@ -372,81 +290,63 @@ fetch('/api/solicitudes')
         let acciones = "";
 
         if(s.estado === "Pendiente"){
-
-            acciones = `
-            <a href="/aprobar/${s.id_solicitud}">
-                <button class="aprobar">✔</button>
-            </a>
-
-            <a href="/rechazar/${s.id_solicitud}">
-                <button class="rechazar">✖</button>
-            </a>
-            `;
-
+            if(s.decision_medico === "🟢 Puede subir"){
+                acciones = `
+                <a href="/aprobar/${s.id_solicitud}">
+                    <button class="aprobar">✔ Aprobar</button>
+                </a>
+                `;
+            }else if(s.decision_medico === "🔴 No puede subir"){
+                acciones = `
+                <a href="/rechazar/${s.id_solicitud}">
+                    <button class="rechazar">✖ Rechazar</button>
+                </a>
+                `;
+            }else{
+                acciones = "Esperando revisión médica";
+            }
         }else{
-
             acciones = s.estado;
-
         }
 
         let dolorTexto = "";
 
         if(s.dolor == 1){
             dolorTexto = "😊 Leve";
-        }
-
-        else if(s.dolor == 2){
+        }else if(s.dolor == 2){
             dolorTexto = "😐 Moderado";
-        }
-
-        else if(s.dolor == 3){
+        }else if(s.dolor == 3){
             dolorTexto = "😖 Urgente";
+        }else{
+            dolorTexto = s.dolor;
         }
 
         tabla.innerHTML += `
-
         <tr>
-
             <td>${s.curso || ""}</td>
 
             <td>
-                <a
-                href="/historial/${encodeURIComponent(s.nombre)}"
-                style="
-                color:#0056b3;
-                font-weight:bold;
-                text-decoration:none;
-                ">
-                    ${s.nombre}
+                <a href="/historial/${encodeURIComponent(s.nombre)}"
+                style="color:#0056b3;font-weight:bold;">
+                ${s.nombre}
                 </a>
             </td>
 
             <td>${s.motivo}</td>
-
             <td>${dolorTexto}</td>
-
+            <td>${s.decision_medico || "Sin revisar"}</td>
             <td>${s.estado}</td>
-
             <td>${s.fecha}</td>
-
             <td>${s.observaciones || "Sin observaciones"}</td>
-
             <td>${acciones}</td>
-
         </tr>
-
         `;
-
     });
-
 });
-
 }
 
 setInterval(cargarInspector,3000);
-
 cargarInspector();
-
 </script>
 
 </body>
