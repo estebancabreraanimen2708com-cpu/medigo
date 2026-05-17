@@ -35,7 +35,8 @@ def asegurar_columnas():
     for nombre, tipo in [
         ("nombre", "VARCHAR(255)"),
         ("curso", "VARCHAR(100)"),
-        ("observaciones", "TEXT")
+        ("observaciones", "TEXT"),
+        ("decision_medico", "VARCHAR(100)")
     ]:
         try:
             cursor.execute(f"ALTER TABLE solicitudes ADD COLUMN {nombre} {tipo}")
@@ -60,7 +61,7 @@ def asegurar_estado_medico():
 
     cursor.execute("""
         INSERT IGNORE INTO estado_medico(id, disponible, mensaje, fecha)
-        VALUES(1, 1, 'Médico disponible: puede subir el estudiante', %s)
+        VALUES(1, 1, 'Médico disponible', %s)
     """, (fecha_ecuador(),))
 
     conn.commit()
@@ -118,8 +119,8 @@ def solicitudes():
 
             cursor.execute("""
                 INSERT INTO solicitudes
-                (id_estudiante, nombre, motivo, dolor, estado, fecha, curso, observaciones)
-                VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
+                (id_estudiante, nombre, motivo, dolor, estado, fecha, curso, observaciones, decision_medico)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
             """, (
                 id_estudiante,
                 nombre,
@@ -128,13 +129,14 @@ def solicitudes():
                 "Pendiente",
                 fecha_ecuador(),
                 curso,
+                "",
                 ""
             ))
         else:
             cursor.execute("""
                 INSERT INTO solicitudes
-                (nombre, motivo, dolor, estado, fecha, curso, observaciones)
-                VALUES (%s,%s,%s,%s,%s,%s,%s)
+                (nombre, motivo, dolor, estado, fecha, curso, observaciones, decision_medico)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
             """, (
                 nombre,
                 motivo,
@@ -142,6 +144,7 @@ def solicitudes():
                 "Pendiente",
                 fecha_ecuador(),
                 curso,
+                "",
                 ""
             ))
 
@@ -174,6 +177,7 @@ def api_solicitudes():
             COALESCE(estado, '') AS estado,
             COALESCE(curso, '') AS curso,
             COALESCE(observaciones, '') AS observaciones,
+            COALESCE(decision_medico, '') AS decision_medico,
             fecha
         FROM solicitudes
         ORDER BY id_solicitud DESC
@@ -208,26 +212,34 @@ def api_estado_medico():
 @app.route('/estado_medico/<estado>')
 def cambiar_estado_medico(estado):
     asegurar_estado_medico()
+    asegurar_columnas()
+
+    id_solicitud = request.args.get("id")
 
     if estado == "disponible":
         disponible = 1
-        mensaje = "Médico disponible: puede subir el estudiante"
+        mensaje = "Médico disponible"
+        decision = "🟢 Puede subir"
     else:
         disponible = 0
-        mensaje = "Médico no disponible: el estudiante no puede subir"
+        mensaje = "Médico no disponible"
+        decision = "🔴 No puede subir"
 
     conn = conectar_bd()
     cursor = conn.cursor()
 
-    cursor.execute("""
-        UPDATE estado_medico
-        SET disponible=%s, mensaje=%s, fecha=%s
-        WHERE id=1
-    """, (
-        disponible,
-        mensaje,
-        fecha_ecuador()
-    ))
+    if id_solicitud:
+        cursor.execute("""
+            UPDATE solicitudes
+            SET decision_medico=%s
+            WHERE id_solicitud=%s
+        """, (decision, id_solicitud))
+    else:
+        cursor.execute("""
+            UPDATE estado_medico
+            SET disponible=%s, mensaje=%s, fecha=%s
+            WHERE id=1
+        """, (disponible, mensaje, fecha_ecuador()))
 
     conn.commit()
     conn.close()
@@ -249,6 +261,7 @@ def historial(nombre):
             COALESCE(dolor, '') AS dolor,
             COALESCE(estado, '') AS estado,
             COALESCE(observaciones, '') AS observaciones,
+            COALESCE(decision_medico, '') AS decision_medico,
             fecha
         FROM solicitudes
         WHERE nombre = %s
@@ -357,6 +370,7 @@ def pdf():
             COALESCE(dolor, '') AS dolor,
             COALESCE(estado, '') AS estado,
             COALESCE(observaciones, '') AS observaciones,
+            COALESCE(decision_medico, '') AS decision_medico,
             fecha
         FROM solicitudes
         ORDER BY id_solicitud DESC
@@ -367,27 +381,47 @@ def pdf():
 
     pdf = FPDF()
     pdf.add_page()
+
+    pdf.set_fill_color(0, 86, 179)
+    pdf.set_text_color(255, 255, 255)
     pdf.set_font("Arial", "B", 18)
-    pdf.cell(0, 10, "Reporte MediGo", ln=True, align="C")
-    pdf.ln(10)
-    pdf.set_font("Arial", "", 10)
+    pdf.cell(190, 15, "MediGo - Reporte Medico", 1, 1, "C", True)
+
+    pdf.ln(8)
+    pdf.set_text_color(0, 43, 92)
 
     for d in datos:
         fecha = str(d["fecha"]) if d["fecha"] else ""
 
-        texto = (
-            f"Curso: {d['curso']} | "
-            f"Nombre: {d['nombre']} | "
-            f"Motivo: {d['motivo']} | "
-            f"Dolor: {d['dolor']} | "
-            f"Estado: {d['estado']} | "
-            f"Fecha: {fecha} | "
-            f"Observaciones: {d['observaciones']}"
-        )
+        pdf.set_fill_color(56, 189, 248)
+        pdf.set_text_color(0, 43, 92)
+        pdf.set_font("Arial", "B", 12)
+        pdf.cell(190, 10, "Solicitud Medica Escolar", 1, 1, "C", True)
 
-        pdf.multi_cell(0, 8, texto)
+        pdf.set_font("Arial", "B", 10)
+        pdf.set_fill_color(235, 248, 255)
 
-    archivo = "reporte.pdf"
+        campos = [
+            ("Curso", d["curso"]),
+            ("Nombre", d["nombre"]),
+            ("Motivo", d["motivo"]),
+            ("Dolor", d["dolor"]),
+            ("Estado", d["estado"]),
+            ("Decision Medico", d["decision_medico"]),
+            ("Fecha", fecha),
+            ("Observaciones", d["observaciones"])
+        ]
+
+        for etiqueta, valor in campos:
+            pdf.set_font("Arial", "B", 10)
+            pdf.cell(45, 9, etiqueta + ":", 1, 0, "L", True)
+
+            pdf.set_font("Arial", "", 10)
+            pdf.multi_cell(145, 9, str(valor), 1, "L")
+
+        pdf.ln(8)
+
+    archivo = "reporte_medigo.pdf"
     pdf.output(archivo)
 
     return send_file(archivo, as_attachment=True)
