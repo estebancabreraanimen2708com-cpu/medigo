@@ -45,6 +45,27 @@ def asegurar_columnas():
 
     conn.close()
 
+def asegurar_estado_medico():
+    conn = conectar_bd()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS estado_medico(
+            id INT PRIMARY KEY,
+            disponible TINYINT DEFAULT 1,
+            mensaje VARCHAR(255),
+            fecha VARCHAR(50)
+        )
+    """)
+
+    cursor.execute("""
+        INSERT IGNORE INTO estado_medico(id, disponible, mensaje, fecha)
+        VALUES(1, 1, 'Médico disponible: puede subir el estudiante', %s)
+    """, (fecha_ecuador(),))
+
+    conn.commit()
+    conn.close()
+
 @app.route('/')
 def inicio():
     return render_template('inicio.html')
@@ -89,10 +110,7 @@ def solicitudes():
 
         if "id_estudiante" in cols:
             try:
-                cursor.execute("""
-                    INSERT INTO estudiantes(nombre)
-                    VALUES(%s)
-                """, (nombre,))
+                cursor.execute("INSERT INTO estudiantes(nombre) VALUES(%s)", (nombre,))
                 conn.commit()
                 id_estudiante = cursor.lastrowid
             except:
@@ -168,6 +186,53 @@ def api_solicitudes():
         d["fecha"] = str(d["fecha"]) if d["fecha"] else ""
 
     return jsonify(datos)
+
+@app.route('/api/estado_medico')
+def api_estado_medico():
+    asegurar_estado_medico()
+
+    conn = conectar_bd()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT disponible, mensaje, fecha
+        FROM estado_medico
+        WHERE id=1
+    """)
+
+    estado = cursor.fetchone()
+    conn.close()
+
+    return jsonify(estado)
+
+@app.route('/estado_medico/<estado>')
+def cambiar_estado_medico(estado):
+    asegurar_estado_medico()
+
+    if estado == "disponible":
+        disponible = 1
+        mensaje = "Médico disponible: puede subir el estudiante"
+    else:
+        disponible = 0
+        mensaje = "Médico no disponible: el estudiante no puede subir"
+
+    conn = conectar_bd()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        UPDATE estado_medico
+        SET disponible=%s, mensaje=%s, fecha=%s
+        WHERE id=1
+    """, (
+        disponible,
+        mensaje,
+        fecha_ecuador()
+    ))
+
+    conn.commit()
+    conn.close()
+
+    return redirect('/medico')
 
 @app.route('/historial/<path:nombre>')
 def historial(nombre):
