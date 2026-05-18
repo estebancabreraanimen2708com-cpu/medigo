@@ -4,34 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MediGo</title>
-
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=50">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=100">
 </head>
-
 <body class="pagina-inicio">
-
 <div class="imagen-inicio"></div>
-
 <div class="contenedor">
-
 <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
-
 <div class="corazon-portada">💙</div>
-
 <div class="circulos-derecha">
-    <img src="{{ url_for('static', filename='escudo.png') }}" class="circulo-img">
-    <img src="{{ url_for('static', filename='salesianos.png') }}" class="circulo-img">
+<img src="{{ url_for('static', filename='escudo.png') }}" class="circulo-img">
+<img src="{{ url_for('static', filename='salesianos.png') }}" class="circulo-img">
 </div>
-
 <h1>MediGo</h1>
-
-<p class="subtitulo">Sistema Médico Escolar</p>
-
-<a href="/roles">
-<button class="btn profesor">EMPEZAR</button>
-</a>
-
+<p class="subtitulo">Sistema Médico Escolar Salesiano</p>
+<a href="/roles"><button class="btn profesor">EMPEZAR</button></a>
 </div>
-
 </body>
 </html>
