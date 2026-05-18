@@ -14,25 +14,19 @@ body{
     align-items:center;
     overflow-x:hidden;
     background:
-        radial-gradient(circle at 20% 20%, rgba(56,189,248,.28), transparent 30%),
-        radial-gradient(circle at 80% 80%, rgba(255,204,0,.25), transparent 32%),
-        linear-gradient(135deg, #eefaff, #ffffff, #fff8d6);
-    background-size:120% 120%;
-    animation:fondoRespira 9s ease-in-out infinite alternate;
+        radial-gradient(circle at 20% 20%, rgba(125,211,252,.35), transparent 30%),
+        radial-gradient(circle at 85% 80%, rgba(253,224,71,.35), transparent 32%),
+        linear-gradient(135deg,#e0f7ff,#ffffff,#fff3b0);
+    background-size:130% 130%;
+    animation:fondoRespira 10s ease-in-out infinite alternate;
     position:relative;
 }
 
 @keyframes fondoRespira{
-    from{
-        background-position:left top;
-    }
-
-    to{
-        background-position:right bottom;
-    }
+    from{background-position:left top;}
+    to{background-position:right bottom;}
 }
 
-/* ECG central */
 body::before{
     content:"";
     position:fixed;
@@ -41,10 +35,10 @@ body::before{
     width:200%;
     height:230px;
     transform:translateY(-50%);
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1000' height='230' viewBox='0 0 1000 230'%3E%3Cpolyline points='0,115 90,115 120,105 150,70 180,115 230,115 250,45 285,180 320,115 390,115 420,155 445,85 470,115 500,115 525,60 550,170 580,115 630,115 650,95 675,145 700,75 730,160 760,115 820,115 850,100 880,130 910,115 1000,115' fill='none' stroke='%23e11d48' stroke-width='10' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1000' height='230' viewBox='0 0 1000 230'%3E%3Cpolyline points='0,115 90,115 120,105 150,70 180,115 230,115 250,45 285,180 320,115 390,115 420,155 445,85 470,115 500,115 525,60 550,170 580,115 630,115 650,95 675,145 700,75 730,160 760,115 820,115 850,100 880,130 910,115 1000,115' fill='none' stroke='%23fb7185' stroke-width='10' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
     background-repeat:repeat-x;
     background-size:1000px 230px;
-    opacity:.32;
+    opacity:.25;
     z-index:-2;
     pointer-events:none;
     animation:ecgMover 13s linear infinite;
@@ -55,7 +49,6 @@ body::before{
     to{background-position-x:-1000px;}
 }
 
-/* líneas suaves */
 body::after{
     content:"";
     position:fixed;
@@ -66,12 +59,12 @@ body::after{
         repeating-linear-gradient(115deg,
         transparent 0px,
         transparent 230px,
-        rgba(56,189,248,.22) 236px,
+        rgba(56,189,248,.18) 236px,
         transparent 242px),
         repeating-linear-gradient(65deg,
         transparent 0px,
         transparent 280px,
-        rgba(255,204,0,.22) 286px,
+        rgba(250,204,21,.18) 286px,
         transparent 292px);
     animation:moverLineas 14s ease-in-out infinite alternate;
 }
@@ -81,10 +74,25 @@ body::after{
     to{transform:translateX(25px) translateY(-20px);}
 }
 
+/* FOTO GRANDE SOLO EN INICIO */
+.imagen-inicio{
+    position:fixed;
+    left:55px;
+    top:390px;
+    width:330px;
+    height:210px;
+    background:url("/static/fondo_inicio.jpg") center/cover no-repeat;
+    border-radius:26px;
+    border:4px solid #38bdf8;
+    box-shadow:0 18px 45px rgba(0,43,92,.25);
+    z-index:0;
+    opacity:.95;
+}
+
 .contenedor{
     width:100%;
     max-width:1050px;
-    background:rgba(255,255,255,.84);
+    background:rgba(255,255,255,.88);
     border:2px solid rgba(56,189,248,.45);
     border-radius:30px;
     padding:130px 40px 40px 40px;
@@ -94,6 +102,7 @@ body::after{
         0 0 25px rgba(56,189,248,.18);
     animation:entrada .6s ease;
     position:relative;
+    z-index:1;
 }
 
 @keyframes entrada{
@@ -163,7 +172,7 @@ p{
 }
 
 .card-seccion{
-    background:rgba(255,255,255,.70);
+    background:rgba(255,255,255,.75);
     border:1px solid rgba(56,189,248,.35);
     border-radius:22px;
     padding:22px;
@@ -190,8 +199,8 @@ textarea{
 input:focus,
 select:focus,
 textarea:focus{
-    border-color:#ffcc00;
-    box-shadow:0 0 15px rgba(255,204,0,.45);
+    border-color:#facc15;
+    box-shadow:0 0 15px rgba(250,204,21,.45);
     transform:translateY(-2px);
 }
 
@@ -219,11 +228,11 @@ textarea{
 }
 
 .profesor{
-    background:linear-gradient(135deg,#38bdf8,#0056b3);
+    background:linear-gradient(135deg,#38bdf8,#2563eb);
 }
 
 .inspector{
-    background:linear-gradient(135deg,#ffcc00,#38bdf8);
+    background:linear-gradient(135deg,#facc15,#38bdf8);
     color:#002b5c;
 }
 
@@ -232,7 +241,7 @@ textarea{
 }
 
 .pdf{
-    background:linear-gradient(135deg,#0056b3,#38bdf8);
+    background:linear-gradient(135deg,#2563eb,#38bdf8);
 }
 
 .emociones{
@@ -285,12 +294,12 @@ textarea{
 }
 
 .amarillo{
-    background:linear-gradient(135deg,#facc15,#ffb703);
+    background:linear-gradient(135deg,#facc15,#f59e0b);
     color:#002b5c;
 }
 
 .rojo{
-    background:linear-gradient(135deg,#dc2626,#ef4444);
+    background:linear-gradient(135deg,#dc2626,#fb7185);
 }
 
 .emociones input:checked + .cara{
@@ -335,7 +344,7 @@ td{
 }
 
 tr:hover td{
-    background:rgba(255,204,0,.20);
+    background:rgba(250,204,21,.20);
 }
 
 .aprobar,
@@ -505,7 +514,7 @@ tr:hover td{
     height:75px;
     border-radius:50%;
     border:none;
-    background:linear-gradient(135deg,#ffcc00,#38bdf8);
+    background:linear-gradient(135deg,#facc15,#38bdf8);
     color:#002b5c;
     font-size:42px;
     font-weight:bold;
@@ -533,7 +542,7 @@ tr:hover td{
     background:linear-gradient(135deg,#ffffff,#e0f7ff);
     border-radius:25px;
     padding:30px;
-    border:3px solid #ffcc00;
+    border:3px solid #facc15;
     color:#002b5c;
 }
 
@@ -561,7 +570,7 @@ tr:hover td{
     height:450px;
     object-fit:cover;
     border-radius:30px;
-    border:4px solid #ffcc00;
+    border:4px solid #facc15;
     box-shadow:0 15px 35px rgba(0,0,0,.25);
 }
 
@@ -579,7 +588,7 @@ tr:hover td{
     padding:8px 15px;
     border:none;
     border-radius:10px;
-    background:#ffcc00;
+    background:#facc15;
     color:#002b5c;
     font-weight:bold;
     cursor:pointer;
@@ -589,7 +598,7 @@ tr:hover td{
     position:fixed;
     top:20px;
     right:20px;
-    background:#0056b3;
+    background:#2563eb;
     color:white;
     padding:15px 20px;
     border-radius:16px;
@@ -620,6 +629,14 @@ a{
     .medico-img{
         height:250px;
     }
+
+    .imagen-inicio{
+        position:relative;
+        left:auto;
+        top:auto;
+        width:90%;
+        margin:15px auto -80px auto;
+    }
 }
 
 @media(max-width:700px){
@@ -643,6 +660,12 @@ a{
     .corazon-portada{
         font-size:48px;
         top:35px;
+    }
+
+    .imagen-inicio{
+        width:94%;
+        height:170px;
+        margin:10px auto -70px auto;
     }
 
     h1{
@@ -687,7 +710,7 @@ a{
     body::before{
         height:180px;
         background-size:850px 180px;
-        opacity:.32;
+        opacity:.28;
     }
 
     .confirm-actions{
