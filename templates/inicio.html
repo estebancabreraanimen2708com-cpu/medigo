@@ -6,18 +6,37 @@
 <title>MediGo</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=100">
 </head>
+
 <body class="pagina-inicio">
+
 <div class="imagen-inicio"></div>
+
 <div class="contenedor">
-<img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
+
+<img src="{{ url_for('static', filename='logo.jpg') }}" class="logo" alt="MediGo">
+
 <div class="corazon-portada">💙</div>
+
+
 <div class="circulos-derecha">
-<img src="{{ url_for('static', filename='escudo.png') }}" class="circulo-img">
-<img src="{{ url_for('static', filename='salesianos.png') }}" class="circulo-img">
+    <img src="{{ url_for('static', filename='escudo.png') }}" class="circulo-img" alt="Escudo Don Bosco">
+    <img src="{{ url_for('static', filename='salesianos.png') }}" class="circulo-img" alt="Salesianos Don Bosco">
 </div>
+
+
 <h1>MediGo</h1>
+
 <p class="subtitulo">Sistema Médico Escolar Salesiano</p>
-<a href="/roles"><button class="btn profesor">EMPEZAR</button></a>
+
+<div class="panel-bienvenida">
+Proyecto educativo de 3ro Bachillerato INF inspirado en el cuidado, la prevención y el acompañamiento salesiano.
 </div>
+
+<a href="/roles">
+<button class="btn profesor">EMPEZAR</button>
+</a>
+
+</div>
+
 </body>
 </html>
