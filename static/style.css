@@ -8,7 +8,6 @@
     --azul:#0056b3;
     --azul2:#38bdf8;
     --amarillo:#ffcc00;
-    --amarillo2:#fff3a3;
     --verde:#22c55e;
     --rojo:#ef4444;
     --texto:#002b5c;
@@ -31,27 +30,34 @@ body{
     position:relative;
 
     background:
-        radial-gradient(circle at 10% 20%, rgba(56,189,248,.40), transparent 28%),
-        radial-gradient(circle at 90% 80%, rgba(255,204,0,.38), transparent 30%),
-        linear-gradient(120deg,#dff6ff,#ffffff,#fff3b0,#e6fbff,#fff8d6);
+        linear-gradient(
+            120deg,
+            #9be7ff 0%,
+            #eafaff 22%,
+            #ffffff 40%,
+            #fff5a8 58%,
+            #ffd84d 75%,
+            #9be7ff 100%
+        );
 
-    background-size:180% 180%, 180% 180%, 420% 420%;
-    animation:fondoSalesiano 13s ease-in-out infinite;
+    background-size:350% 350%;
+    animation:fondoSalesiano 12s ease-in-out infinite;
 }
 
 @keyframes fondoSalesiano{
     0%{
-        background-position:0% 50%,100% 50%,0% 50%;
+        background-position:0% 50%;
     }
+
     50%{
-        background-position:100% 45%,0% 55%,100% 50%;
+        background-position:100% 50%;
     }
+
     100%{
-        background-position:0% 50%,100% 50%,0% 50%;
+        background-position:0% 50%;
     }
 }
 
-/* ECG de fondo */
 body::before{
     content:"";
     position:fixed;
@@ -63,18 +69,22 @@ body::before{
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1000' height='170' viewBox='0 0 1000 170'%3E%3Cpolyline points='0,85 90,85 120,78 150,50 180,85 230,85 250,25 285,145 320,85 390,85 420,120 445,60 470,85 500,85 525,40 550,135 580,85 630,85 650,70 675,110 700,55 730,125 760,85 820,85 850,75 880,100 910,85 1000,85' fill='none' stroke='%23fb7185' stroke-width='8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
     background-repeat:repeat-x;
     background-size:1000px 170px;
-    opacity:.25;
+    opacity:.23;
     z-index:-2;
     pointer-events:none;
     animation:ecgMover 13s linear infinite;
 }
 
 @keyframes ecgMover{
-    from{background-position-x:0;}
-    to{background-position-x:-1000px;}
+    from{
+        background-position-x:0;
+    }
+
+    to{
+        background-position-x:-1000px;
+    }
 }
 
-/* líneas salesianas */
 body::after{
     content:"";
     position:fixed;
@@ -82,17 +92,33 @@ body::after{
     z-index:-3;
     pointer-events:none;
     background:
-        repeating-linear-gradient(115deg,transparent 0px,transparent 220px,rgba(56,189,248,.22) 226px,transparent 233px),
-        repeating-linear-gradient(65deg,transparent 0px,transparent 280px,rgba(255,204,0,.22) 286px,transparent 293px);
+        repeating-linear-gradient(
+            115deg,
+            transparent 0px,
+            transparent 220px,
+            rgba(56,189,248,.22) 226px,
+            transparent 233px
+        ),
+        repeating-linear-gradient(
+            65deg,
+            transparent 0px,
+            transparent 280px,
+            rgba(255,204,0,.22) 286px,
+            transparent 293px
+        );
     animation:moverLineas 15s ease-in-out infinite alternate;
 }
 
 @keyframes moverLineas{
-    from{transform:translateX(-35px) translateY(0);}
-    to{transform:translateX(35px) translateY(-25px);}
+    from{
+        transform:translateX(-35px) translateY(0);
+    }
+
+    to{
+        transform:translateX(35px) translateY(-25px);
+    }
 }
 
-/* Imagen decorativa de inicio */
 .imagen-inicio{
     position:fixed;
     left:45px;
@@ -109,12 +135,19 @@ body::after{
 }
 
 @keyframes fotoInicioFlota{
-    0%{transform:translateY(0) rotate(-1deg);}
-    50%{transform:translateY(-10px) rotate(1deg);}
-    100%{transform:translateY(0) rotate(-1deg);}
+    0%{
+        transform:translateY(0) rotate(-1deg);
+    }
+
+    50%{
+        transform:translateY(-10px) rotate(1deg);
+    }
+
+    100%{
+        transform:translateY(0) rotate(-1deg);
+    }
 }
 
-/* Contenedor principal */
 .contenedor{
     width:100%;
     max-width:1050px;
@@ -137,7 +170,12 @@ body::after{
     position:absolute;
     inset:0;
     background:
-        linear-gradient(135deg,rgba(56,189,248,.10),transparent 35%,rgba(255,204,0,.10));
+        linear-gradient(
+            135deg,
+            rgba(56,189,248,.10),
+            transparent 35%,
+            rgba(255,204,0,.10)
+        );
     pointer-events:none;
 }
 
@@ -147,11 +185,17 @@ body::after{
 }
 
 @keyframes entrada{
-    from{opacity:0; transform:translateY(20px) scale(.98);}
-    to{opacity:1; transform:translateY(0) scale(1);}
+    from{
+        opacity:0;
+        transform:translateY(20px) scale(.98);
+    }
+
+    to{
+        opacity:1;
+        transform:translateY(0) scale(1);
+    }
 }
 
-/* logo izquierdo redondo */
 .logo{
     width:78px;
     height:78px;
@@ -171,7 +215,6 @@ body::after{
     transform:scale(1.06) rotate(4deg);
 }
 
-/* sellos en todos los paneles */
 .circulos-derecha{
     position:absolute;
     top:18px;
@@ -198,12 +241,19 @@ body::after{
 }
 
 @keyframes flotarCirculo{
-    0%{transform:translateY(0);}
-    50%{transform:translateY(-6px);}
-    100%{transform:translateY(0);}
+    0%{
+        transform:translateY(0);
+    }
+
+    50%{
+        transform:translateY(-6px);
+    }
+
+    100%{
+        transform:translateY(0);
+    }
 }
 
-/* corazón solo portada */
 .corazon-portada{
     position:absolute;
     top:25px;
@@ -216,9 +266,17 @@ body::after{
 }
 
 @keyframes latidoCorazon{
-    0%{transform:translateX(-50%) scale(1);}
-    50%{transform:translateX(-50%) scale(1.14);}
-    100%{transform:translateX(-50%) scale(1);}
+    0%{
+        transform:translateX(-50%) scale(1);
+    }
+
+    50%{
+        transform:translateX(-50%) scale(1.14);
+    }
+
+    100%{
+        transform:translateX(-50%) scale(1);
+    }
 }
 
 h1{
@@ -341,7 +399,6 @@ textarea{
     background:linear-gradient(135deg,#2563eb,#38bdf8);
 }
 
-/* roles */
 .roles-grid{
     display:grid;
     grid-template-columns:repeat(3,1fr);
@@ -349,7 +406,6 @@ textarea{
     margin-top:20px;
 }
 
-/* dolor */
 .emociones{
     display:flex;
     justify-content:center;
@@ -414,7 +470,6 @@ textarea{
     box-shadow:0 0 23px rgba(56,189,248,.70);
 }
 
-/* tablas */
 .tabla-scroll{
     width:100%;
     overflow-x:auto;
@@ -489,7 +544,6 @@ tr:hover td{
     width:100%;
 }
 
-/* confirmar */
 .confirm-modal{
     position:fixed;
     inset:0;
@@ -547,7 +601,6 @@ tr:hover td{
     background:var(--verde);
 }
 
-/* modal */
 .btn-mas{
     position:fixed;
     bottom:22px;
@@ -596,7 +649,6 @@ tr:hover td{
     font-weight:bold;
 }
 
-/* médico */
 .medico-layout{
     display:grid;
     grid-template-columns:145px minmax(0,1fr) 145px;
@@ -620,9 +672,17 @@ tr:hover td{
 }
 
 @keyframes imagenMedicoFlota{
-    0%{transform:translateY(0);}
-    50%{transform:translateY(-8px);}
-    100%{transform:translateY(0);}
+    0%{
+        transform:translateY(0);
+    }
+
+    50%{
+        transform:translateY(-8px);
+    }
+
+    100%{
+        transform:translateY(0);
+    }
 }
 
 .obs-area{
@@ -645,7 +705,6 @@ tr:hover td{
     cursor:pointer;
 }
 
-/* cursos */
 .imagenes-donbosco{
     display:grid;
     grid-template-columns:repeat(3,1fr);
@@ -676,19 +735,28 @@ tr:hover td{
 }
 
 @keyframes toastEntrada{
-    from{opacity:0; transform:translateX(80px);}
-    to{opacity:1; transform:translateX(0);}
+    from{
+        opacity:0;
+        transform:translateX(80px);
+    }
+
+    to{
+        opacity:1;
+        transform:translateX(0);
+    }
 }
 
 @keyframes toastSalida{
-    to{opacity:0; transform:translateX(80px);}
+    to{
+        opacity:0;
+        transform:translateX(80px);
+    }
 }
 
 a{
     text-decoration:none;
 }
 
-/* tablets */
 @media(max-width:1200px){
     body{
         align-items:flex-start;
@@ -714,7 +782,6 @@ a{
     }
 }
 
-/* celular */
 @media(max-width:700px){
     body{
         padding:10px;
