@@ -4,36 +4,22 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Login {{ rol }}</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=100">
 </head>
-
 <body>
-
 <div class="contenedor">
-
 <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
-
+<div class="circulos-derecha">
+<img src="{{ url_for('static', filename='escudo.png') }}" class="circulo-img">
+<img src="{{ url_for('static', filename='salesianos.png') }}" class="circulo-img">
+</div>
 <h1>Login {{ rol|capitalize }}</h1>
-
-{% if error %}
-<div style="background:#e74c3c; color:white; padding:12px; border-radius:12px; margin-bottom:15px;">
-{{ error }}
-</div>
-{% endif %}
-
+{% if error %}<div style="background:#ef4444;color:white;padding:12px;border-radius:12px;margin-bottom:15px;text-align:center;font-weight:bold;">{{ error }}</div>{% endif %}
 <form method="POST">
-
 <input type="text" name="usuario" placeholder="Usuario" required>
-
 <input type="password" name="password" placeholder="Contraseña" required>
-
-<button type="submit" class="btn medico">
-INGRESAR
-</button>
-
+<button type="submit" class="btn medico">INGRESAR</button>
 </form>
-
 </div>
-
 </body>
 </html>
