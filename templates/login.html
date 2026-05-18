@@ -6,20 +6,43 @@
 <title>Login {{ rol }}</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=100">
 </head>
+
 <body>
+
 <div class="contenedor">
-<img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
+
+<img src="{{ url_for('static', filename='logo.jpg') }}" class="logo" alt="MediGo">
+
+
 <div class="circulos-derecha">
-<img src="{{ url_for('static', filename='escudo.png') }}" class="circulo-img">
-<img src="{{ url_for('static', filename='salesianos.png') }}" class="circulo-img">
+    <img src="{{ url_for('static', filename='escudo.png') }}" class="circulo-img" alt="Escudo Don Bosco">
+    <img src="{{ url_for('static', filename='salesianos.png') }}" class="circulo-img" alt="Salesianos Don Bosco">
 </div>
+
+
 <h1>Login {{ rol|capitalize }}</h1>
-{% if error %}<div style="background:#ef4444;color:white;padding:12px;border-radius:12px;margin-bottom:15px;text-align:center;font-weight:bold;">{{ error }}</div>{% endif %}
-<form method="POST">
-<input type="text" name="usuario" placeholder="Usuario" required>
-<input type="password" name="password" placeholder="Contraseña" required>
-<button type="submit" class="btn medico">INGRESAR</button>
-</form>
+
+<p class="subtitulo">Acceso seguro al panel MediGo</p>
+
+{% if error %}
+<div style="background:#e74c3c; color:white; padding:12px; border-radius:12px; margin-bottom:15px;">
+{{ error }}
 </div>
+{% endif %}
+
+<form method="POST">
+
+<input type="text" name="usuario" placeholder="Usuario" required>
+
+<input type="password" name="password" placeholder="Contraseña" required>
+
+<button type="submit" class="btn medico">
+INGRESAR
+</button>
+
+</form>
+
+</div>
+
 </body>
 </html>
