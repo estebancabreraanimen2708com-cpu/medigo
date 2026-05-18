@@ -7,14 +7,13 @@ import os
 
 app = Flask(__name__)
 
-# ===== CONEXIÓN RAILWAY =====
 def conectar_bd():
     return mysql.connector.connect(
-        host=os.environ.get("MYSQLHOST"),
-        user=os.environ.get("MYSQLUSER"),
-        password=os.environ.get("MYSQLPASSWORD"),
-        database=os.environ.get("MYSQLDATABASE"),
-        port=int(os.environ.get("MYSQLPORT"))
+        host="roundhouse.proxy.rlwy.net",
+        user="root",
+        password="wYbBPSlKSxHuYpUKYiYSfWzMnnqUyAVJ",
+        database="railway",
+        port=21196
     )
 
 ecuador = pytz.timezone("America/Guayaquil")
@@ -22,419 +21,366 @@ ecuador = pytz.timezone("America/Guayaquil")
 def fecha_ecuador():
     return datetime.now(ecuador).strftime("%Y-%m-%d %H:%M:%S")
 
+def limpiar_pdf(texto):
+    if texto is None:
+        return ""
+
+    texto = str(texto)
+    texto = texto.replace("🟢", "[Puede subir]")
+    texto = texto.replace("🔴", "[No puede subir]")
+    texto = texto.replace("😊", "")
+    texto = texto.replace("😐", "")
+    texto = texto.replace("😖", "")
+
+    return texto.encode("latin-1", "ignore").decode("latin-1")
 
 def asegurar_columnas():
     conn = conectar_bd()
     cursor = conn.cursor()
 
     columnas = [
-        ("nombre","VARCHAR(255)"),
-        ("curso","VARCHAR(100)"),
-        ("observaciones","TEXT"),
-        ("decision_medico","VARCHAR(100)")
+        ("nombre", "VARCHAR(255)"),
+        ("curso", "VARCHAR(100)"),
+        ("observaciones", "TEXT"),
+        ("decision_medico", "VARCHAR(100)")
     ]
 
-    for nombre,tipo in columnas:
+    for nombre, tipo in columnas:
         try:
-            cursor.execute(
-                f"ALTER TABLE solicitudes ADD COLUMN {nombre} {tipo}"
-            )
+            cursor.execute(f"ALTER TABLE solicitudes ADD COLUMN {nombre} {tipo}")
             conn.commit()
         except:
             pass
 
     conn.close()
 
-
 @app.route('/')
 def inicio():
-    return render_template("inicio.html")
-
+    return render_template('inicio.html')
 
 @app.route('/roles')
 def roles():
-    return render_template("roles.html")
+    return render_template('roles.html')
 
-
-@app.route('/login/<rol>', methods=["GET","POST"])
+@app.route('/login/<rol>', methods=['GET', 'POST'])
 def login(rol):
+    error = None
 
-    error=None
+    if request.method == 'POST':
+        usuario = request.form['usuario']
+        password = request.form['password']
 
-    if request.method=="POST":
+        if rol == "inspector" and usuario == "inspector" and password == "123":
+            return redirect('/inspector')
 
-        usuario=request.form["usuario"]
-        password=request.form["password"]
+        if rol == "medico" and usuario == "medico" and password == "123":
+            return redirect('/medico')
 
-        if(
-            rol=="inspector"
-            and usuario=="inspector"
-            and password=="123"
-        ):
+        error = "Usuario o contraseña incorrectos"
 
-            return redirect("/inspector")
+    return render_template('login.html', rol=rol, error=error)
 
-
-        if(
-            rol=="medico"
-            and usuario=="medico"
-            and password=="123"
-        ):
-
-            return redirect("/medico")
-
-
-        error="Usuario o contraseña incorrectos"
-
-
-    return render_template(
-        "login.html",
-        rol=rol,
-        error=error
-    )
-
-
-@app.route('/solicitudes',methods=["GET","POST"])
+@app.route('/solicitudes', methods=['GET', 'POST'])
 def solicitudes():
-
     asegurar_columnas()
 
-    if request.method=="POST":
+    if request.method == 'POST':
+        curso = request.form.get('curso', '')
+        nombre = request.form.get('nombre_manual', '')
+        motivo = request.form.get('motivo', '')
+        dolor = request.form.get('dolor', '')
+        origen = request.form.get('origen', 'profesor')
 
-        curso=request.form.get("curso","")
-        nombre=request.form.get(
-            "nombre_manual",""
-        )
-
-        motivo=request.form.get(
-            "motivo",""
-        )
-
-        dolor=request.form.get(
-            "dolor",""
-        )
-
-        origen=request.form.get(
-            "origen",
-            "profesor"
-        )
-
-        conn=conectar_bd()
-        cursor=conn.cursor()
+        conn = conectar_bd()
+        cursor = conn.cursor()
 
         cursor.execute("""
-
-        INSERT INTO solicitudes
-
-        (
-        nombre,
-        motivo,
-        dolor,
-        estado,
-        fecha,
-        curso,
-        observaciones,
-        decision_medico
-        )
-
-        VALUES
-        (%s,%s,%s,%s,%s,%s,%s,%s)
-
-        """,
-
-        (
-        nombre,
-        motivo,
-        dolor,
-        "Pendiente",
-        fecha_ecuador(),
-        curso,
-        "",
-        "Sin revisar"
-        )
-        )
+            INSERT INTO solicitudes
+            (nombre, motivo, dolor, estado, fecha, curso, observaciones, decision_medico)
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
+        """, (
+            nombre,
+            motivo,
+            dolor,
+            "Pendiente",
+            fecha_ecuador(),
+            curso,
+            "",
+            "Sin revisar"
+        ))
 
         conn.commit()
         conn.close()
 
-        if origen=="inspector":
+        if origen == "inspector":
+            return redirect('/inspector')
 
-            return redirect(
-            "/inspector"
-            )
+        if origen == "medico":
+            return redirect('/medico')
 
-        return redirect(
-        "/solicitudes"
-        )
+        return redirect('/solicitudes')
 
-
-    return render_template(
-    "solicitudes.html"
-    )
-
+    return render_template('solicitudes.html')
 
 @app.route('/api/solicitudes')
 def api_solicitudes():
+    asegurar_columnas()
 
-    conn=conectar_bd()
-
-    cursor=conn.cursor(
-    dictionary=True
-    )
+    conn = conectar_bd()
+    cursor = conn.cursor(dictionary=True)
 
     cursor.execute("""
-
-    SELECT *
-
-    FROM solicitudes
-
-    ORDER BY
-    id_solicitud DESC
-
+        SELECT
+            id_solicitud,
+            COALESCE(nombre, '') AS nombre,
+            COALESCE(motivo, '') AS motivo,
+            COALESCE(dolor, '') AS dolor,
+            COALESCE(estado, '') AS estado,
+            COALESCE(curso, '') AS curso,
+            COALESCE(observaciones, '') AS observaciones,
+            COALESCE(decision_medico, 'Sin revisar') AS decision_medico,
+            fecha
+        FROM solicitudes
+        ORDER BY id_solicitud DESC
     """)
 
-    datos=cursor.fetchall()
-
+    datos = cursor.fetchall()
     conn.close()
+
+    for d in datos:
+        d["fecha"] = str(d["fecha"]) if d["fecha"] else ""
 
     return jsonify(datos)
 
-
 @app.route('/inspector')
 def inspector():
-
-    return render_template(
-    "inspector.html"
-    )
-
+    return render_template('inspector.html')
 
 @app.route('/medico')
 def medico():
+    return render_template('medico.html')
 
-    return render_template(
-    "medico.html"
-    )
+@app.route('/decision_medico/<int:id>/<decision>')
+def decision_medico(id, decision):
+    asegurar_columnas()
 
-
-@app.route(
-'/decision_medico/<int:id>/<decision>'
-)
-
-def decision_medico(
-id,
-decision
-):
-
-    if decision=="subir":
-
-        texto="🟢 Puede subir"
-
+    if decision == "subir":
+        texto = "🟢 Puede subir"
     else:
+        texto = "🔴 No puede subir"
 
-        texto="🔴 No puede subir"
-
-
-    conn=conectar_bd()
-
-    cursor=conn.cursor(
-    dictionary=True
-    )
-
+    conn = conectar_bd()
+    cursor = conn.cursor(dictionary=True)
 
     cursor.execute("""
+        SELECT COALESCE(decision_medico, 'Sin revisar') AS decision_medico
+        FROM solicitudes
+        WHERE id_solicitud=%s
+    """, (id,))
 
-    SELECT
-    decision_medico
-
-    FROM solicitudes
-
-    WHERE
-    id_solicitud=%s
-
-    """,
-
-    (id,)
-    )
-
-    fila=cursor.fetchone()
-
+    fila = cursor.fetchone()
 
     if fila:
+        actual = fila["decision_medico"]
 
-        actual=fila[
-        "decision_medico"
-        ]
-
-        if(
-            actual
-            and
-            actual!="Sin revisar"
-        ):
-
+        if actual and actual != "Sin revisar":
             conn.close()
+            return redirect('/medico')
 
-            return redirect(
-            "/medico"
-            )
-
-
-    cursor=conn.cursor()
+    cursor = conn.cursor()
 
     cursor.execute("""
-
-    UPDATE solicitudes
-
-    SET
-    decision_medico=%s
-
-    WHERE
-    id_solicitud=%s
-
-    """,
-
-    (
-    texto,
-    id
-    )
-    )
+        UPDATE solicitudes
+        SET decision_medico=%s
+        WHERE id_solicitud=%s
+        AND (
+            decision_medico IS NULL
+            OR decision_medico=''
+            OR decision_medico='Sin revisar'
+        )
+    """, (texto, id))
 
     conn.commit()
     conn.close()
 
-    return redirect(
-    "/medico"
-    )
-
+    return redirect('/medico')
 
 @app.route('/aprobar/<int:id>')
 def aprobar(id):
-
-    conn=conectar_bd()
-
-    cursor=conn.cursor()
+    conn = conectar_bd()
+    cursor = conn.cursor()
 
     cursor.execute("""
-
-    UPDATE solicitudes
-
-    SET estado='Aprobado'
-
-    WHERE
-    id_solicitud=%s
-
-    """,
-
-    (id,)
-    )
+        UPDATE solicitudes
+        SET estado='Aprobado'
+        WHERE id_solicitud=%s
+    """, (id,))
 
     conn.commit()
     conn.close()
 
-    return redirect(
-    "/inspector"
-    )
-
+    return redirect('/inspector')
 
 @app.route('/rechazar/<int:id>')
 def rechazar(id):
-
-    conn=conectar_bd()
-
-    cursor=conn.cursor()
+    conn = conectar_bd()
+    cursor = conn.cursor()
 
     cursor.execute("""
-
-    UPDATE solicitudes
-
-    SET estado='Rechazado'
-
-    WHERE
-    id_solicitud=%s
-
-    """,
-
-    (id,)
-    )
+        UPDATE solicitudes
+        SET estado='Rechazado'
+        WHERE id_solicitud=%s
+    """, (id,))
 
     conn.commit()
     conn.close()
 
-    return redirect(
-    "/inspector"
-    )
-
+    return redirect('/inspector')
 
 @app.route('/atendido/<int:id>')
 def atendido(id):
-
-    conn=conectar_bd()
-
-    cursor=conn.cursor()
+    conn = conectar_bd()
+    cursor = conn.cursor()
 
     cursor.execute("""
-
-    UPDATE solicitudes
-
-    SET estado='Atendido'
-
-    WHERE
-    id_solicitud=%s
-
-    """,
-
-    (id,)
-    )
+        UPDATE solicitudes
+        SET estado='Atendido'
+        WHERE id_solicitud=%s
+    """, (id,))
 
     conn.commit()
-
     conn.close()
 
-    return redirect(
-    "/medico"
-    )
+    return redirect('/medico')
 
-
-@app.route(
-'/observacion/<int:id>',
-methods=["POST"]
-)
-
+@app.route('/observacion/<int:id>', methods=['POST'])
 def observacion(id):
+    texto = request.form.get('observaciones', '')
 
-    texto=request.form.get(
-    "observaciones",""
-    )
-
-    conn=conectar_bd()
-
-    cursor=conn.cursor()
+    conn = conectar_bd()
+    cursor = conn.cursor()
 
     cursor.execute("""
-
-    UPDATE solicitudes
-
-    SET
-    observaciones=%s
-
-    WHERE
-    id_solicitud=%s
-
-    """,
-
-    (
-    texto,
-    id
-    )
-    )
+        UPDATE solicitudes
+        SET observaciones=%s
+        WHERE id_solicitud=%s
+    """, (texto, id))
 
     conn.commit()
-
     conn.close()
 
-    return redirect(
-    "/medico"
+    return redirect('/medico')
+
+@app.route('/historial/<path:nombre>')
+def historial(nombre):
+    asegurar_columnas()
+
+    conn = conectar_bd()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT
+            COALESCE(nombre, '') AS nombre,
+            COALESCE(curso, '') AS curso,
+            COALESCE(motivo, '') AS motivo,
+            COALESCE(dolor, '') AS dolor,
+            COALESCE(estado, '') AS estado,
+            COALESCE(observaciones, '') AS observaciones,
+            COALESCE(decision_medico, 'Sin revisar') AS decision_medico,
+            fecha
+        FROM solicitudes
+        WHERE nombre = %s
+        ORDER BY id_solicitud DESC
+    """, (nombre,))
+
+    datos = cursor.fetchall()
+    conn.close()
+
+    for d in datos:
+        d["fecha"] = str(d["fecha"]) if d["fecha"] else ""
+
+    return render_template(
+        'historial.html',
+        historial=datos,
+        nombre=nombre,
+        total=len(datos)
     )
 
+@app.route('/pdf')
+def pdf():
+    asegurar_columnas()
 
-if __name__=="__main__":
+    conn = conectar_bd()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT
+            COALESCE(nombre, '') AS nombre,
+            COALESCE(curso, '') AS curso,
+            COALESCE(motivo, '') AS motivo,
+            COALESCE(dolor, '') AS dolor,
+            COALESCE(estado, '') AS estado,
+            COALESCE(observaciones, '') AS observaciones,
+            COALESCE(decision_medico, 'Sin revisar') AS decision_medico,
+            fecha
+        FROM solicitudes
+        ORDER BY id_solicitud DESC
+    """)
+
+    datos = cursor.fetchall()
+    conn.close()
+
+    pdf = FPDF()
+    pdf.add_page()
+
+    try:
+        pdf.image("static/logo.jpg", 10, 8, 25)
+    except:
+        pass
+
+    pdf.set_font("Arial", "B", 18)
+    pdf.set_text_color(0, 86, 179)
+    pdf.cell(0, 12, limpiar_pdf("MediGo - Reporte Medico"), 0, 1, "C")
+
+    pdf.set_font("Arial", "", 10)
+    pdf.set_text_color(60, 60, 60)
+    pdf.cell(0, 8, limpiar_pdf("Sistema Medico Escolar Salesiano"), 0, 1, "C")
+    pdf.cell(0, 8, limpiar_pdf("Fecha de descarga: " + fecha_ecuador()), 0, 1, "C")
+    pdf.ln(8)
+
+    for d in datos:
+        fecha = str(d["fecha"]) if d["fecha"] else ""
+
+        pdf.set_fill_color(235, 248, 255)
+        pdf.set_text_color(0, 43, 92)
+        pdf.set_font("Arial", "B", 12)
+        pdf.cell(0, 10, limpiar_pdf("Solicitud Medica Escolar"), 1, 1, "C", True)
+
+        campos = [
+            ("Curso", d["curso"]),
+            ("Nombre", d["nombre"]),
+            ("Motivo", d["motivo"]),
+            ("Dolor", d["dolor"]),
+            ("Estado", d["estado"]),
+            ("Decision medico", d["decision_medico"]),
+            ("Fecha", fecha),
+            ("Observaciones", d["observaciones"])
+        ]
+
+        for etiqueta, valor in campos:
+            pdf.set_font("Arial", "B", 10)
+            pdf.set_fill_color(245, 252, 255)
+            pdf.cell(45, 9, limpiar_pdf(etiqueta + ":"), 1, 0, "L", True)
+
+            pdf.set_font("Arial", "", 10)
+            pdf.multi_cell(145, 9, limpiar_pdf(valor), 1, "L")
+
+        pdf.ln(6)
+
+    archivo = "/tmp/reporte_medigo.pdf"
+    pdf.output(archivo)
+
+    return send_file(archivo, as_attachment=True, download_name="reporte_medigo.pdf")
+
+if __name__ == '__main__':
     app.run(debug=True)
