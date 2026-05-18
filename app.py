@@ -9,11 +9,11 @@ app = Flask(__name__)
 
 def conectar_bd():
     return mysql.connector.connect(
-        host="roundhouse.proxy.rlwy.net",
-        user="root",
-        password="wYbBPSlKSxHuYpUKYiYSfWzMnnqUyAVJ",
-        database="railway",
-        port=21196
+        host=os.environ.get("MYSQLHOST", "TU_HOST"),
+        user=os.environ.get("MYSQLUSER", "root"),
+        password=os.environ.get("MYSQLPASSWORD", "TU_PASSWORD"),
+        database=os.environ.get("MYSQLDATABASE", "railway"),
+        port=int(os.environ.get("MYSQLPORT", "3306"))
     )
 
 ecuador = pytz.timezone("America/Guayaquil")
@@ -24,12 +24,15 @@ def fecha_ecuador():
 def limpiar_pdf(texto):
     if texto is None:
         return ""
+
     texto = str(texto)
+
     texto = texto.replace("🟢", "[Puede subir]")
     texto = texto.replace("🔴", "[No puede subir]")
     texto = texto.replace("😊", "")
     texto = texto.replace("😐", "")
     texto = texto.replace("😖", "")
+
     return texto.encode("latin-1", "ignore").decode("latin-1")
 
 def asegurar_columnas():
@@ -160,12 +163,34 @@ def decision_medico(id, decision):
         texto = "🔴 No puede subir"
 
     conn = conectar_bd()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT COALESCE(decision_medico, 'Sin revisar') AS decision_medico
+        FROM solicitudes
+        WHERE id_solicitud=%s
+    """, (id,))
+
+    fila = cursor.fetchone()
+
+    if fila:
+        actual = fila["decision_medico"]
+
+        if actual and actual != "Sin revisar":
+            conn.close()
+            return redirect('/medico')
+
     cursor = conn.cursor()
 
     cursor.execute("""
         UPDATE solicitudes
         SET decision_medico=%s
         WHERE id_solicitud=%s
+        AND (
+            decision_medico IS NULL
+            OR decision_medico=''
+            OR decision_medico='Sin revisar'
+        )
     """, (texto, id))
 
     conn.commit()
