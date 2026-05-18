@@ -9,11 +9,11 @@ app = Flask(__name__)
 
 def conectar_bd():
     return mysql.connector.connect(
-        host=os.environ.get("MYSQLHOST", "TU_HOST"),
-        user=os.environ.get("MYSQLUSER", "root"),
-        password=os.environ.get("MYSQLPASSWORD", "TU_PASSWORD"),
-        database=os.environ.get("MYSQLDATABASE", "railway"),
-        port=int(os.environ.get("MYSQLPORT", "3306"))
+        host="roundhouse.proxy.rlwy.net",
+        user="root",
+        password="TU_PASSWORD_REAL_DE_RAILWAY",
+        database="railway",
+        port=21196
     )
 
 ecuador = pytz.timezone("America/Guayaquil")
@@ -26,7 +26,6 @@ def limpiar_pdf(texto):
         return ""
 
     texto = str(texto)
-
     texto = texto.replace("🟢", "[Puede subir]")
     texto = texto.replace("🔴", "[No puede subir]")
     texto = texto.replace("😊", "")
@@ -116,9 +115,6 @@ def solicitudes():
         if origen == "inspector":
             return redirect('/inspector')
 
-        if origen == "medico":
-            return redirect('/medico')
-
         return redirect('/solicitudes')
 
     return render_template('solicitudes.html')
@@ -152,6 +148,14 @@ def api_solicitudes():
         d["fecha"] = str(d["fecha"]) if d["fecha"] else ""
 
     return jsonify(datos)
+
+@app.route('/inspector')
+def inspector():
+    return render_template('inspector.html')
+
+@app.route('/medico')
+def medico():
+    return render_template('medico.html')
 
 @app.route('/decision_medico/<int:id>/<decision>')
 def decision_medico(id, decision):
@@ -198,45 +202,6 @@ def decision_medico(id, decision):
 
     return redirect('/medico')
 
-@app.route('/historial/<path:nombre>')
-def historial(nombre):
-    asegurar_columnas()
-
-    conn = conectar_bd()
-    cursor = conn.cursor(dictionary=True)
-
-    cursor.execute("""
-        SELECT
-            COALESCE(nombre, '') AS nombre,
-            COALESCE(curso, '') AS curso,
-            COALESCE(motivo, '') AS motivo,
-            COALESCE(dolor, '') AS dolor,
-            COALESCE(estado, '') AS estado,
-            COALESCE(observaciones, '') AS observaciones,
-            COALESCE(decision_medico, 'Sin revisar') AS decision_medico,
-            fecha
-        FROM solicitudes
-        WHERE nombre = %s
-        ORDER BY id_solicitud DESC
-    """, (nombre,))
-
-    datos = cursor.fetchall()
-    conn.close()
-
-    for d in datos:
-        d["fecha"] = str(d["fecha"]) if d["fecha"] else ""
-
-    return render_template(
-        'historial.html',
-        historial=datos,
-        nombre=nombre,
-        total=len(datos)
-    )
-
-@app.route('/inspector')
-def inspector():
-    return render_template('inspector.html')
-
 @app.route('/aprobar/<int:id>')
 def aprobar(id):
     conn = conectar_bd()
@@ -268,10 +233,6 @@ def rechazar(id):
     conn.close()
 
     return redirect('/inspector')
-
-@app.route('/medico')
-def medico():
-    return render_template('medico.html')
 
 @app.route('/atendido/<int:id>')
 def atendido(id):
@@ -306,6 +267,41 @@ def observacion(id):
     conn.close()
 
     return redirect('/medico')
+
+@app.route('/historial/<path:nombre>')
+def historial(nombre):
+    asegurar_columnas()
+
+    conn = conectar_bd()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT
+            COALESCE(nombre, '') AS nombre,
+            COALESCE(curso, '') AS curso,
+            COALESCE(motivo, '') AS motivo,
+            COALESCE(dolor, '') AS dolor,
+            COALESCE(estado, '') AS estado,
+            COALESCE(observaciones, '') AS observaciones,
+            COALESCE(decision_medico, 'Sin revisar') AS decision_medico,
+            fecha
+        FROM solicitudes
+        WHERE nombre = %s
+        ORDER BY id_solicitud DESC
+    """, (nombre,))
+
+    datos = cursor.fetchall()
+    conn.close()
+
+    for d in datos:
+        d["fecha"] = str(d["fecha"]) if d["fecha"] else ""
+
+    return render_template(
+        'historial.html',
+        historial=datos,
+        nombre=nombre,
+        total=len(datos)
+    )
 
 @app.route('/pdf')
 def pdf():
