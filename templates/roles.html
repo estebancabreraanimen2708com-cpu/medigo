@@ -4,32 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Roles</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=100">
 </head>
-
 <body>
-
 <div class="contenedor">
-
 <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
-
-<h1>MediGo</h1>
-
-<p class="subtitulo">Selecciona tu rol</p>
-
-<a href="/solicitudes">
-<button class="btn profesor">👨‍🏫 Profesor</button>
-</a>
-
-<a href="/login/inspector">
-<button class="btn inspector">🕵️ Inspector</button>
-</a>
-
-<a href="/login/medico">
-<button class="btn medico">🩺 Médico</button>
-</a>
-
+<div class="circulos-derecha">
+<img src="{{ url_for('static', filename='escudo.png') }}" class="circulo-img">
+<img src="{{ url_for('static', filename='salesianos.png') }}" class="circulo-img">
 </div>
-
+<h1>MediGo</h1>
+<p class="subtitulo">Selecciona tu rol</p>
+<a href="/solicitudes"><button class="btn profesor">👨‍🏫 Profesor</button></a>
+<a href="/login/inspector"><button class="btn inspector">🕵️ Inspector</button></a>
+<a href="/login/medico"><button class="btn medico">🩺 Médico</button></a>
+</div>
 </body>
 </html>
