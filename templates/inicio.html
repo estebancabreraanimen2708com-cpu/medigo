@@ -1,31 +1,28 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MediGo</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-
-<body class="pagina-inicio">
-
-<div class="imagen-inicio"></div>
-
 <div class="contenedor">
 
 <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
 
 <div class="corazon-portada">💙</div>
 
-<h1>MediGo</h1>
+<!-- NUEVAS IMÁGENES DERECHA -->
+<div class="circulos-derecha">
 
-<p>Sistema Médico Escolar</p>
+<img src="{{ url_for('static', filename='escudo.png') }}"
+class="circulo-img">
 
-<a href="/roles">
-<button class="btn profesor">EMPEZAR</button>
-</a>
+<img src="{{ url_for('static', filename='salesianos.png') }}"
+class="circulo-img">
 
 </div>
 
-</body>
-</html>
+<h1>MediGo</h1>
+
+<p class="subtitulo">
+Sistema Médico Escolar
+</p>
+
+<button class="btn profesor">
+EMPEZAR
+</button>
+
+</div>
