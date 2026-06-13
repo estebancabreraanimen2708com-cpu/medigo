@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Solicitudes</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=300">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=400">
 </head>
 
 <body>
@@ -22,23 +22,17 @@
 
 <p class="subtitulo">Panel del Profesor</p>
 
-<form method="POST" id="formSolicitud">
-
-<div class="card-seccion">
-<h3>Datos del profesor</h3>
-
-<input
-type="text"
-name="profesor_id"
-placeholder="ID del profesor"
-required>
-
-<input
-type="text"
-name="profesor_nombre"
-placeholder="Nombre del profesor"
-required>
+<div class="panel-bienvenida">
+Solicitud enviada por profesor autenticado. El ID se guarda automáticamente.
 </div>
+
+<a href="/logout_profesor">
+<button type="button" class="btn medico">
+Cerrar sesión de profesor
+</button>
+</a>
+
+<form method="POST" id="formSolicitud">
 
 <div class="card-seccion">
 <h3>Curso</h3>
