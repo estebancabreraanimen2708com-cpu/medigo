@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Médico</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=500">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=501">
 </head>
 
 <body>
@@ -73,17 +73,6 @@ fetch('/api/solicitudes')
 
     data.forEach(s=>{
 
-        let accion=`
-            <div style="display:flex;flex-direction:column;gap:8px;">
-                <a href="/consulta/${s.id_solicitud}">
-                    <button class="btn-subir" type="button">🩺 En consulta</button>
-                </a>
-                <a href="/atendido/${s.id_solicitud}">
-                    <button class="aprobar" type="button">✅ Atendido</button>
-                </a>
-            </div>
-        `;
-
         let dolorTexto="";
         let prioridad="-";
         let claseFila="";
@@ -144,6 +133,63 @@ fetch('/api/solicitudes')
                     </a>
                     <a href="/decision_medico/${s.id_solicitud}/no_subir" onclick="return confirmarDecision('NO puede subir')">
                         <button class="btn-nosubir" type="button">🔴 No puede subir</button>
+                    </a>
+                </div>
+            `;
+        }
+
+        let accion="";
+
+        if(decision === "🔴 No puede subir"){
+            accion=`
+                <span style="
+                    display:inline-block;
+                    padding:10px 12px;
+                    border-radius:14px;
+                    background:rgba(239,68,68,.16);
+                    color:#991b1b;
+                    font-weight:bold;
+                ">
+                Solicitud rechazada por médico
+                </span>
+            `;
+        }
+        else if(s.estado === "Rechazado"){
+            accion=`
+                <span style="
+                    display:inline-block;
+                    padding:10px 12px;
+                    border-radius:14px;
+                    background:rgba(239,68,68,.16);
+                    color:#991b1b;
+                    font-weight:bold;
+                ">
+                Rechazado por inspector
+                </span>
+            `;
+        }
+        else if(s.estado === "Atendido"){
+            accion=`
+                <span style="
+                    display:inline-block;
+                    padding:10px 12px;
+                    border-radius:14px;
+                    background:rgba(34,197,94,.16);
+                    color:#166534;
+                    font-weight:bold;
+                ">
+                ✅ Atención finalizada
+                </span>
+            `;
+        }
+        else{
+            accion=`
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                    <a href="/consulta/${s.id_solicitud}">
+                        <button class="btn-subir" type="button">🩺 En consulta</button>
+                    </a>
+                    <a href="/atendido/${s.id_solicitud}">
+                        <button class="aprobar" type="button">✅ Atendido</button>
                     </a>
                 </div>
             `;
