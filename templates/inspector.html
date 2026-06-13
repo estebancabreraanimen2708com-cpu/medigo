@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Inspector</title>
 
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=300">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=500">
 </head>
 
 <body>
@@ -38,6 +38,7 @@
 <th>Dolor</th>
 <th>Decisión Médico</th>
 <th>Estado</th>
+<th>Estado Consulta</th>
 <th>Fecha</th>
 <th>Observaciones</th>
 <th>Acciones</th>
@@ -171,7 +172,7 @@
 <input type="radio" name="dolor" value="3" id="insDolor3">
 <label for="insDolor3" class="cara rojo">
 <img src="{{ url_for('static', filename='donbosco_urgente.png') }}" class="donbosco-cara">
-<span>Urgente</span>
+<span>🔔 Urgente</span>
 </label>
 
 </div>
@@ -323,13 +324,19 @@ fetch('/api/solicitudes')
         }else if(s.dolor == 2){
             dolorTexto = "😐 Moderado";
         }else if(s.dolor == 3){
-            dolorTexto = "😖 Urgente";
+            dolorTexto = "🔔 😖 Urgente";
         }else{
             dolorTexto = s.dolor;
         }
 
+        let claseFila = "";
+
+        if(s.dolor == 3 && s.estado !== "Atendido"){
+            claseFila = "background:rgba(239,68,68,.18); box-shadow:inset 5px 0 #ef4444;";
+        }
+
         tabla.innerHTML += `
-        <tr>
+        <tr style="${claseFila}">
             <td>${s.profesor_id || ""}</td>
             <td>${s.profesor_nombre || ""}</td>
             <td>${s.curso || ""}</td>
@@ -343,6 +350,7 @@ fetch('/api/solicitudes')
             <td>${dolorTexto}</td>
             <td>${s.decision_medico || "Sin revisar"}</td>
             <td>${s.estado}</td>
+            <td>${s.estado_consulta || "Esperando atención"}</td>
             <td>${s.fecha}</td>
             <td>${s.observaciones || "Sin observaciones"}</td>
             <td>${acciones}</td>
