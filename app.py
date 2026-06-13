@@ -10,11 +10,11 @@ app.secret_key = "medigo_clave_segura"
 
 def conectar_bd():
     return mysql.connector.connect(
-        host=os.environ.get("MYSQLHOST", "roundhouse.proxy.rlwy.net"),
-        user=os.environ.get("MYSQLUSER", "root"),
-        password=os.environ.get("MYSQLPASSWORD"),
-        database=os.environ.get("MYSQLDATABASE", "railway"),
-        port=int(os.environ.get("MYSQLPORT", "21196"))
+        host=os.environ.get("DB_HOST"),
+        user=os.environ.get("DB_USER"),
+        password=os.environ.get("DB_PASSWORD"),
+        database=os.environ.get("DB_NAME"),
+        port=int(os.environ.get("DB_PORT"))
     )
 
 ecuador = pytz.timezone("America/Guayaquil")
@@ -25,12 +25,14 @@ def fecha_ecuador():
 def limpiar_pdf(texto):
     if texto is None:
         return ""
+
     texto = str(texto)
     texto = texto.replace("🟢", "[Puede subir]")
     texto = texto.replace("🔴", "[No puede subir]")
     texto = texto.replace("😊", "")
     texto = texto.replace("😐", "")
     texto = texto.replace("😖", "")
+
     return texto.encode("latin-1", "ignore").decode("latin-1")
 
 def asegurar_columnas():
@@ -100,7 +102,7 @@ def login(rol):
                 error = "Profesor no registrado o contraseña incorrecta"
 
             except Exception:
-                error = "Error de conexión con la base de datos. Revisa MYSQLPASSWORD en Render."
+                error = "Error de conexión con la base de datos. Revisa las variables DB_ en Render."
 
         else:
             error = "Usuario o contraseña incorrectos"
@@ -121,6 +123,7 @@ def solicitudes():
     if request.method == 'GET':
         if "profesor_id" not in session:
             return redirect('/login/profesor')
+
         return render_template('solicitudes.html')
 
     curso = request.form.get('curso', '')
@@ -144,7 +147,18 @@ def solicitudes():
 
     cursor.execute("""
         INSERT INTO solicitudes
-        (nombre, motivo, dolor, estado, fecha, curso, observaciones, decision_medico, profesor_id, profesor_nombre)
+        (
+            nombre,
+            motivo,
+            dolor,
+            estado,
+            fecha,
+            curso,
+            observaciones,
+            decision_medico,
+            profesor_id,
+            profesor_nombre
+        )
         VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
     """, (
         nombre,
@@ -211,7 +225,10 @@ def medico():
 def decision_medico(id, decision):
     asegurar_columnas()
 
-    texto = "🟢 Puede subir" if decision == "subir" else "🔴 No puede subir"
+    if decision == "subir":
+        texto = "🟢 Puede subir"
+    else:
+        texto = "🔴 No puede subir"
 
     conn = conectar_bd()
     cursor = conn.cursor(dictionary=True)
@@ -224,9 +241,12 @@ def decision_medico(id, decision):
 
     fila = cursor.fetchone()
 
-    if fila and fila["decision_medico"] and fila["decision_medico"] != "Sin revisar":
-        conn.close()
-        return redirect('/medico')
+    if fila:
+        actual = fila["decision_medico"]
+
+        if actual and actual != "Sin revisar":
+            conn.close()
+            return redirect('/medico')
 
     cursor = conn.cursor()
 
@@ -234,7 +254,11 @@ def decision_medico(id, decision):
         UPDATE solicitudes
         SET decision_medico=%s
         WHERE id_solicitud=%s
-        AND (decision_medico IS NULL OR decision_medico='' OR decision_medico='Sin revisar')
+        AND (
+            decision_medico IS NULL
+            OR decision_medico=''
+            OR decision_medico='Sin revisar'
+        )
     """, (texto, id))
 
     conn.commit()
@@ -246,37 +270,66 @@ def decision_medico(id, decision):
 def aprobar(id):
     conn = conectar_bd()
     cursor = conn.cursor()
-    cursor.execute("UPDATE solicitudes SET estado='Aprobado' WHERE id_solicitud=%s", (id,))
+
+    cursor.execute("""
+        UPDATE solicitudes
+        SET estado='Aprobado'
+        WHERE id_solicitud=%s
+    """, (id,))
+
     conn.commit()
     conn.close()
+
     return redirect('/inspector')
 
 @app.route('/rechazar/<int:id>')
 def rechazar(id):
     conn = conectar_bd()
     cursor = conn.cursor()
-    cursor.execute("UPDATE solicitudes SET estado='Rechazado' WHERE id_solicitud=%s", (id,))
+
+    cursor.execute("""
+        UPDATE solicitudes
+        SET estado='Rechazado'
+        WHERE id_solicitud=%s
+    """, (id,))
+
     conn.commit()
     conn.close()
+
     return redirect('/inspector')
 
 @app.route('/atendido/<int:id>')
 def atendido(id):
     conn = conectar_bd()
     cursor = conn.cursor()
-    cursor.execute("UPDATE solicitudes SET estado='Atendido' WHERE id_solicitud=%s", (id,))
+
+    cursor.execute("""
+        UPDATE solicitudes
+        SET estado='Atendido'
+        WHERE id_solicitud=%s
+    """, (id,))
+
     conn.commit()
     conn.close()
+
     return redirect('/medico')
 
 @app.route('/observacion/<int:id>', methods=['POST'])
 def observacion(id):
     texto = request.form.get('observaciones', '')
+
     conn = conectar_bd()
     cursor = conn.cursor()
-    cursor.execute("UPDATE solicitudes SET observaciones=%s WHERE id_solicitud=%s", (texto, id))
+
+    cursor.execute("""
+        UPDATE solicitudes
+        SET observaciones=%s
+        WHERE id_solicitud=%s
+    """, (texto, id))
+
     conn.commit()
     conn.close()
+
     return redirect('/medico')
 
 @app.route('/historial/<path:nombre>')
@@ -309,7 +362,12 @@ def historial(nombre):
     for d in datos:
         d["fecha"] = str(d["fecha"]) if d["fecha"] else ""
 
-    return render_template('historial.html', historial=datos, nombre=nombre, total=len(datos))
+    return render_template(
+        'historial.html',
+        historial=datos,
+        nombre=nombre,
+        total=len(datos)
+    )
 
 @app.route('/pdf')
 def pdf():
