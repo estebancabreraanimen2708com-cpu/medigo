@@ -29,6 +29,7 @@ def limpiar_pdf(texto):
     texto = str(texto)
     texto = texto.replace("🟢", "[Puede subir]")
     texto = texto.replace("🔴", "[No puede subir]")
+    texto = texto.replace("🔔", "[Urgente]")
     texto = texto.replace("😊", "")
     texto = texto.replace("😐", "")
     texto = texto.replace("😖", "")
@@ -45,7 +46,8 @@ def asegurar_columnas():
         ("observaciones", "TEXT"),
         ("decision_medico", "VARCHAR(100)"),
         ("profesor_id", "VARCHAR(50)"),
-        ("profesor_nombre", "VARCHAR(100)")
+        ("profesor_nombre", "VARCHAR(100)"),
+        ("estado_consulta", "VARCHAR(100)")
     ]
 
     for nombre, tipo in columnas:
@@ -157,9 +159,10 @@ def solicitudes():
             observaciones,
             decision_medico,
             profesor_id,
-            profesor_nombre
+            profesor_nombre,
+            estado_consulta
         )
-        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
     """, (
         nombre,
         motivo,
@@ -170,7 +173,8 @@ def solicitudes():
         "",
         "Sin revisar",
         profesor_id,
-        profesor_nombre
+        profesor_nombre,
+        "Esperando atención"
     ))
 
     conn.commit()
@@ -200,9 +204,15 @@ def api_solicitudes():
             COALESCE(decision_medico, 'Sin revisar') AS decision_medico,
             COALESCE(profesor_id, '') AS profesor_id,
             COALESCE(profesor_nombre, '') AS profesor_nombre,
+            COALESCE(estado_consulta, 'Esperando atención') AS estado_consulta,
             fecha
         FROM solicitudes
-        ORDER BY id_solicitud DESC
+        ORDER BY
+            CASE
+                WHEN dolor = '3' AND estado != 'Atendido' THEN 0
+                ELSE 1
+            END,
+            id_solicitud DESC
     """)
 
     datos = cursor.fetchall()
@@ -266,6 +276,24 @@ def decision_medico(id, decision):
 
     return redirect('/medico')
 
+@app.route('/consulta/<int:id>')
+def consulta(id):
+    asegurar_columnas()
+
+    conn = conectar_bd()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        UPDATE solicitudes
+        SET estado_consulta='En consulta'
+        WHERE id_solicitud=%s
+    """, (id,))
+
+    conn.commit()
+    conn.close()
+
+    return redirect('/medico')
+
 @app.route('/aprobar/<int:id>')
 def aprobar(id):
     conn = conectar_bd()
@@ -289,7 +317,8 @@ def rechazar(id):
 
     cursor.execute("""
         UPDATE solicitudes
-        SET estado='Rechazado'
+        SET estado='Rechazado',
+            estado_consulta='No autorizado'
         WHERE id_solicitud=%s
     """, (id,))
 
@@ -305,7 +334,8 @@ def atendido(id):
 
     cursor.execute("""
         UPDATE solicitudes
-        SET estado='Atendido'
+        SET estado='Atendido',
+            estado_consulta='Atendido'
         WHERE id_solicitud=%s
     """, (id,))
 
@@ -350,6 +380,7 @@ def historial(nombre):
             COALESCE(decision_medico, 'Sin revisar') AS decision_medico,
             COALESCE(profesor_id, '') AS profesor_id,
             COALESCE(profesor_nombre, '') AS profesor_nombre,
+            COALESCE(estado_consulta, 'Esperando atención') AS estado_consulta,
             fecha
         FROM solicitudes
         WHERE nombre = %s
@@ -387,6 +418,7 @@ def pdf():
             COALESCE(decision_medico, 'Sin revisar') AS decision_medico,
             COALESCE(profesor_id, '') AS profesor_id,
             COALESCE(profesor_nombre, '') AS profesor_nombre,
+            COALESCE(estado_consulta, 'Esperando atención') AS estado_consulta,
             fecha
         FROM solicitudes
         ORDER BY id_solicitud DESC
@@ -429,6 +461,7 @@ def pdf():
             ("Motivo", d["motivo"]),
             ("Dolor", d["dolor"]),
             ("Estado", d["estado"]),
+            ("Estado consulta", d["estado_consulta"]),
             ("Decision medico", d["decision_medico"]),
             ("Fecha", fecha),
             ("Observaciones", d["observaciones"])
