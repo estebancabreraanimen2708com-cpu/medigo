@@ -4,316 +4,192 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Médico</title>
-
-<link rel="stylesheet"
-href="{{ url_for('static', filename='style.css') }}?v=200">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=500">
 </head>
 
 <body>
 
 <div class="medico-layout">
 
-<img
-src="{{ url_for('static', filename='maria.png') }}"
-class="medico-img">
+<img src="{{ url_for('static', filename='maria.png') }}" class="medico-img" alt="María Auxiliadora">
 
 <div class="contenedor">
 
-<img
-src="{{ url_for('static', filename='logo.jpg') }}"
-class="logo">
+<img src="{{ url_for('static', filename='logo.jpg') }}" class="logo" alt="MediGo">
 
 <div class="circulos-derecha">
-<img src="{{ url_for('static', filename='escudo.png') }}" class="circulo-img">
-<img src="{{ url_for('static', filename='salesianos.png') }}" class="circulo-img">
+    <img src="{{ url_for('static', filename='escudo.png') }}" class="circulo-img" alt="Escudo Don Bosco">
+    <img src="{{ url_for('static', filename='salesianos.png') }}" class="circulo-img" alt="Salesianos Don Bosco">
 </div>
 
 <h1>Panel Médico</h1>
 
-<p class="subtitulo">
-Evaluación médica y seguimiento
-</p>
+<p class="subtitulo">Evaluación médica y seguimiento del estudiante</p>
 
 <div class="tabla-scroll">
-
 <table>
-
 <thead>
-
 <tr>
+<th>Prioridad</th>
 <th>Curso</th>
 <th>Nombre</th>
 <th>Motivo</th>
 <th>Dolor</th>
 <th>Estado</th>
+<th>Estado Consulta</th>
 <th>Decisión Médico</th>
 <th>Fecha</th>
 <th>Acción</th>
 <th>Observaciones</th>
 </tr>
-
 </thead>
-
 <tbody id="tablaMedico"></tbody>
-
 </table>
-
 </div>
 
 </div>
 
-<img
-src="{{ url_for('static', filename='jesus.png') }}"
-class="medico-img">
+<img src="{{ url_for('static', filename='jesus.png') }}" class="medico-img" alt="Jesús">
 
 </div>
-
 
 <script>
-
 let escribiendoObservacion=false;
 
 function confirmarDecision(texto){
-
-return confirm(
-"¿Confirmas que el estudiante "
-+texto+
-"? Esta acción ya no se podrá cambiar."
-);
-
+    return confirm("¿Confirmas que el estudiante " + texto + "? Esta decisión ya no se podrá cambiar.");
 }
-
 
 function cargarMedico(){
-
-if(escribiendoObservacion){
-
-return;
-
-}
+if(escribiendoObservacion){return;}
 
 fetch('/api/solicitudes')
-
 .then(r=>r.json())
-
 .then(data=>{
-
-let tabla=
-document.getElementById(
-"tablaMedico"
-);
-
-tabla.innerHTML="";
-
-
-data.forEach(s=>{
-
-let accion="-";
-
-
-if(
-s.estado==="Aprobado"
-){
-
-accion=`
-
-<a href="/atendido/${s.id_solicitud}">
-
-<button
-class="aprobar">
-
-Atendido
-
-</button>
-
-</a>
-
-`;
-
-}
-
-
-let dolorTexto="";
-
-
-if(
-s.dolor==1
-){
-
-dolorTexto="😊 Leve";
-
-}
-
-else if(
-s.dolor==2
-){
-
-dolorTexto="😐 Moderado";
-
-}
-
-else if(
-s.dolor==3
-){
-
-dolorTexto="😖 Urgente";
-
-}
-
-else{
-
-dolorTexto=s.dolor;
-
-}
-
-
-let decision=s.decision_medico||"Sin revisar";
-
-let botones="";
-
-if(
-decision=="Sin revisar"
-){
-
-botones=`
-
-<a
-href="/decision_medico/${s.id_solicitud}/subir"
-
-onclick="
-return confirmarDecision(
-'puede subir'
-)
-">
-
-<button
-class="btn-subir">
-
-🟢 Puede subir
-
-</button>
-
-</a>
-
-<a
-href="/decision_medico/${s.id_solicitud}/no_subir"
-
-onclick="
-return confirmarDecision(
-'NO puede subir'
-)
-">
-
-<button
-class="btn-nosubir">
-
-🔴 No puede subir
-
-</button>
-
-</a>
-
-`;
-
-}
-
-else{
-
-botones=`
-
-<div
-style="
-font-weight:bold;
-background:#eaf6ff;
-padding:12px;
-border-radius:14px;
-color:#00468d;
-">
-
-${decision}
-
-<br><br>
-
-✅ Decisión guardada
-
-</div>
-
-`;
-
-}
-
-
-tabla.innerHTML+=`
-
-<tr>
-
-<td>${s.curso}</td>
-
-<td>${s.nombre}</td>
-
-<td>${s.motivo}</td>
-
-<td>${dolorTexto}</td>
-
-<td>${s.estado}</td>
-
-<td>${botones}</td>
-
-<td>${s.fecha}</td>
-
-<td>${accion}</td>
-
-<td>
-
-<form
-method="POST"
-action="/observacion/${s.id_solicitud}">
-
-<textarea
-class="obs-area"
-name="observaciones"
-
-onfocus="
-escribiendoObservacion=true
-"
-
-onblur="
-setTimeout(()=>{
-escribiendoObservacion=false
-},1500)
-"
-
->${s.observaciones||""}</textarea>
-
-<button
-class="btn-obs">
-
-Guardar
-
-</button>
-
-</form>
-
-</td>
-
-</tr>
-
-`;
-
+    if(escribiendoObservacion){return;}
+
+    let tabla=document.getElementById("tablaMedico");
+    tabla.innerHTML="";
+
+    data.forEach(s=>{
+
+        let accion=`
+            <div style="display:flex;flex-direction:column;gap:8px;">
+                <a href="/consulta/${s.id_solicitud}">
+                    <button class="btn-subir" type="button">🩺 En consulta</button>
+                </a>
+                <a href="/atendido/${s.id_solicitud}">
+                    <button class="aprobar" type="button">✅ Atendido</button>
+                </a>
+            </div>
+        `;
+
+        let dolorTexto="";
+        let prioridad="-";
+        let claseFila="";
+
+        if(s.dolor==1){
+            dolorTexto="😊 Leve";
+        }
+        else if(s.dolor==2){
+            dolorTexto="😐 Moderado";
+        }
+        else if(s.dolor==3){
+            dolorTexto="🔔 😖 Urgente";
+            prioridad=`
+                <span style="
+                    background:#ef4444;
+                    color:white;
+                    padding:8px 10px;
+                    border-radius:14px;
+                    font-weight:bold;
+                    display:inline-block;
+                    animation:campanaUrgente 1s infinite;
+                ">
+                🔔 PRIORIDAD
+                </span>
+            `;
+            claseFila="background:rgba(239,68,68,.18); box-shadow:inset 5px 0 #ef4444;";
+        }
+        else{
+            dolorTexto=s.dolor;
+        }
+
+        let decision=s.decision_medico||"Sin revisar";
+        let bloqueDecision="";
+
+        if(decision !== "Sin revisar" && decision !== ""){
+            bloqueDecision = `
+                <div style="display:flex;flex-direction:column;gap:8px;align-items:center;">
+                    <strong>${decision}</strong>
+                    <span style="
+                        display:inline-block;
+                        padding:8px 10px;
+                        border-radius:12px;
+                        background:rgba(0,86,179,.10);
+                        color:#002b5c;
+                        font-size:12px;
+                        font-weight:bold;
+                    ">
+                    Decisión guardada
+                    </span>
+                </div>
+            `;
+        }else{
+            bloqueDecision = `
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                    <strong>Sin revisar</strong>
+                    <a href="/decision_medico/${s.id_solicitud}/subir" onclick="return confirmarDecision('puede subir')">
+                        <button class="btn-subir" type="button">🟢 Puede subir</button>
+                    </a>
+                    <a href="/decision_medico/${s.id_solicitud}/no_subir" onclick="return confirmarDecision('NO puede subir')">
+                        <button class="btn-nosubir" type="button">🔴 No puede subir</button>
+                    </a>
+                </div>
+            `;
+        }
+
+        tabla.innerHTML+=`
+        <tr style="${claseFila}">
+            <td>${prioridad}</td>
+            <td>${s.curso||""}</td>
+            <td>
+                <a href="/historial/${encodeURIComponent(s.nombre)}" style="color:#0056b3;font-weight:bold;text-decoration:none;">
+                ${s.nombre}
+                </a>
+            </td>
+            <td>${s.motivo}</td>
+            <td>${dolorTexto}</td>
+            <td>${s.estado}</td>
+            <td>${s.estado_consulta || "Esperando atención"}</td>
+            <td>${bloqueDecision}</td>
+            <td>${s.fecha}</td>
+            <td>${accion}</td>
+            <td>
+                <form method="POST" action="/observacion/${s.id_solicitud}">
+                    <textarea class="obs-area" name="observaciones" placeholder="Escribir observación..." onfocus="escribiendoObservacion=true" onblur="setTimeout(()=>{escribiendoObservacion=false;},1500)">${s.observaciones||""}</textarea>
+                    <br>
+                    <button class="btn-obs" type="submit">Guardar</button>
+                </form>
+            </td>
+        </tr>`;
+    });
 });
-
-});
-
 }
 
-setInterval(
-cargarMedico,
-3000
-);
-
+setInterval(cargarMedico,3000);
 cargarMedico();
-
 </script>
+
+<style>
+@keyframes campanaUrgente{
+    0%{transform:rotate(0deg) scale(1);}
+    25%{transform:rotate(-8deg) scale(1.05);}
+    50%{transform:rotate(8deg) scale(1.08);}
+    75%{transform:rotate(-8deg) scale(1.05);}
+    100%{transform:rotate(0deg) scale(1);}
+}
+</style>
 
 </body>
 </html>
