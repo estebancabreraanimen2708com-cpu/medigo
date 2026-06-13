@@ -4,32 +4,27 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Roles</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=100">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=400">
 </head>
 
 <body>
 
 <div class="contenedor">
 
-<img src="{{ url_for('static', filename='logo.jpg') }}" class="logo" alt="MediGo">
-
+<img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
 
 <div class="circulos-derecha">
-    <img src="{{ url_for('static', filename='escudo.png') }}" class="circulo-img" alt="Escudo Don Bosco">
-    <img src="{{ url_for('static', filename='salesianos.png') }}" class="circulo-img" alt="Salesianos Don Bosco">
+<img src="{{ url_for('static', filename='escudo.png') }}" class="circulo-img">
+<img src="{{ url_for('static', filename='salesianos.png') }}" class="circulo-img">
 </div>
-
 
 <h1>MediGo</h1>
 
 <p class="subtitulo">Selecciona tu rol</p>
 
-<div class="panel-bienvenida">
-Cada rol ayuda a cuidar mejor a los estudiantes: profesor, inspector y médico trabajan juntos.
-</div>
-
 <div class="roles-grid">
-<a href="/solicitudes">
+
+<a href="/login/profesor">
 <button class="btn profesor">👨‍🏫 Profesor</button>
 </a>
 
@@ -40,6 +35,7 @@ Cada rol ayuda a cuidar mejor a los estudiantes: profesor, inspector y médico t
 <a href="/login/medico">
 <button class="btn medico">🩺 Médico</button>
 </a>
+
 </div>
 
 </div>
