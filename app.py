@@ -42,7 +42,9 @@ def asegurar_columnas():
         ("nombre", "VARCHAR(255)"),
         ("curso", "VARCHAR(100)"),
         ("observaciones", "TEXT"),
-        ("decision_medico", "VARCHAR(100)")
+        ("decision_medico", "VARCHAR(100)"),
+        ("profesor_id", "VARCHAR(50)"),
+        ("profesor_nombre", "VARCHAR(100)")
     ]
 
     for nombre, tipo in columnas:
@@ -91,13 +93,31 @@ def solicitudes():
         dolor = request.form.get('dolor', '')
         origen = request.form.get('origen', 'profesor')
 
+        profesor_id = request.form.get('profesor_id', '')
+        profesor_nombre = request.form.get('profesor_nombre', '')
+
+        if origen == "inspector":
+            profesor_id = "INSPECTOR"
+            profesor_nombre = "Inspector"
+
         conn = conectar_bd()
         cursor = conn.cursor()
 
         cursor.execute("""
             INSERT INTO solicitudes
-            (nombre, motivo, dolor, estado, fecha, curso, observaciones, decision_medico)
-            VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
+            (
+                nombre,
+                motivo,
+                dolor,
+                estado,
+                fecha,
+                curso,
+                observaciones,
+                decision_medico,
+                profesor_id,
+                profesor_nombre
+            )
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
         """, (
             nombre,
             motivo,
@@ -106,7 +126,9 @@ def solicitudes():
             fecha_ecuador(),
             curso,
             "",
-            "Sin revisar"
+            "Sin revisar",
+            profesor_id,
+            profesor_nombre
         ))
 
         conn.commit()
@@ -114,9 +136,6 @@ def solicitudes():
 
         if origen == "inspector":
             return redirect('/inspector')
-
-        if origen == "medico":
-            return redirect('/medico')
 
         return redirect('/solicitudes')
 
@@ -139,6 +158,8 @@ def api_solicitudes():
             COALESCE(curso, '') AS curso,
             COALESCE(observaciones, '') AS observaciones,
             COALESCE(decision_medico, 'Sin revisar') AS decision_medico,
+            COALESCE(profesor_id, '') AS profesor_id,
+            COALESCE(profesor_nombre, '') AS profesor_nombre,
             fecha
         FROM solicitudes
         ORDER BY id_solicitud DESC
@@ -287,6 +308,8 @@ def historial(nombre):
             COALESCE(estado, '') AS estado,
             COALESCE(observaciones, '') AS observaciones,
             COALESCE(decision_medico, 'Sin revisar') AS decision_medico,
+            COALESCE(profesor_id, '') AS profesor_id,
+            COALESCE(profesor_nombre, '') AS profesor_nombre,
             fecha
         FROM solicitudes
         WHERE nombre = %s
@@ -322,6 +345,8 @@ def pdf():
             COALESCE(estado, '') AS estado,
             COALESCE(observaciones, '') AS observaciones,
             COALESCE(decision_medico, 'Sin revisar') AS decision_medico,
+            COALESCE(profesor_id, '') AS profesor_id,
+            COALESCE(profesor_nombre, '') AS profesor_nombre,
             fecha
         FROM solicitudes
         ORDER BY id_solicitud DESC
@@ -357,6 +382,8 @@ def pdf():
         pdf.cell(0, 10, limpiar_pdf("Solicitud Medica Escolar"), 1, 1, "C", True)
 
         campos = [
+            ("Profesor ID", d["profesor_id"]),
+            ("Profesor", d["profesor_nombre"]),
             ("Curso", d["curso"]),
             ("Nombre", d["nombre"]),
             ("Motivo", d["motivo"]),
