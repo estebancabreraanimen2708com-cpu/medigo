@@ -1,17 +1,17 @@
-from flask import Flask, render_template, request, redirect, jsonify, send_file
+from flask import Flask, render_template, request, redirect, jsonify, send_file, session
 import mysql.connector
 from fpdf import FPDF
 from datetime import datetime
 import pytz
-import os
 
 app = Flask(__name__)
+app.secret_key = "medigo_clave_segura"
 
 def conectar_bd():
     return mysql.connector.connect(
         host="roundhouse.proxy.rlwy.net",
         user="root",
-        password="wYbBPSlKSxHuYpUKYiYSfWzMnnqUyAVJ",
+        password="PEGA_AQUI_TU_PASSWORD_REAL_DE_RAILWAY",
         database="railway",
         port=21196
     )
@@ -78,13 +78,45 @@ def login(rol):
         if rol == "medico" and usuario == "medico" and password == "123":
             return redirect('/medico')
 
+        if rol == "profesor":
+            conn = conectar_bd()
+            cursor = conn.cursor(dictionary=True)
+
+            cursor.execute("""
+                SELECT id_profesor, nombre, usuario
+                FROM profesores
+                WHERE usuario=%s AND password=%s
+            """, (usuario, password))
+
+            profesor = cursor.fetchone()
+            conn.close()
+
+            if profesor:
+                session["profesor_id"] = profesor["id_profesor"]
+                session["profesor_nombre"] = profesor["nombre"]
+                session["profesor_usuario"] = profesor["usuario"]
+                return redirect('/solicitudes')
+
         error = "Usuario o contraseña incorrectos"
 
     return render_template('login.html', rol=rol, error=error)
 
+@app.route('/logout_profesor')
+def logout_profesor():
+    session.pop("profesor_id", None)
+    session.pop("profesor_nombre", None)
+    session.pop("profesor_usuario", None)
+    return redirect('/roles')
+
 @app.route('/solicitudes', methods=['GET', 'POST'])
 def solicitudes():
     asegurar_columnas()
+
+    if request.method == 'GET':
+        if "profesor_id" not in session:
+            return redirect('/login/profesor')
+
+        return render_template('solicitudes.html')
 
     if request.method == 'POST':
         curso = request.form.get('curso', '')
@@ -93,12 +125,15 @@ def solicitudes():
         dolor = request.form.get('dolor', '')
         origen = request.form.get('origen', 'profesor')
 
-        profesor_id = request.form.get('profesor_id', '')
-        profesor_nombre = request.form.get('profesor_nombre', '')
-
         if origen == "inspector":
             profesor_id = "INSPECTOR"
             profesor_nombre = "Inspector"
+        else:
+            if "profesor_id" not in session:
+                return redirect('/login/profesor')
+
+            profesor_id = session.get("profesor_id")
+            profesor_nombre = session.get("profesor_nombre")
 
         conn = conectar_bd()
         cursor = conn.cursor()
@@ -138,8 +173,6 @@ def solicitudes():
             return redirect('/inspector')
 
         return redirect('/solicitudes')
-
-    return render_template('solicitudes.html')
 
 @app.route('/api/solicitudes')
 def api_solicitudes():
