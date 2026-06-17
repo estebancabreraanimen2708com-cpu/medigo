@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MediGo</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=100">
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=600">
 </head>
 
 <body class="pagina-inicio">
@@ -17,19 +18,48 @@
 
 <div class="corazon-portada">💙</div>
 
-
 <div class="circulos-derecha">
     <img src="{{ url_for('static', filename='escudo.png') }}" class="circulo-img" alt="Escudo Don Bosco">
     <img src="{{ url_for('static', filename='salesianos.png') }}" class="circulo-img" alt="Salesianos Don Bosco">
 </div>
 
-
 <h1>MediGo</h1>
 
 <p class="subtitulo">Sistema Médico Escolar Salesiano</p>
 
-<div class="panel-bienvenida">
-Proyecto educativo de 3ro Bachillerato INF inspirado en el cuidado, la prevención y el acompañamiento salesiano.
+<div style="
+margin:20px auto;
+max-width:520px;
+background:rgba(255,255,255,.75);
+border:2px solid rgba(56,189,248,.55);
+border-radius:22px;
+padding:18px;
+box-shadow:0 10px 24px rgba(0,43,92,.13);
+text-align:center;
+">
+
+<h2 style="
+margin:0 0 8px 0;
+font-size:24px;
+color:#0056b3;
+">
+📘 Guía de funcionamiento
+</h2>
+
+<p style="
+font-size:15px;
+margin-bottom:14px;
+color:#002b5c;
+">
+Manual institucional del sistema MediGo para explicar roles, validación, flujo operativo y trazabilidad.
+</p>
+
+<a href="{{ url_for('static', filename='Guia_Funcionamiento_MediGo_Mejorada.pdf') }}" target="_blank">
+<button class="btn inspector" type="button">
+📄 VER GUÍA DE FUNCIONAMIENTO
+</button>
+</a>
+
 </div>
 
 <a href="/roles">
